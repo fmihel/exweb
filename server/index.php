@@ -16,17 +16,9 @@ require SOURCE_ROOT.'connect.php';
 require SOURCE_ROOT.'stream.php';
 require SOURCE_ROOT.'exweb.php';
 
-/**
- * список состояний STATE
- * 
- * init         (event = init)
- * send_string  (event = send_string)
- * encode_string (event = encode_string)
- * open         (event = open_string)
- * ready        (event = close_string)
- * completed    (!!not from client!!)
- * error        (!!not from client!!)
- */
+//------------------------------------------------------------------------------------------
+Result::autorize();
+//------------------------------------------------------------------------------------------
 
 if (Utils::requestContains('event')){
     switch ($_REQUEST['event']){

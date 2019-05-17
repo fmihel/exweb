@@ -40,6 +40,14 @@ class Result{
         return true;
         
     }
+    public static function autorize(){
+        
+        self::requestContains('key');
+        
+        if ($_REQUEST['key'] !== WS_CONF::GET('key'))
+            Result::error('access denied');
+
+    }
     
 }
 ?>

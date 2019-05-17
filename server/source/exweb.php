@@ -58,6 +58,9 @@ class exweb {
 
         return $result;
     }
+    /**
+     * отправка сообщения клиенту
+     */
     public static function send(string $str,$data = null){
         
         // создаем строку в таблице REST_API

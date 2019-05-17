@@ -23,6 +23,8 @@ type
         fBlockLen: Integer;
         fBlockSize: Integer;
         fHttp: THttp;
+        fKey: string;
+        procedure addKey(Params: THash);
         procedure ExceptionOtvet(var res:TExWebResult;otvet: THash;
             event:string; msg: string='');
         function getScript: string;
@@ -52,6 +54,8 @@ type
         //1 Размер блока, на которые будет разбит пакет отсылки. (загружается с сервера)
         property BlockSize: Integer read fBlockSize write fBlockSize;
         property Http: THttp read fHttp write fHttp;
+        //1 Ключ доступа к передачи
+        property Key: string read fKey write fKey;
         property Script: string read getScript write setScript;
     end;
 
@@ -87,12 +91,18 @@ begin
     Script:=aScript;
     BlockSize:=1024;
     BlockLen:=1024;
+    Key:='test';
 end;
 
 destructor TExWeb.Destroy;
 begin
     fHttp.Free();
     inherited Destroy;
+end;
+
+procedure TExWeb.addKey(Params: THash);
+begin
+    Params['key']:=Key;
 end;
 
 procedure TExWeb.ExceptionOtvet(var res:TExWebResult;otvet: THash; event:string;
@@ -110,12 +120,31 @@ end;
 
 function TExWeb.get(NameValueParams: array of variant; Response: THash):
     TExWebResult;
+var
+    cParams: THash;
+
+    const
+        cFuncName = 'get';
+
 begin
-    result:=httpResultToExWebResult(http.get(NameValueParams,Response));
+    cParams:=Hash(NameValueParams);
+    try
+    try
+        result:=get(cParams,Response);
+    except
+    on e:Exception do
+    begin
+        {$ifdef _log_}ULog.Error('',e,ClassName,cFuncName);{$endif}
+    end;
+    end;
+    finally
+        FreeHash(cParams);
+    end;
 end;
 
 function TExWeb.get(Params, Response: THash): TExWebResult;
 begin
+    addKey(Params);
     result:=httpResultToExWebResult(http.get(Params,Response));
 end;
 
@@ -149,6 +178,7 @@ begin
 
     try
     try
+        addKey(cParams);
         result:=post(cParams,data,Response);
     except
     on e:Exception do
@@ -164,11 +194,11 @@ end;
 function TExWeb.post(Params: THash; data: TStream; Response: THash):
     TExWebResult;
 begin
+    addKey(Params);
     if (data<>nil) then
         result:=httpResultToExWebResult(http.write(Params,data,Response))
     else
         result:=httpResultToExWebResult(http.write(Params,Response));
-
 end;
 
 function TExWeb.recv(var str: string; data: TStream; prevResult: TExWebState):
