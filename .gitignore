@@ -4,6 +4,7 @@
 /client/test/
 /client/__history/
 /client/__recovery/
+/client/projects/
 
 /server/_render/
 /server/_render/*
