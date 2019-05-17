@@ -9,7 +9,7 @@ class Result{
         exit;
     }
 
-    public static function error(string $msg,int $res = 0,array $data = []){
+    public static function error(string $msg='',int $res = 0,array $data = []){
         $request = '"res":'.$res;
         $request.=',"msg":"'.$msg.'"';
         if (count($data))

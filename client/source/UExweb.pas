@@ -20,6 +20,7 @@ type
 
     TExWeb = class(TObject)
     private
+        fBlockLen: Integer;
         fBlockSize: Integer;
         fHttp: THttp;
         procedure ExceptionOtvet(var res:TExWebResult;otvet: THash;
@@ -46,6 +47,8 @@ type
             TExWebState;
         function send(const str: string; data: TStream; prevState:
             TExWebState): TExWebState;
+        //1 Размер блока, на которые будет разбита строка отсылки. (загружается с сервера)
+        property BlockLen: Integer read fBlockLen write fBlockLen;
         //1 Размер блока, на которые будет разбит пакет отсылки. (загружается с сервера)
         property BlockSize: Integer read fBlockSize write fBlockSize;
         property Http: THttp read fHttp write fHttp;
@@ -83,6 +86,7 @@ begin
     fHttp:=THttp.Create();
     Script:=aScript;
     BlockSize:=1024;
+    BlockLen:=1024;
 end;
 
 destructor TExWeb.Destroy;
@@ -231,6 +235,7 @@ begin
 
         id          :=  otvet.Hash['data']['id'];
         BlockSize   :=  otvet.Hash['data'].Int['block_size'];
+        BlockLen    :=  otvet.Hash['data'].Int['block_len'];
 
         // отправка строки
         cResult:=_send(str,id);
@@ -241,16 +246,31 @@ begin
             raise Exception.Create('_send(str)<>ewrOk');
         end;
 
+
         //----------------------------------------------------------------------------------------
         // отправка бинарных данных
-        cResult:=_send(data,id);
+        if (data<>nil) and (data.size>0) then begin
+            cResult:=_send(data,id);
+
+            if cResult<>ewrOk then begin
+                result:=prevState;
+                result.result:=false;
+                raise Exception.Create('_send(stream)<>ewrOk');
+            end;
+        end;
+
+        //----------------------------------------------------------------------------------------
+        // подтверждение передачи
+        // не зависимо от результата подтверждения, считаем общий результат успешным
+        cResult:=get(['event','close','id',id],otvet);
+        if (cResult<>ewrOk) or (otvet.Int['res'] = 0) then
+            cResult:=ewrNeedConfirm;
 
         if (cResult = ewrOk) or (cResult = ewrNeedConfirm) then begin
             result.result       :=  true;
             result.id           :=  id;
             result.webResult    :=  cResult;
         end;
-        //----------------------------------------------------------------------------------------
 
     except
     on e:Exception do
@@ -289,7 +309,7 @@ begin
         cStr:=Utils.rusCod(cStr);
 
         cLen:=Length(cStr);
-        cBlockLen:=512;
+        cBlockLen:=BlockLen;
 
         while(Length(cStr)>0) do begin
             cBlock:=Utils.UrlEncode(copy(cStr,1,cBlockLen));
@@ -366,19 +386,6 @@ begin
         if (otvet.Hash['data'].Int['check'] = 0) then begin
             result:=ewrHashSumNotCompare;
             raise Exception.Create('event=hash_sum_copare,check = 0');
-        end;
-        //----------------------------------------------------------------------------------------
-        // подтверждение передачи
-        result:=get(['event','close','id',info.id],otvet);
-
-        if result<>ewrOk then begin
-            result:=ewrNeedConfirm;
-            raise Exception.Create('event=close');
-        end;
-
-        if (otvet.Int['res'] = 0) then begin
-            result:=ewrNeedConfirm;
-            raise Exception.Create('event=close,'+otvet['msg']);
         end;
 
     except

@@ -15,6 +15,17 @@ require SOURCE_ROOT.'result.php';
 require SOURCE_ROOT.'connect.php';
 require SOURCE_ROOT.'stream.php';
 
+/**
+ * список состояний STATE
+ * 
+ * init         (event = init)
+ * send_string  (event = send_string)
+ * encode_string (event = encode_string)
+ * open         (event = open_string)
+ * ready        (event = close_string)
+ * completed    (!!not from client!!)
+ * error        (!!not from client!!)
+ */
 
 if (Utils::requestContains('event')){
     switch ($_REQUEST['event']){
@@ -22,7 +33,7 @@ if (Utils::requestContains('event')){
         // инициализация передачи
         case "init":{
             // очистка предыдущих неуспешных передач
-            $q = "select * from REST_API where OWNER='client' and STATE<>'ready' ";
+            $q = "select * from REST_API where OWNER='client' and STATE NOT IN ('ready','error','completed')";
             $ds = Result::ds($q);
 
             while(base::by($ds,$row)){
@@ -30,7 +41,7 @@ if (Utils::requestContains('event')){
                 Result::query($q);
             };
 
-            $q = "delete from REST_API where OWNER='client' and STATE<>'ready' ";
+            $q = "delete from REST_API where OWNER='client' and  STATE NOT IN ('ready','error','completed')";
             Result::query($q);
 
             // создаем строку в таблице REST_API
@@ -47,7 +58,8 @@ if (Utils::requestContains('event')){
                 'id'=>$id,
                 'upload_max_filesize'=>(int)(ini_get('upload_max_filesize'))*1024*1024,
                 'post_max_size'=>(int)(ini_get('post_max_size'))*1024*1024,
-                'block_size'=>1000*1024 // размер блоков, на которые будет разбит отправляемый клиентом бинарный пакет
+                'block_size'=>100*1024, // размер блоков, на которые будет разбит отправляемый клиентом бинарный пакет
+                'block_len'=>1024, // размер блоков, на которые будет разбита строка, отправляемая клиентом
 
             ]);
 
@@ -92,8 +104,8 @@ if (Utils::requestContains('event')){
         // завершениен передачи и разрешение на чтение данных
         case "close":{
             Result::requestContains('id');
-
-            $q = "update REST_API set STATE='ready' , LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$_REQUEST['id'];            
+            //Result::error();    
+            $q = "update REST_API set STATE='ready' , LAST_UPDATE=CURRENT_TIMESTAMP where STATE<>'completed' and ID_REST_API=".$_REQUEST['id'];            
             Result::query($q);    
 
             Result::ok();
