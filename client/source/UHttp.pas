@@ -128,7 +128,9 @@ begin
     result:=hrError;
     try
     try
+
         cUrl:=UUrl.Url.build(Url,aParams,false,Encode);
+
 
         aResponse:=Http.Get(cUrl);
         result:=hrOk;

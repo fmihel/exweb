@@ -14,6 +14,7 @@ require SOURCE_ROOT.'utils.php';
 require SOURCE_ROOT.'result.php';
 require SOURCE_ROOT.'connect.php';
 require SOURCE_ROOT.'stream.php';
+require SOURCE_ROOT.'exweb.php';
 
 /**
  * список состояний STATE
@@ -128,7 +129,7 @@ if (Utils::requestContains('event')){
             // последний успешный блок
             $q = "select MD5 from REST_API where ID_REST_API = ".$_REQUEST['id'];
             $clientMD5 = strtoupper(trim(base::val($q,'','exweb')));
-            $serverMD5  = strtoupper(trim(md5($stream->getBlock($_REQUEST['id']))));
+            $serverMD5  = strtoupper(trim(md5(exweb::getBlock($_REQUEST['id']))));
             
             Result::ok([
                 'check'=>($clientMD5===$serverMD5?1:0)
@@ -153,7 +154,7 @@ if (Utils::requestContains('event')){
             $row = base::row($q,'exweb','utf8');
 
             if ($row!=[]){
-                $block  = $stream->getBlock($row['ID_REST_API']);
+                $block  = exweb::getBlock($row['ID_REST_API']);
                 
                 echo 'id = '.$row['ID_REST_API'].'<br>';
                 echo 'orig = '.strtoupper($row['MD5']).'<br>';
@@ -170,15 +171,13 @@ if (Utils::requestContains('event')){
             
         };break;    
         //----------------------------------------------------------------------------------
-        // 
         case "view_as_image":{
-            // ------------------------------------------------
             // последний успешный блок
             $q = "select ID_REST_API,MD5 from REST_API where STATE = 'ready' and OWNER='client' order by ID_REST_API desc";
             $row = base::row($q,'exweb');
 
             if ($row!=[]){
-                $block  = $stream->getBlock($row['ID_REST_API']);
+                $block  = exweb::getBlock($row['ID_REST_API']);
 
                 $img    = imagecreatefromstring($block);
 
@@ -188,12 +187,17 @@ if (Utils::requestContains('event')){
                 echo 'not ready api data';    
             }
 
-            // ------------------------------------------------
-
-            
         };break;    
+        //----------------------------------------------------------------------------------
+        case "test":{
+            $msg = exweb::recv(true);
+            var_dump($msg);
+        };break;
+        //----------------------------------------------------------------------------------
+        
         default:
             Result::error('no data');
+
     }
 
 }else{

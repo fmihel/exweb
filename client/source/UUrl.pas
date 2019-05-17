@@ -14,16 +14,17 @@ type
     Url = class(TObject)
     public
         class function build(const aURL: string; aNameValueParams: array of
-            variant; unionParams: Boolean = false; enc: Boolean = false):
-            string; overload; static;
+            variant; unionParams: Boolean = false; enc: Boolean = false;
+            noCache: boolean = true): string; overload; static;
         //1 Строим строку запроса из входного hash
-        class function build(const cHash: THash; enc: Boolean = false): string;
-            overload; static;
+        class function build(const cHash: THash; enc: Boolean = false; noCache:
+            boolean = true): string; overload; static;
         class function build(const cHash: THash; const cNameValueParams: array
-            of variant; unionParams: Boolean = false; enc: Boolean = false):
-            string; overload; static;
+            of variant; unionParams: Boolean = false; enc: Boolean = false;
+            noCache: boolean = true): string; overload; static;
         class function build(cHash, cParams: THash; unionParams: Boolean =
-            false; enc: Boolean = false): string; overload; static;
+            false; enc: Boolean = false; noCache: boolean = true): string;
+            overload; static;
         //1 Парсинг строки параметров
         class function params(params: string; toHash: THash = nil; dec: Boolean
             = false): THash; static;
@@ -65,7 +66,8 @@ uses IdURI, UUtils;
 ************************************* Url **************************************
 }
 class function Url.build(const aURL: string; aNameValueParams: array of variant;
-    unionParams: Boolean = false; enc: Boolean = false): string;
+    unionParams: Boolean = false; enc: Boolean = false; noCache: boolean =
+    true): string;
 var
     cHash: THash;
     cParams: THash;
@@ -73,15 +75,16 @@ begin
     cHash:=parse(aUrl);
     cParams:=Hash(aNameValueParams);
 
-    result:=build(cHash,cParams,unionParams,enc);
+    result:=build(cHash,cParams,unionParams,enc,noCache);
 
     FreeHash(cParams);
     FreeHash(cHash);
 end;
 
-class function Url.build(const cHash: THash; enc: Boolean = false): string;
+class function Url.build(const cHash: THash; enc: Boolean = false; noCache:
+    boolean = true): string;
 var
-  cParam: string;
+    cParam: string;
     cParams: string;
     i: Integer;
 begin
@@ -104,28 +107,37 @@ begin
             cParams:=cParams+'='+cParam;
          end;
     end;
+    if (noCache) then begin
+        if (cParams='') then
+            cParams:=cParams+'?'
+        else
+            cParams:=cParams+'&';
+        cParams:=cParams+'noCache='+Utils.randomStr(5);
+
+    end;
     result:=cHash['addr']+cParams;
 end;
 
 class function Url.build(const cHash: THash; const cNameValueParams: array of
-    variant; unionParams: Boolean = false; enc: Boolean = false): string;
+    variant; unionParams: Boolean = false; enc: Boolean = false; noCache:
+    boolean = true): string;
 var
     cParams: THash;
 begin
     cParams :=Hash(cNameValueParams);
-    result  :=build(cHash,cParams,unionParams,enc);
+    result  :=build(cHash,cParams,unionParams,enc,noCache);
     FreeHash(cParams);
 end;
 
 class function Url.build(cHash, cParams: THash; unionParams: Boolean = false;
-    enc: Boolean = false): string;
+    enc: Boolean = false; noCache: boolean = true): string;
 begin
     if (unionParams) then
         cHash.Hash['params'].union(cParams)
     else
         cHash.Hash['params'].assign(cParams);
 
-    result:=build(cHash,enc);
+    result:=build(cHash,enc,noCache);
 end;
 
 class function Url.params(params: string; toHash: THash = nil; dec: Boolean =
@@ -133,7 +145,7 @@ class function Url.params(params: string; toHash: THash = nil; dec: Boolean =
 var
     cHash: THash;
     cNameValue: THash;
-  cParam: string;
+    cParam: string;
     i: Integer;
 begin
     if (toHash = nil) then

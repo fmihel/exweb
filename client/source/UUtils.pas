@@ -23,6 +23,7 @@ type
         class function isFloat(const aStr: string): Boolean; static;
         class function isInt(const aStr:string): Boolean; static;
         class function isNumeric(const aStr: string): Boolean; static;
+        class function randomStr(aLen: integer=10): string; static;
         class function readFromStream(Stream: TStream): string; static;
         class function rusCod(s: string): string; static;
         class function rusEnCod(s: string): string; static;
@@ -32,6 +33,7 @@ type
         class function UrlEncode(Str: AnsiString): AnsiString; static;
         class function writeToStream(str: string; Stream: TStream): Integer;
             static;
+
     end;
 
 implementation
@@ -170,6 +172,17 @@ end;
 class function Utils.isNumeric(const aStr: string): Boolean;
 begin
     result:= ( isInt(aStr) or isFloat(aStr) );
+end;
+
+class function Utils.randomStr(aLen: integer=10): string;
+var
+    i: Integer;
+begin
+    randomize;
+    result:='';
+    if aLen>0 then
+    for i:=0 to aLen-1 do
+        result:=result+chr(65+random(25));
 end;
 
 class function Utils.readFromStream(Stream: TStream): string;

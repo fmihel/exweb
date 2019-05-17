@@ -60,31 +60,7 @@ class Stream{
         }
     }
     
-    /**
-     * получение блока
-     * @return block
-     */
-    public function getBlock($id_rest_api)
-    {
-        $block = false;
-        try{
-            $q = 'select ID_REST_API_DATA,SIZE from REST_API_DATA where ID_REST_API ='.$id_rest_api.' order by ID_REST_API_DATA';                
-            $ds = base::ds($q,'exweb');
-            while(base::by($ds,$row)){
-                $q = 'select BLOCK from REST_API_DATA where ID_REST_API_DATA ='.$row['ID_REST_API_DATA'];
-                $data = base::val($q,'','exweb');
-                if ($block===false)
-                    $block=$data;
-                else    
-                    $block.=$data;
-            };
 
-        }catch(Exception $e){
-            return '';
-        }
-        return $block;
-        
-    }
 }
 
 $stream = new Stream();
