@@ -1,5 +1,9 @@
 <?php
 
+namespace exweb;
+use exweb\source\{Utils,Result,exweb};
+
+
 if(!isset($Application)){
     require_once '../../wsi/ide/ws/utils/application.php';
     
@@ -16,8 +20,11 @@ require SOURCE_ROOT.'connect.php';
 require SOURCE_ROOT.'stream.php';
 require SOURCE_ROOT.'exweb.php';
 
+
+
 //------------------------------------------------------------------------------------------
-Result::autorize();
+// проверка наличия ключа авторизации
+// Result::autorize();
 //------------------------------------------------------------------------------------------
 
 if (Utils::requestContains('event')){
@@ -29,7 +36,7 @@ if (Utils::requestContains('event')){
             $q = "select * from REST_API where OWNER='client' and STATE NOT IN ('ready','error','completed')";
             $ds = Result::ds($q);
 
-            while(base::by($ds,$row)){
+            while(\base::by($ds,$row)){
                 $q = "delete from REST_API_DATA where ID_REST_API = ".$row['ID_REST_API'];
                 Result::query($q);
             };
@@ -38,7 +45,7 @@ if (Utils::requestContains('event')){
             Result::query($q);
 
             // создаем строку в таблице REST_API
-            $id = base::insert_uuid('REST_API','ID_REST_API','exweb');
+            $id = \base::insert_uuid('REST_API','ID_REST_API','exweb');
 
             if ($id===false)
                 Result::error('error create row in rest_api');
@@ -75,7 +82,7 @@ if (Utils::requestContains('event')){
             Result::requestContains('id');
 
             $q = "select STR from REST_API where ID_REST_API=".$_REQUEST['id'];    
-            $str = base::val($q,'','exweb');    
+            $str = \base::val($q,'','exweb');    
             $str = Utils::rusEnCod($str);
 
             $q = "update REST_API set STR='".addslashes($str)."', STATE='encode_string', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$_REQUEST['id'];
@@ -108,7 +115,7 @@ if (Utils::requestContains('event')){
         case "block":{
             Result::requestContains('id','size');
             
-            $id = base::insert_uuid('REST_API_DATA','ID_REST_API_DATA','exweb');
+            $id = \base::insert_uuid('REST_API_DATA','ID_REST_API_DATA','exweb');
             $q = "update REST_API_DATA set BLOCK='".addslashes($stream->data)."',SIZE =".$_REQUEST['size']." , ID_REST_API = ".$_REQUEST['id']."  where ID_REST_API_DATA=".$id;            
             Result::query($q);    
 
@@ -120,7 +127,7 @@ if (Utils::requestContains('event')){
             Result::requestContains('id');
             // последний успешный блок
             $q = "select MD5 from REST_API where ID_REST_API = ".$_REQUEST['id'];
-            $clientMD5 = strtoupper(trim(base::val($q,'','exweb')));
+            $clientMD5 = strtoupper(trim(\base::val($q,'','exweb')));
             $serverMD5  = strtoupper(trim(md5(exweb::getBlock($_REQUEST['id']))));
             
             Result::ok([
@@ -128,7 +135,44 @@ if (Utils::requestContains('event')){
             ]);
             
         };break;    
+        // получить id сообщения (если есть)
+        // еcли запись есть, то возвращает id и доп информацию
+        // если не существует то возвращает  id = -1
         
+        case "recv_get_id":{
+            
+            $q = "select * from REST_API where STATE='ready' and OWNER='server' ";
+            $row = Result::row($q);
+            
+            if ($row===[])
+                Result::ok(['id'=>-1]);
+            else    
+                Result::ok([
+                    'id'=>$row['ID_REST_API'],
+                    'str_len'=>mb_strlen($row['STR']),
+                    'size'=>$row['SIZE'],
+                    'md5'=>$row['MD5']
+                ]);
+            
+        };break;    
+        case "recv_str":{
+            Result::requestContains('id');
+            
+            $q = "select STR from REST_API where ID_REST_API=".$_REQUEST['id'];
+            $row = Result::row($q);
+            
+            if ($row===[])
+                Result::error('can`t read row where ID_REST_API='.$_REQUEST['id']);
+            else    
+                Result::ok([
+                    'id'=>$_REQUEST['id'],
+                    'str'=>Utils::rusCod($row['STR']),
+                    
+                ]);
+            
+        };break;    
+    
+
         //----------------------------------------------------------------------------------
         // отображение последнего пакета для отладки
         case "view_last_ready":{
@@ -143,7 +187,7 @@ if (Utils::requestContains('event')){
             // ------------------------------------------------
             // последний успешный блок
             $q = "select * from REST_API where STATE = 'ready' and OWNER='client' order by ID_REST_API desc";
-            $row = base::row($q,'exweb','utf8');
+            $row = \base::row($q,'exweb','utf8');
 
             if ($row!=[]){
                 $block  = exweb::getBlock($row['ID_REST_API']);
@@ -166,7 +210,7 @@ if (Utils::requestContains('event')){
         case "view_as_image":{
             // последний успешный блок
             $q = "select ID_REST_API,MD5 from REST_API where STATE = 'ready' and OWNER='client' order by ID_REST_API desc";
-            $row = base::row($q,'exweb');
+            $row = \base::row($q,'exweb');
 
             if ($row!=[]){
                 $block  = exweb::getBlock($row['ID_REST_API']);

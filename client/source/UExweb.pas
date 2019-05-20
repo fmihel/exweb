@@ -203,7 +203,104 @@ end;
 
 function TExWeb.recv(var str: string; data: TStream; prevResult: TExWebState):
     TExWebState;
+var
+    otvet: THash;
+    cMD5: string;
+    cResult: TExWebResult;
+    id: string;
+
+    const
+        cFuncName = 'send';
 begin
+{
+    result:=prevState;
+    result.result:=false;
+
+    try
+    try
+
+        if (prevState.webResult = ewrNeedConfirm) then begin
+            // есть необходимость закрыть последнюю успешную предачу
+            cResult:=get(['event','close','id',prevState.id],otvet);
+
+            if cResult<>ewrOk then begin
+                result:=prevState;
+                result.result:=false;
+                raise Exception.Create('event=close');
+            end;
+
+            if (otvet.Int['res'] = 0) then begin
+                result:=prevState;
+                result.result:=false;
+                raise Exception.Create('event=close,'+otvet['msg']);
+            end;
+        end;
+
+        // получаем id сообщения
+        cResult:=get(['event','recv_get_id'],otvet);
+
+        if cResult<>ewrOk then begin
+            result:=prevState;
+            result.result:=false;
+            raise Exception.Create('event=recv_get_id');
+        end;
+
+        if (otvet.Int['res'] = 0) then begin
+            result:=prevState;
+            result.result:=false;
+            raise Exception.Create('event=init_recv,'+otvet['msg']);
+        end;
+
+        id          :=  otvet.Hash['data']['id'];
+        BlockSize   :=  otvet.Hash['data'].Int['block_size'];
+        BlockLen    :=  otvet.Hash['data'].Int['block_len'];
+
+        // отправка строки
+        cResult:=_send(str,id);
+
+        if cResult<>ewrOk then begin
+            result:=prevState;
+            result.result:=false;
+            raise Exception.Create('_send(str)<>ewrOk');
+        end;
+
+
+        //----------------------------------------------------------------------------------------
+        // отправка бинарных данных
+        if (data<>nil) and (data.size>0) then begin
+            cResult:=_send(data,id);
+
+            if cResult<>ewrOk then begin
+                result:=prevState;
+                result.result:=false;
+                raise Exception.Create('_send(stream)<>ewrOk');
+            end;
+        end;
+
+        //----------------------------------------------------------------------------------------
+        // подтверждение передачи
+        // не зависимо от результата подтверждения, считаем общий результат успешным
+        cResult:=get(['event','close','id',id],otvet);
+        if (cResult<>ewrOk) or (otvet.Int['res'] = 0) then
+            cResult:=ewrNeedConfirm;
+
+        if (cResult = ewrOk) or (cResult = ewrNeedConfirm) then begin
+            result.result       :=  true;
+            result.id           :=  id;
+            result.webResult    :=  cResult;
+        end;
+
+    except
+    on e:Exception do
+    begin
+
+    end;
+    end;
+    finally
+        FreeHash(otvet);
+    end;
+        }
+
 end;
 
 function TExWeb.send(const str: string; data: TStream; prevState: TExWebState):

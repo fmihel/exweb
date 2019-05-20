@@ -1,5 +1,7 @@
 <?php
 
+namespace exweb\source;
+
 class Stream{
     
     public $read_block_name;   
@@ -50,10 +52,10 @@ class Stream{
                         }    
 
                 }else   
-                    throw new Exception("var `$this->read_block_name`  defined but file `$file` not exists");
+                    throw new \Exception("var `$this->read_block_name`  defined but file `$file` not exists");
         
             }    
-        }catch (Exception $e){
+        }catch (\Exception $e){
             $this->data = null;
             $this->md5 = '';
             $this->haveIncomingData = false;

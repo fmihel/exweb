@@ -1,5 +1,5 @@
 <?php
-use PhpOffice\PhpSpreadsheet\Calculation\Exception;
+namespace exweb\source;
 
 class exweb {
 
@@ -12,32 +12,32 @@ class exweb {
         $block = false;
         try{
             $q = 'select ID_REST_API_DATA from REST_API_DATA where ID_REST_API ='.$id_rest_api.' order by ID_REST_API_DATA';                
-            $ds = base::ds($q,'exweb');
+            $ds = \base::ds($q,'exweb');
             $row =[];
-            while(base::by($ds,$row)){
+            while(\base::by($ds,$row)){
                 $q = 'select BLOCK from REST_API_DATA where ID_REST_API_DATA ='.$row['ID_REST_API_DATA'];
-                $data = base::val($q,'','exweb');
+                $data = \base::val($q,'','exweb');
                 if ($block===false)
                     $block=$data;
                 else    
                     $block.=$data;
             };
 
-        }catch(Exception $e){
+        }catch(\Exception $e){
             return '';
         }
         return $block;
     }
     /**
-     * получение сообщения
+     * получение сообщения (из офиса)
      * при указании $completed = true сообщение, после прочтения будет помечено как 'completed'
      * @return ['id'=>int,'str'=>string,'data'=>stream]
      */
     public static function recv(bool $completed = false){
         $q = "select ID_REST_API,STR,SIZE from REST_API where OWNER='client' and STATE='ready' order by ID_REST_API";
-        $row = base::row($q,'exweb');
+        $row = \base::row($q,'exweb');
         if ($row === false)
-            throw new Exception(base::error('exweb'));
+            throw new \Exception(\base::error('exweb'));
         
         $result = [
             'id'=>0,
@@ -59,28 +59,29 @@ class exweb {
         return $result;
     }
     /**
-     * отправка сообщения клиенту
+     * отправка сообщения клиенту(в офис)
      */
     public static function send(string $str,$data = null){
         
         // создаем строку в таблице REST_API
-        $id = base::insert_uuid('REST_API','ID_REST_API','exweb');
+        $id = \base::insert_uuid('REST_API','ID_REST_API','exweb');
 
         if ($id===false)
-            return false;
+            Result::error('Error create row in REST_API');
         
-            $q = "update REST_API set OWNER='server', STATE='init', STR = '".$str."', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$id;
+        $q = "update REST_API set OWNER='server', STATE='init', STR = '".$str."', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$id;
         
-        if (!base::query($q,'exweb'))
-            return false;
+        Result::query($q);
+
+        Result::query("update REST_API set STATE='ready', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$id);
 
         return $id;
-        
     }
     public static function completed(int $id_rest_api){
         $q = "update REST_API set STATE='completed' where ID_REST_API=$id_rest_api";
-        return base::query($q,'exweb');
+        return \base::query($q,'exweb');
     }
+    
 }
 
 ?>
