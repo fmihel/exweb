@@ -330,34 +330,34 @@ begin
 
         if (prevState.webResult = ewrNeedConfirm) then begin
             // есть необходимость закрыть последнюю успешную предачу
-            cResult:=get(['event','close','id',prevState.id],otvet);
+            cResult:=get(['event','send_ready','id',prevState.id],otvet);
 
             if cResult<>ewrOk then begin
                 result:=prevState;
                 result.result:=false;
-                raise Exception.Create('event=close');
+                raise Exception.Create('event=send_ready');
             end;
 
             if (otvet.Int['res'] = 0) then begin
                 result:=prevState;
                 result.result:=false;
-                raise Exception.Create('event=close,'+otvet['msg']);
+                raise Exception.Create('event=send_ready,'+otvet['msg']);
             end;
         end;
 
         // инициализируем передачу и получаем настрйки сервера
-        cResult:=get(['event','init'],otvet);
+        cResult:=get(['event','send_init'],otvet);
 
         if cResult<>ewrOk then begin
             result:=prevState;
             result.result:=false;
-            raise Exception.Create('event=init');
+            raise Exception.Create('event=send_init');
         end;
 
         if (otvet.Int['res'] = 0) then begin
             result:=prevState;
             result.result:=false;
-            raise Exception.Create('event=init,'+otvet['msg']);
+            raise Exception.Create('event=send_init,'+otvet['msg']);
         end;
 
         id          :=  otvet.Hash['data']['id'];
@@ -389,7 +389,7 @@ begin
         //----------------------------------------------------------------------------------------
         // подтверждение передачи
         // не зависимо от результата подтверждения, считаем общий результат успешным
-        cResult:=get(['event','close','id',id],otvet);
+        cResult:=get(['event','send_ready','id',id],otvet);
         if (cResult<>ewrOk) or (otvet.Int['res'] = 0) then
             cResult:=ewrNeedConfirm;
 
@@ -447,8 +447,8 @@ begin
         end;
 
         //------------------------------------------------------
-        result:=get(['event','encode_string','id',id],otvet);
-        ExceptionOtvet(result,otvet,'encode_string');
+        result:=get(['event','send_encode','id',id],otvet);
+        ExceptionOtvet(result,otvet,'send_encode');
         //------------------------------------------------------
 
     except
@@ -494,8 +494,8 @@ begin
 
         //----------------------------------------------------------------------------------------
         // инициируем начало передачи
-        result:=get(['event','open','size',info.size,'blockSize',info.blockSize,'count',info.count,'md5',info.md5,'id',info.id],otvet);
-        ExceptionOtvet(result,otvet,'open');
+        result:=get(['event','send_block_init','size',info.size,'blockSize',info.blockSize,'count',info.count,'md5',info.md5,'id',info.id],otvet);
+        ExceptionOtvet(result,otvet,'send_block_init');
 
         //----------------------------------------------------------------------------------------
         // отсылка полезной информации
@@ -512,7 +512,7 @@ begin
 
         if (otvet.Hash['data'].Int['check'] = 0) then begin
             result:=ewrHashSumNotCompare;
-            raise Exception.Create('event=hash_sum_copare,check = 0');
+            raise Exception.Create('event=hash_sum_compare,check = 0');
         end;
 
     except
@@ -548,7 +548,7 @@ begin
         data.Position:=0;
         //----------------------------------------------------------------------------------------
         // поблочная передача данных
-        params['event'] :=  'block';
+        params['event'] :=  'send_block';
         params['id']    :=  info.id;
         //----------------------------------------------------------------------------------------
         for i:=0 to info.count-1 do begin
@@ -570,7 +570,7 @@ begin
                 block.Position:=0;
 
                 result:=post(params,block,httpResponse);
-                ExceptionOtvet(result,httpResponse,'block');
+                ExceptionOtvet(result,httpResponse,'send_block');
 
 
             except

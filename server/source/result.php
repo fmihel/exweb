@@ -46,6 +46,16 @@ class Result{
             return [];    
         return $row;    
     }
+    public static function val(string $sql,string $fieldName,string $msgOnError=''){
+        $row = self::row($sql,$msgOnError);
+        if  ($row === [])
+            self::error($msgOnError.'query:['.$sql.'] $row = []');
+        if (isset($row[$fieldName]))
+            return $row[$fieldName];
+        else
+            self::error($msgOnError.'query:['.$sql.'] '.$fieldName.' not exists');    
+    }
+
 
     public static function requestContains(/**name1,name2,... */){
         for($i=0;$i<func_num_args();$i++){

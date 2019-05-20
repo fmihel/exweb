@@ -41,7 +41,7 @@ class TWS extends WS{
                 text-overflow: ellipsis;
                 margin:0px;
                 padding:0px;
-                background:#272822;
+                background:#242424;
                 color:#849D9D;
                 font-family: "Segoe UI", "Roboto", arial, sans-serif;
                 font-size:12px;

@@ -31,7 +31,7 @@ if (Utils::requestContains('event')){
     switch ($_REQUEST['event']){
         //----------------------------------------------------------------------------------
         // инициализация передачи
-        case "init":{
+        case "send_init":{
             // очистка предыдущих неуспешных передач
             $q = "select * from REST_API where OWNER='client' and STATE NOT IN ('ready','error','completed')";
             $ds = Result::ds($q);
@@ -78,31 +78,31 @@ if (Utils::requestContains('event')){
         };break;
         //----------------------------------------------------------------------------------
         // декодировка получеенной строки, по завершению передачи строки
-        case "encode_string":{
+        case "send_encode":{
             Result::requestContains('id');
 
             $q = "select STR from REST_API where ID_REST_API=".$_REQUEST['id'];    
             $str = \base::val($q,'','exweb');    
             $str = Utils::rusEnCod($str);
 
-            $q = "update REST_API set STR='".addslashes($str)."', STATE='encode_string', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$_REQUEST['id'];
+            $q = "update REST_API set STR='".addslashes($str)."', STATE='encode', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$_REQUEST['id'];
             Result::query($q);    
             
             Result::ok();
         };break;
         //----------------------------------------------------------------------------------
         // инициализация передачи бинарных данных
-        case "open":{
+        case "send_block_init":{
             Result::requestContains('id','size','md5');
 
-            $q = "update REST_API set MD5='".$_REQUEST['md5']."', STATE='open', SIZE = ".$_REQUEST['size'].', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API='.$_REQUEST['id'];
+            $q = "update REST_API set MD5='".$_REQUEST['md5']."', STATE='block_init', SIZE = ".$_REQUEST['size'].', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API='.$_REQUEST['id'];
             Result::query($q);    
 
             Result::ok();
         };break;
         //----------------------------------------------------------------------------------
         // завершениен передачи и разрешение на чтение данных
-        case "close":{
+        case "send_ready":{
             Result::requestContains('id');
             //Result::error();    
             $q = "update REST_API set STATE='ready' , LAST_UPDATE=CURRENT_TIMESTAMP where STATE<>'completed' and ID_REST_API=".$_REQUEST['id'];            
@@ -112,7 +112,7 @@ if (Utils::requestContains('event')){
         };break;    
         //----------------------------------------------------------------------------------
         // передача бинарного блока данных
-        case "block":{
+        case "send_block":{
             Result::requestContains('id','size');
             
             $id = \base::insert_uuid('REST_API_DATA','ID_REST_API_DATA','exweb');
@@ -135,23 +135,28 @@ if (Utils::requestContains('event')){
             ]);
             
         };break;    
+        //----------------------------------------------------------------------------------
         // получить id сообщения (если есть)
         // еcли запись есть, то возвращает id и доп информацию
         // если не существует то возвращает  id = -1
-        
         case "recv_get_id":{
             
-            $q = "select * from REST_API where STATE='ready' and OWNER='server' ";
+            $q = "select * from REST_API where STATE='ready' and OWNER='server'order by ID_REST_API";
             $row = Result::row($q);
             
             if ($row===[])
                 Result::ok(['id'=>-1]);
-            else    
+            else
+                $q = 'select count(*) count from REST_API_DATA where ID_REST_API = '.$row['ID_REST_API']; 
+                $count_blocks = Result::val($q,'count');
+
                 Result::ok([
                     'id'=>$row['ID_REST_API'],
                     'str_len'=>mb_strlen($row['STR']),
                     'size'=>$row['SIZE'],
-                    'md5'=>$row['MD5']
+                    'md5'=>$row['MD5'],
+                    "count_blocks"=>$count_blocks
+                    
                 ]);
             
         };break;    
@@ -167,11 +172,10 @@ if (Utils::requestContains('event')){
                 Result::ok([
                     'id'=>$_REQUEST['id'],
                     'str'=>Utils::rusCod($row['STR']),
-                    
                 ]);
             
         };break;    
-    
+        
 
         //----------------------------------------------------------------------------------
         // отображение последнего пакета для отладки
