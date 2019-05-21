@@ -2,7 +2,7 @@
 
 namespace exweb;
 use exweb\source\{Utils,Result,exweb};
-
+use Complex\Exception;
 
 if(!isset($Application)){
     require_once '../../wsi/ide/ws/utils/application.php';
@@ -31,7 +31,7 @@ if (Utils::requestContains('event')){
     switch ($_REQUEST['event']){
         //----------------------------------------------------------------------------------
         // инициализация передачи
-        case "send_init":{
+        case "init_send":{
             // очистка предыдущих неуспешных передач
             $q = "select * from REST_API where OWNER='client' and STATE NOT IN ('ready','error','completed')";
             $ds = Result::ds($q);
@@ -50,7 +50,7 @@ if (Utils::requestContains('event')){
             if ($id===false)
                 Result::error('error create row in rest_api');
 
-            $q = "update REST_API set OWNER='client', STATE='init', STR = '', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$id;
+            $q = "update REST_API set OWNER='client', STATE='init_send', STR = '', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$id;
             Result::query($q);    
 
             Result::ok([
@@ -78,38 +78,28 @@ if (Utils::requestContains('event')){
         };break;
         //----------------------------------------------------------------------------------
         // декодировка получеенной строки, по завершению передачи строки
-        case "send_encode":{
+        case "string_encode":{
             Result::requestContains('id');
 
             $q = "select STR from REST_API where ID_REST_API=".$_REQUEST['id'];    
-            $str = \base::val($q,'','exweb');    
+            $str = \base::val($q,'','exweb');
             $str = Utils::rusEnCod($str);
 
-            $q = "update REST_API set STR='".addslashes($str)."', STATE='encode', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$_REQUEST['id'];
+            $q = "update REST_API set STR='".addslashes($str)."', STATE='string_encode', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$_REQUEST['id'];
             Result::query($q);    
             
             Result::ok();
         };break;
         //----------------------------------------------------------------------------------
         // инициализация передачи бинарных данных
-        case "send_block_init":{
-            Result::requestContains('id','size','md5');
+        case "init_send_block":{
+            Result::requestContains('id','size','md5','count');
 
-            $q = "update REST_API set MD5='".$_REQUEST['md5']."', STATE='block_init', SIZE = ".$_REQUEST['size'].', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API='.$_REQUEST['id'];
+            $q = "update REST_API set MD5='".$_REQUEST['md5']."', STATE='init_send_block', SIZE = ".$_REQUEST['size'].',BLOCK_COUNT='.$_REQUEST['count'].',BLOCK_NUM=-1, LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API='.$_REQUEST['id'];
             Result::query($q);    
 
             Result::ok();
         };break;
-        //----------------------------------------------------------------------------------
-        // завершениен передачи и разрешение на чтение данных
-        case "send_ready":{
-            Result::requestContains('id');
-            //Result::error();    
-            $q = "update REST_API set STATE='ready' , LAST_UPDATE=CURRENT_TIMESTAMP where STATE<>'completed' and ID_REST_API=".$_REQUEST['id'];            
-            Result::query($q);    
-
-            Result::ok();
-        };break;    
         //----------------------------------------------------------------------------------
         // передача бинарного блока данных
         case "send_block":{
@@ -117,6 +107,9 @@ if (Utils::requestContains('event')){
             
             $id = \base::insert_uuid('REST_API_DATA','ID_REST_API_DATA','exweb');
             $q = "update REST_API_DATA set BLOCK='".addslashes($stream->data)."',SIZE =".$_REQUEST['size']." , ID_REST_API = ".$_REQUEST['id']."  where ID_REST_API_DATA=".$id;            
+            Result::query($q);    
+
+            $q = "update REST_API set STATE='send_block', BLOCK_NUM=".$_REQUEST['i'].", LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$_REQUEST['id'];
             Result::query($q);    
 
             Result::ok();
@@ -136,12 +129,22 @@ if (Utils::requestContains('event')){
             
         };break;    
         //----------------------------------------------------------------------------------
+        // завершениен передачи и разрешение на чтение данных
+        case "ready":{
+            Result::requestContains('id');
+            //Result::error();    
+            $q = "update REST_API set STATE='ready' , LAST_UPDATE=CURRENT_TIMESTAMP where STATE<>'completed' and ID_REST_API=".$_REQUEST['id'];            
+            Result::query($q);    
+
+            Result::ok();
+        };break;    
+        //----------------------------------------------------------------------------------
         // получить id сообщения (если есть)
         // еcли запись есть, то возвращает id и доп информацию
         // если не существует то возвращает  id = -1
         case "recv_get_id":{
             
-            $q = "select * from REST_API where STATE='ready' and OWNER='server'order by ID_REST_API";
+            $q = "select * from REST_API where STATE='ready' and OWNER='server' order by ID_REST_API";
             $row = Result::row($q);
             
             if ($row===[])
@@ -160,7 +163,8 @@ if (Utils::requestContains('event')){
                 ]);
             
         };break;    
-        case "recv_str":{
+        // чтение строки исходящего сообщения
+        case "recv_string":{
             Result::requestContains('id');
             
             $q = "select STR from REST_API where ID_REST_API=".$_REQUEST['id'];
@@ -171,12 +175,66 @@ if (Utils::requestContains('event')){
             else    
                 Result::ok([
                     'id'=>$_REQUEST['id'],
-                    'str'=>Utils::rusCod($row['STR']),
+                    'string'=>Utils::rusCod($row['STR']),
                 ]);
             
         };break;    
-        
+        // получение информации по блоку ( вообще можно и без нее)
+        case "recv_block_info":{
+            Result::requestContains('id','i');
+            // получаем id блока по порялковому номеру 
+            $q = "select ID_REST_API_DATA from REST_API_DATA where ID_REST_API=".$_REQUEST['id'].' order by ID_REST_API_DATA';
+            $rows = Result::rows($q);
+            $id = $rows[intval($_REQUEST['i'])]['ID_REST_API_DATA'];
+            
 
+            $q = "select SIZE from REST_API_DATA where ID_REST_API_DATA=".$id;
+            $row = Result::row($q);
+            
+            if ($row===[])
+                Result::error('can`t read row where ID_REST_API_DATA='.$id);
+            else    
+                Result::ok([
+                    'size'=>$row['SIZE'],
+                    'id'=>$id
+                ]);
+        };break; 
+        // считывание i го блока   
+        case "recv_block":{
+            Result::requestContains('id','i');
+            // получаем id блока по порядковому номеру 
+            $q = "select ID_REST_API_DATA from REST_API_DATA where ID_REST_API=".$_REQUEST['id'].' order by ID_REST_API_DATA';
+            $rows = Result::rows($q);
+            try{
+
+                if(!isset($rows[intval($_REQUEST['i'])]))
+                    throw new \Exception('offset error');
+
+                $id = $rows[intval($_REQUEST['i'])]['ID_REST_API_DATA'];
+
+                $q = "select BLOCK,SIZE from REST_API_DATA where ID_REST_API_DATA=".$id;
+                $row = Result::row($q);
+            
+                if ($row===[])
+                    Result::error('can`t read row where ID_REST_API_DATA='.$id);
+                else{    
+                    echo $row['BLOCK'];
+                    exit;
+                };    
+            }catch (\Exception $e){
+                echo '';
+                exit;
+            }
+            
+        };break;    
+        
+        //----------------------------------------------------------------------------------
+        // указывает, что сообщение обработано, и его можно удалить
+        case "completed":{
+            Result::requestContains('id');
+            $q = '';
+            Result::ok();
+        };break;    
         //----------------------------------------------------------------------------------
         // отображение последнего пакета для отладки
         case "view_last_ready":{

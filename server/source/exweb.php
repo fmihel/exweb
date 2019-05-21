@@ -70,10 +70,10 @@ class exweb {
             Result::error('Error create row in REST_API');
         
         $q = "update REST_API set OWNER='server', STATE='init', STR = '".$str."', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$id;
-        
         Result::query($q);
 
-        Result::query("update REST_API set STATE='ready', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$id);
+        $q = "update REST_API set STATE='ready', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$id;
+        Result::query($q);
 
         return $id;
     }

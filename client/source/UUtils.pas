@@ -196,24 +196,31 @@ end;
 
 class function Utils.rusCod(s: string): string;
 var
-    c: Char;
+    c: AnsiChar;
     code: Integer;
     i: Integer;
     LMax, LMin, HMax, HMin: Integer;
+    ansi:AnsiString;
+
 begin
 
-    LMin:=Ord(Char('à'));
-    LMax:=Ord(Char('ÿ'));
-    HMin:=Ord(Char('À'));
-    HMax:=Ord(Char('ß'));
+    LMin:=Ord(AnsiChar('à'));
+    LMax:=Ord(AnsiChar('ÿ'));
+    HMin:=Ord(AnsiChar('À'));
+    HMax:=Ord(AnsiChar('ß')) ;
+    ansi:=AnsiString(s);
 
     result:='';
-    for i:=1 to length(s) do begin
-        c:=s[i];
+    for i:=1 to length(ansi) do begin
+        c:=ansi[i];
         code:=ord(c);
         if ((code>=HMin) and (code<=HMax)) or
            ((code>=LMin) and (code<=LMax)) then
-           result:=result+'#'+IntToStr(code)+';'
+                result:=result+'#'+IntToStr(code)+';'
+        else if (code = Ord(AnsiChar('¸'))) then
+            result:=result+'#1027;'
+        else if (code = Ord(AnsiChar('¨'))) then
+            result:=result+'#1028;'
         else
             result:=result+c;
 
@@ -222,26 +229,34 @@ end;
 
 class function Utils.rusEnCod(s: string): string;
 var
-    code: string;
+    code: AnsiString;
+    cStr:AnsiString;
     i: Integer;
     LMax, LMin, HMax, HMin: Integer;
 begin
 
-    LMin:=Ord(Char('à'));
-    LMax:=Ord(Char('ÿ'));
-    HMin:=Ord(Char('À'));
-    HMax:=Ord(Char('ß'));
+    LMin:=Ord(AnsiChar('à'));
+    LMax:=Ord(AnsiChar('ÿ'));
+    HMin:=Ord(AnsiChar('À'));
+    HMax:=Ord(AnsiChar('ß'));
 
-    result:=s;
+    cStr:=AnsiString(s);
+
+
     for i:=LMin to LMax do begin
-        code:='#'+InttOStr(i)+';';
-        result:=StringReplace(result,code,chr(i),[rfReplaceAll]);
+        code:='#'+IntToStr(i)+';';
+        cStr:=StringReplace(cStr,code,AnsiChar(chr(i)),[rfReplaceAll]);
+    end;
 
-    end;
     for i:=HMin to HMax do begin
-        code:='#'+InttOStr(i)+';';
-        result:=StringReplace(result,code,chr(i),[rfReplaceAll]);
+        code:='#'+IntToStr(i)+';';
+        cStr:=StringReplace(cStr,code,AnsiChar(chr(i)),[rfReplaceAll]);
     end;
+
+    cStr:=StringReplace(cStr,'#1027;',AnsiChar('¸'),[rfReplaceAll]);
+    cStr:=StringReplace(cStr,'#1028;',AnsiChar('¨'),[rfReplaceAll]);
+
+    result:=cStr;
 end;
 
 class function Utils.StrToFloat(str: string): Double;

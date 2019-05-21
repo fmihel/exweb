@@ -28,7 +28,12 @@ type
         procedure ExceptionOtvet(var res:TExWebResult;otvet: THash;
             event:string; msg: string='');
         function getScript: string;
+        function httpResultToExWebResult(aHttpResult: THttpResult):
+            TExWebResult;
+        function read(Params: THash; aData: TStream): TExWebResult;
         procedure setScript(const Value: string);
+        function _recvBlock(data: TStream;id:string;count:integer):
+            TExWebResult;
         function _send(str:string; id: string): TExWebResult; overload;
         function _send(data: TStream; id: string): TExWebResult; overload;
         function _sendBlock(info: TExWebBlockInfo; data: TStream): TExWebResult;
@@ -38,14 +43,12 @@ type
         function get(NameValueParams: array of variant; Response: THash):
             TExWebResult; overload;
         function get(Params, Response: THash): TExWebResult; overload;
-        function httpResultToExWebResult(aHttpResult: THttpResult):
-            TExWebResult;
         function post(Params:array of variant; data: TStream; Response: THash):
             TExWebResult; overload;
         function post(Params: THash; data: TStream; Response: THash):
             TExWebResult; overload;
         //1 чтение данных
-        function recv(var str: string; data: TStream; prevResult: TExWebState):
+        function recv(var str: string; data: TStream; prevState: TExWebState):
             TExWebState;
         function send(const str: string; data: TStream; prevState:
             TExWebState): TExWebState;
@@ -201,38 +204,49 @@ begin
         result:=httpResultToExWebResult(http.write(Params,Response));
 end;
 
-function TExWeb.recv(var str: string; data: TStream; prevResult: TExWebState):
+function TExWeb.read(Params: THash; aData: TStream): TExWebResult;
+begin
+    addKey(Params);
+    result:=httpResultToExWebResult(http.read(Params,aData));
+end;
+
+function TExWeb.recv(var str: string; data: TStream; prevState: TExWebState):
     TExWebState;
 var
+    cBlockLen: Integer;
     otvet: THash;
     cMD5: string;
+    cMD5Recv: string;
+    count: Integer;
     cResult: TExWebResult;
     id: string;
+    size: Integer;
 
     const
         cFuncName = 'send';
+
 begin
-{
+
     result:=prevState;
     result.result:=false;
-
+    otvet:=Hash();
     try
     try
 
         if (prevState.webResult = ewrNeedConfirm) then begin
             // есть необходимость закрыть последнюю успешную предачу
-            cResult:=get(['event','close','id',prevState.id],otvet);
+            cResult:=get(['event','completed','id',prevState.id],otvet);
 
             if cResult<>ewrOk then begin
                 result:=prevState;
                 result.result:=false;
-                raise Exception.Create('event=close');
+                raise Exception.Create('event=completed');
             end;
 
             if (otvet.Int['res'] = 0) then begin
                 result:=prevState;
                 result.result:=false;
-                raise Exception.Create('event=close,'+otvet['msg']);
+                raise Exception.Create('event=completed,'+otvet['msg']);
             end;
         end;
 
@@ -252,35 +266,58 @@ begin
         end;
 
         id          :=  otvet.Hash['data']['id'];
-        BlockSize   :=  otvet.Hash['data'].Int['block_size'];
-        BlockLen    :=  otvet.Hash['data'].Int['block_len'];
-
-        // отправка строки
-        cResult:=_send(str,id);
-
-        if cResult<>ewrOk then begin
+        if (id = '-1') then begin
             result:=prevState;
             result.result:=false;
-            raise Exception.Create('_send(str)<>ewrOk');
+            raise Exception.Create('no messages');
         end;
 
+        cBlockLen    :=  otvet.Hash['data'].Int['str_len'];
+        size         :=  otvet.Hash['data'].Int['size'];
+        count        :=  otvet.Hash['data'].Int['count_blocks'];
+        cMD5         :=  UpperCase(otvet.Hash['data']['md5']);
 
-        //----------------------------------------------------------------------------------------
-        // отправка бинарных данных
-        if (data<>nil) and (data.size>0) then begin
-            cResult:=_send(data,id);
+        if (cBlockLen>0) then begin
+            cResult:=get(['event','recv_string','id',id],otvet);
 
             if cResult<>ewrOk then begin
                 result:=prevState;
                 result.result:=false;
-                raise Exception.Create('_send(stream)<>ewrOk');
+                raise Exception.Create('event=recv_str');
             end;
+
+            str:=otvet.Hash['data']['string'];
+
+            str:=Utils.rusEnCod(str);
+         end else
+            str:='';
+
+        //----------------------------------------------------------------------------------------
+        if (size>0) then begin
+            data.Size:=0;
+            cResult:=_recvBlock(data,id,count);
+
+            if cResult<>ewrOk then begin
+                result:=prevState;
+                result.result:=false;
+                data.Size:=0;
+                raise Exception.Create('_recvBlock<>ewrOk');
+            end;
+
+            cMD5Recv := UpperCase(MD5(data));
+            //if (cMD5<>cMD5Recv) then begin
+            //    result:=prevState;
+            //    result.result:=true;
+            //    data.Size:=0;
+            //    raise Exception.Create('hesh sum recv and sending is not equal');
+            //end;
+
         end;
 
         //----------------------------------------------------------------------------------------
         // подтверждение передачи
         // не зависимо от результата подтверждения, считаем общий результат успешным
-        cResult:=get(['event','close','id',id],otvet);
+        cResult:=get(['event','completed','id',id],otvet);
         if (cResult<>ewrOk) or (otvet.Int['res'] = 0) then
             cResult:=ewrNeedConfirm;
 
@@ -299,7 +336,7 @@ begin
     finally
         FreeHash(otvet);
     end;
-        }
+
 
 end;
 
@@ -330,34 +367,34 @@ begin
 
         if (prevState.webResult = ewrNeedConfirm) then begin
             // есть необходимость закрыть последнюю успешную предачу
-            cResult:=get(['event','send_ready','id',prevState.id],otvet);
+            cResult:=get(['event','ready','id',prevState.id],otvet);
 
             if cResult<>ewrOk then begin
                 result:=prevState;
                 result.result:=false;
-                raise Exception.Create('event=send_ready');
+                raise Exception.Create('event=ready');
             end;
 
             if (otvet.Int['res'] = 0) then begin
                 result:=prevState;
                 result.result:=false;
-                raise Exception.Create('event=send_ready,'+otvet['msg']);
+                raise Exception.Create('event=ready,'+otvet['msg']);
             end;
         end;
 
         // инициализируем передачу и получаем настрйки сервера
-        cResult:=get(['event','send_init'],otvet);
+        cResult:=get(['event','init_send'],otvet);
 
         if cResult<>ewrOk then begin
             result:=prevState;
             result.result:=false;
-            raise Exception.Create('event=send_init');
+            raise Exception.Create('event=init_send');
         end;
 
         if (otvet.Int['res'] = 0) then begin
             result:=prevState;
             result.result:=false;
-            raise Exception.Create('event=send_init,'+otvet['msg']);
+            raise Exception.Create('event=init_send,'+otvet['msg']);
         end;
 
         id          :=  otvet.Hash['data']['id'];
@@ -389,7 +426,7 @@ begin
         //----------------------------------------------------------------------------------------
         // подтверждение передачи
         // не зависимо от результата подтверждения, считаем общий результат успешным
-        cResult:=get(['event','send_ready','id',id],otvet);
+        cResult:=get(['event','ready','id',id],otvet);
         if (cResult<>ewrOk) or (otvet.Int['res'] = 0) then
             cResult:=ewrNeedConfirm;
 
@@ -413,6 +450,56 @@ end;
 procedure TExWeb.setScript(const Value: string);
 begin
     fHttp.Script:=Value;
+end;
+
+function TExWeb._recvBlock(data: TStream;id:string;count:integer): TExWebResult;
+var
+    otvet: THash;
+    i: Integer;
+    cParams: THash;
+    cRead: TMemoryStream;
+
+    const
+        cFuncName = '_recvBlock';
+
+begin
+    result:=ewrUnknownError;
+    otvet:=Hash();
+    cParams:=Hash();
+    cRead:=TMemoryStream.Create;
+    try
+    try
+
+        //----------------------------------------------------------------------------------------
+        data.Position:=0;
+
+        for i:=0 to count-1 do begin
+            cParams.clear;
+            cParams.add(['event','recv_block','i',i,'id',id]);
+            cRead.Clear;
+
+            result:=read(cParams,cRead);
+            if result<>ewrOk then
+                raise Exception.Create('event=recv_block');
+
+            data.CopyFrom(cRead,cRead.Size);
+
+        end;
+
+
+        data.Position:=0;
+        result:=ewrOk;
+    except
+    on e:Exception do
+    begin
+        {$ifdef _log_}ULog.Error(TExWebResultStr[integer(result)],e,ClassName,cFuncName);{$endif}
+    end;
+    end;
+    finally
+        cRead.Free;
+        FreeHash(otvet);
+        FreeHash(cParams);
+    end;
 end;
 
 function TExWeb._send(str:string; id: string): TExWebResult;
@@ -447,8 +534,8 @@ begin
         end;
 
         //------------------------------------------------------
-        result:=get(['event','send_encode','id',id],otvet);
-        ExceptionOtvet(result,otvet,'send_encode');
+        result:=get(['event','string_encode','id',id],otvet);
+        ExceptionOtvet(result,otvet,'string_encode');
         //------------------------------------------------------
 
     except
@@ -494,8 +581,8 @@ begin
 
         //----------------------------------------------------------------------------------------
         // инициируем начало передачи
-        result:=get(['event','send_block_init','size',info.size,'blockSize',info.blockSize,'count',info.count,'md5',info.md5,'id',info.id],otvet);
-        ExceptionOtvet(result,otvet,'send_block_init');
+        result:=get(['event','init_send_block','size',info.size,'blockSize',info.blockSize,'count',info.count,'md5',info.md5,'id',info.id],otvet);
+        ExceptionOtvet(result,otvet,'init_send_block');
 
         //----------------------------------------------------------------------------------------
         // отсылка полезной информации

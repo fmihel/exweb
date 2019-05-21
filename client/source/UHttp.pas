@@ -44,6 +44,7 @@ type
             THttpResult; overload;
         function write(data: TStream; var aResponse: string): THttpResult;
             overload;
+        function read(aParams:THash;aData:TStream):THttpResult;
         property Encode: Boolean read fEncode write fEncode;
         property http: TidHTTP read fhttp write fhttp;
         property read_block_name: string read fread_block_name write
@@ -155,6 +156,53 @@ begin
             result:=hrNoValidJSON;
         if (cHashParsingResult = hjprErrorCreate) then
             result:=hrErrorCreateHash;
+    end;
+end;
+
+function THttp.read(aParams:THash;aData: TStream): THttpResult;
+
+    var
+        cChar: AnsiChar;
+        cPostStream: TIdMultiPartFormDataStream;
+        cPostStrings:TStringList;
+        cResponse:string;
+        cUrl: string;
+        i: Integer;
+    const
+        cFuncName = 'read';
+begin
+
+    cPostStream:=TIdMultiPartFormDataStream.Create();
+    cPostStrings:=TStringList.Create();
+    result:=hrError;
+    try
+    try
+        aData.Size:=0;
+        cPostStream.AddFormField('empty','','',aData,'file100tmp_');
+
+        if (aParams<>nil) then
+            cUrl:=UUrl.Url.build(Url,aParams,false,Encode)
+        else
+            cUrl:=Script;
+
+        cResponse:=http.Post(cUrl,cPostStream);
+
+        for i:=1 to Length(cResponse) do begin
+            cChar:=AnsiChar(cResponse[i]);
+            aData.Write(cChar,sizeof(AnsiChar));
+        end;
+
+        aData.Position:=0;
+        result:=hrOK;
+    except
+    on e:Exception do
+    begin
+        {$ifdef _log_}ULog.Error('',e,ClassName,cFuncName);{$endif}
+    end;
+    end;
+    finally
+        cPostStrings.Free;
+        cPostStream.Free;
     end;
 end;
 

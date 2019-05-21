@@ -46,6 +46,12 @@ class Result{
             return [];    
         return $row;    
     }
+
+    public static function rows(string $sql,string $msgOnError=''){
+        $ds = self::ds($sql,$msgOnError);
+        return \base::rows($ds);
+    }
+
     public static function val(string $sql,string $fieldName,string $msgOnError=''){
         $row = self::row($sql,$msgOnError);
         if  ($row === [])

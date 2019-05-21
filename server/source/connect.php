@@ -7,8 +7,8 @@
     define ('BASE_NAME1',   WS_CONF::GET('exweb_base'));    
 
     base::connect(SERVER_NAME1,SERVER_USER1,SERVER_PASS1,BASE_NAME1,'exweb');
-    base::charSet('cp1251','exweb');
-    //base::charSet('utf8','exweb');
+    //base::charSet('cp1251','exweb');
+    base::charSet('utf8','exweb');
 
     define ('SERVER_NAME2', WS_CONF::GET('deco_server'));
     define ('SERVER_USER2', WS_CONF::GET('deco_user')); 
