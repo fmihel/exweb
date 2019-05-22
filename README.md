@@ -1,8 +1,9 @@
 # exweb
 Набор клиент-серверных библиотек для обмена между Apache(PHP) и Win (Delphi).
 
-### Пример использования на Delphi
 
+### Пример использования на Delphi
+#### upload
 ```
 Uses UExWebType,UExWeb;
 ...
@@ -23,7 +24,7 @@ begin
         if (ExWebState.result) then
             ShowMessage('send: Ok');
         else
-            ShowMessage('send: Ok');
+            ShowMessage('send: Error');
     finally
         cData.Free;
         exweb.Free;
@@ -33,8 +34,43 @@ end;
 
 ```
 
-## Алгоритм передачи
-### Список состояний
+#### upload
+```
+Uses UExWebType,UExWeb;
+...
+
+var
+    exweb:TExWeb;
+    ExWebState:TExWebState;
+    cData:TMemoryStream;
+    cStr:string;
+begin
+
+    exweb:=TExWeb.Create('https://site/exweb/server/');
+    cData:=TMemoryStream.Create;
+
+    try
+
+        ExWebState:=exweb.recv(cStr,cData,ExWebState);
+        if (ExWebState.result) then begin
+            cData.SaveToFile('c://file.jpg');
+            ShowMessage(cStr);
+        end else
+            ShowMessage('recv: Error');
+    finally
+        cData.Free;
+        exweb.Free;
+    end;
+
+end;
+
+```
+
+#Принцип работы протокола
+Протокол exweb предназначен для передачи и приема сообщений между клиентом windows и сервером Apache.
+Основной здачей протокола является наличие достоверной информации о факте приема противоположной стороной информации.
+
+# Описание состояний
 
 |server|client|notes|
 |------|------|-----|

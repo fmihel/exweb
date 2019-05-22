@@ -199,6 +199,7 @@ if (Utils::requestContains('event')){
                     'id'=>$id
                 ]);
         };break; 
+       
         // считывание i го блока   
         case "recv_block":{
             Result::requestContains('id','i');
@@ -217,9 +218,9 @@ if (Utils::requestContains('event')){
             
                 if ($row===[])
                     Result::error('can`t read row where ID_REST_API_DATA='.$id);
-                else{    
+                else{
                     echo $row['BLOCK'];
-                    exit;
+                    exit;    
                 };    
             }catch (\Exception $e){
                 echo '';
@@ -232,7 +233,9 @@ if (Utils::requestContains('event')){
         // указывает, что сообщение обработано, и его можно удалить
         case "completed":{
             Result::requestContains('id');
-            $q = '';
+            
+            if (!exweb::completed($_REQUEST['id']))
+                Result::error('set completed for id='.$_REQUEST['id'] );
             Result::ok();
         };break;    
         //----------------------------------------------------------------------------------
@@ -288,8 +291,43 @@ if (Utils::requestContains('event')){
         };break;    
         //----------------------------------------------------------------------------------
         case "test":{
-            $msg = exweb::recv(true);
-            var_dump($msg);
+            
+            // получаем id блока по порядковому номеру 
+            $q = "select ID_REST_API_DATA from REST_API_DATA where ID_REST_API=340 order by ID_REST_API_DATA";
+            $rows = Result::rows($q);
+            try{
+
+                $id = $rows[0]['ID_REST_API_DATA'];
+
+                $q = "select BLOCK,SIZE from REST_API_DATA where ID_REST_API_DATA=".$id;
+                $row = Result::row($q);
+            
+                //if ($row===[])
+                //    Result::error('can`t read row where ID_REST_API_DATA='.$id);
+                //else{
+                /*
+                    $n = 0;
+                $block = $row['BLOCK'];
+                for($i = 0;$i<10;$i++){    
+                    for($j=0;$j<16;$j++){
+                        $c =  $block[$n];
+                        $code = ord($c);
+                        echo ''.$n.':'.$c.'('.$code.') ';
+                        $n++;
+                    }
+                    echo '<br>';
+                }
+                */    
+                $block = $row['BLOCK'];
+                for($i=0;$i<strlen($block);$i++){
+                    echo ord($block[$i]).'f';
+                }
+                exit;
+            }catch (\Exception $e){
+                echo 'ERROR!!!';
+                exit;
+            }
+
         };break;
         //----------------------------------------------------------------------------------
         

@@ -77,8 +77,8 @@ class exweb {
 
         return $id;
     }
-    public static function completed(int $id_rest_api){
-        $q = "update REST_API set STATE='completed' where ID_REST_API=$id_rest_api";
+    public static function completed(int $id){
+        $q = "update REST_API set STATE='completed' where ID_REST_API=$id";
         return \base::query($q,'exweb');
     }
     

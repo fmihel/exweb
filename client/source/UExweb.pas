@@ -37,6 +37,8 @@ type
         function _send(str:string; id: string): TExWebResult; overload;
         function _send(data: TStream; id: string): TExWebResult; overload;
         function _sendBlock(info: TExWebBlockInfo; data: TStream): TExWebResult;
+        property BlockLen: Integer read fBlockLen write fBlockLen;
+        property BlockSize: Integer read fBlockSize write fBlockSize;
     public
         constructor Create(aScript: string);
         destructor Destroy; override;
@@ -50,12 +52,9 @@ type
         //1 чтение данных
         function recv(var str: string; data: TStream; prevState: TExWebState):
             TExWebState;
+        //1 отправка сообщени€
         function send(const str: string; data: TStream; prevState:
             TExWebState): TExWebState;
-        //1 –азмер блока, на которые будет разбита строка отсылки. (загружаетс€ с сервера)
-        property BlockLen: Integer read fBlockLen write fBlockLen;
-        //1 –азмер блока, на которые будет разбит пакет отсылки. (загружаетс€ с сервера)
-        property BlockSize: Integer read fBlockSize write fBlockSize;
         property Http: THttp read fHttp write fHttp;
         //1  люч доступа к передачи
         property Key: string read fKey write fKey;
@@ -305,12 +304,12 @@ begin
             end;
 
             cMD5Recv := UpperCase(MD5(data));
-            //if (cMD5<>cMD5Recv) then begin
-            //    result:=prevState;
-            //    result.result:=true;
-            //    data.Size:=0;
-            //    raise Exception.Create('hesh sum recv and sending is not equal');
-            //end;
+            if (cMD5<>cMD5Recv) then begin
+                result:=prevState;
+                result.result:=false;
+                data.Size:=0;
+                raise Exception.Create('hesh sum recv and sending is not equal');
+            end;
 
         end;
 

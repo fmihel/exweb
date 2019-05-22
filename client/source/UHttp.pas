@@ -28,13 +28,20 @@ type
     public
         constructor Create;
         destructor Destroy; override;
+        //1 Простой GET запрос
         function get(NameValueParams: array of variant; var Response: string):
             THttpResult; overload;
+        //1 Простой GET запрос с последующим распарсиванием ответа (aResponse)
         function get(NameValueParams: array of variant; aResponse: THash):
             THttpResult; overload;
+        //1 Простой GET запрос
         function get(aParams: THash; var aResponse: string): THttpResult;
             overload;
+        //1 Простой GET запрос  с последующим распарсиванием ответа (aResponse)
         function get(aParams, aResponse: THash): THttpResult; overload;
+        //1 Чтение данных в поток
+        function read(aParams:THash;aData:TStream): THttpResult;
+        //1 Запись строки на сервер (POST)
         function write(aParams: THash; var aResponse: string): THttpResult;
             overload;
         function write(aParams, aResponse: THash): THttpResult; overload;
@@ -44,7 +51,6 @@ type
             THttpResult; overload;
         function write(data: TStream; var aResponse: string): THttpResult;
             overload;
-        function read(aParams:THash;aData:TStream):THttpResult;
         property Encode: Boolean read fEncode write fEncode;
         property http: TidHTTP read fhttp write fhttp;
         property read_block_name: string read fread_block_name write
@@ -159,17 +165,18 @@ begin
     end;
 end;
 
-function THttp.read(aParams:THash;aData: TStream): THttpResult;
+function THttp.read(aParams:THash;aData:TStream): THttpResult;
+var
+    cChar: AnsiChar;
+    cPostStream: TIdMultiPartFormDataStream;
+    cPostStrings: TStringList;
+    cResponse: AnsiString;
+    cUrl: string;
+    i: Integer;
 
-    var
-        cChar: AnsiChar;
-        cPostStream: TIdMultiPartFormDataStream;
-        cPostStrings:TStringList;
-        cResponse:string;
-        cUrl: string;
-        i: Integer;
     const
         cFuncName = 'read';
+
 begin
 
     cPostStream:=TIdMultiPartFormDataStream.Create();
@@ -177,20 +184,14 @@ begin
     result:=hrError;
     try
     try
-        aData.Size:=0;
-        cPostStream.AddFormField('empty','','',aData,'file100tmp_');
 
+        aData.Size:=0;
         if (aParams<>nil) then
             cUrl:=UUrl.Url.build(Url,aParams,false,Encode)
         else
             cUrl:=Script;
 
-        cResponse:=http.Post(cUrl,cPostStream);
-
-        for i:=1 to Length(cResponse) do begin
-            cChar:=AnsiChar(cResponse[i]);
-            aData.Write(cChar,sizeof(AnsiChar));
-        end;
+        http.Get(cUrl,aData);
 
         aData.Position:=0;
         result:=hrOK;

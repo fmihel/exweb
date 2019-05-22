@@ -25,7 +25,9 @@ type
         class function isNumeric(const aStr: string): Boolean; static;
         class function randomStr(aLen: integer=10): string; static;
         class function readFromStream(Stream: TStream): string; static;
+        //1  одирует все кириличиские символы
         class function rusCod(s: string): string; static;
+        //1 ƒекодирует все коды в их кириличиское представление
         class function rusEnCod(s: string): string; static;
         //1 ѕреобразует вещественное из строки ( с учетом что разделитель и точка и зап€та€)
         class function StrToFloat(str: string): Double; static;
@@ -33,7 +35,6 @@ type
         class function UrlEncode(Str: AnsiString): AnsiString; static;
         class function writeToStream(str: string; Stream: TStream): Integer;
             static;
-
     end;
 
 implementation
@@ -200,8 +201,7 @@ var
     code: Integer;
     i: Integer;
     LMax, LMin, HMax, HMin: Integer;
-    ansi:AnsiString;
-
+    ansi: AnsiString;
 begin
 
     LMin:=Ord(AnsiChar('а'));
@@ -230,7 +230,7 @@ end;
 class function Utils.rusEnCod(s: string): string;
 var
     code: AnsiString;
-    cStr:AnsiString;
+    cStr: AnsiString;
     i: Integer;
     LMax, LMin, HMax, HMin: Integer;
 begin
