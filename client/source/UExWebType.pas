@@ -10,7 +10,7 @@ type
     TExWebState = record
     public
         //1 идентификатор сообщения
-        id: string;
+        id: string[16];
         //1 Результат операции
         webResult: TExWebResult;
         result: Boolean;

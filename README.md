@@ -1,6 +1,58 @@
 # exweb
-Набор клиент-серверных библиотек для обмена между Apache(PHP) и Win (Delphi).
+Клиент-серверная библиотека для обмена между Apache и Windows, реализованная на PHP7 и Delphi
 
+### Пример использования exweb.dll
+Для использования необходимо подключить к проекту файлы: `UExWebType.pas`, `exweb_import.pas`, `exweb_type.pas`;
+```
+Uses  UExWebType, exweb_import, exweb_type ;
+
+```
+#### создание и подключение
+```
+var exweb:TExweb_import;
+....
+exweb := TExweb_import.create();
+if not exweb.Connect('exweb.dll') then
+  ShowMessage('connect error');
+  
+```
+#### установка адреса скрипта
+```
+exweb.setParam('url','http://site/exweb/');
+```
+#### отправка сообщения
+```
+var state:TExWebState;
+     data:TMemoryStream;
+...
+data:=TMemoryStream.Create();
+
+state:=exweb.send('message',data,state);
+if (not state.result) then
+  ShowMessage('error send');
+  
+data.free;  
+```
+
+#### прием сообщения
+```
+var state:TExWebState;
+     data:TMemoryStream;
+     str:string;
+...
+data:=TMemoryStream.Create();
+
+state:=exweb.recv(str,data,state);
+if (not state.result) then
+  ShowMessage('error send');
+  
+data.free();  
+```
+
+#### завершение работы
+```
+exweb.free();
+```
 
 ### Пример использования на Delphi
 #### upload
@@ -34,7 +86,7 @@ end;
 
 ```
 
-#### upload
+#### download
 ```
 Uses UExWebType,UExWeb;
 ...
@@ -66,7 +118,7 @@ end;
 
 ```
 
-#Принцип работы протокола
+# Принцип работы протокола
 Протокол exweb предназначен для передачи и приема сообщений между клиентом windows и сервером Apache.
 Основной здачей протокола является наличие достоверной информации о факте приема противоположной стороной информации.
 

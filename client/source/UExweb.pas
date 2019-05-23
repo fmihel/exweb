@@ -5,7 +5,7 @@ interface
 uses
   SysUtils, Windows, Messages, Classes, Graphics, Controls, Forms, Dialogs,
   UUrl,UHash,UHttp,UExWebType;
-{$define _log_}
+{-$define _log_}
 
 
 type
@@ -65,7 +65,7 @@ function TExWebStateToStr(aState:TExWebState):string;
 implementation
 
 uses
-{$ifdef _log_}ULog  {$endif}, umd5, UUtils;
+{$ifdef _log_}ULog,  {$endif} umd5, UUtils;
 function TExWebStateToStr(aState:TExWebState):string;
 begin
 
@@ -384,6 +384,7 @@ begin
         // инициализируем передачу и получаем настрйки сервера
         cResult:=get(['event','init_send'],otvet);
 
+        //if (1>0) then begin
         if cResult<>ewrOk then begin
             result:=prevState;
             result.result:=false;
@@ -395,6 +396,7 @@ begin
             result.result:=false;
             raise Exception.Create('event=init_send,'+otvet['msg']);
         end;
+
 
         id          :=  otvet.Hash['data']['id'];
         BlockSize   :=  otvet.Hash['data'].Int['block_size'];
@@ -425,15 +427,20 @@ begin
         //----------------------------------------------------------------------------------------
         // подтверждение передачи
         // не зависимо от результата подтверждения, считаем общий результат успешным
+
         cResult:=get(['event','ready','id',id],otvet);
+
+
         if (cResult<>ewrOk) or (otvet.Int['res'] = 0) then
             cResult:=ewrNeedConfirm;
+
 
         if (cResult = ewrOk) or (cResult = ewrNeedConfirm) then begin
             result.result       :=  true;
             result.id           :=  id;
             result.webResult    :=  cResult;
         end;
+
 
     except
     on e:Exception do

@@ -22,6 +22,7 @@ type
         fEncode: Boolean;
         fhttp: TidHTTP;
         fread_block_name: string;
+        fSSL: TIdIOHandler;
         fScript: string;
         fUrl: THash;
         procedure setScript(const Value: string);
@@ -73,20 +74,18 @@ begin
     inherited Create;
     fEncode:=false;
     fHttp:=TIdHttp.Create(nil);
-    fHttp.IOHandler:=TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+    fSSL:=TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+    fHttp.IOHandler:=fSSL;
     fUrl:=Hash();
     Script:='http://windeco/exweb/server/';
     fread_block_name:='b';
 end;
 
 destructor THttp.Destroy;
-var
-    cSSL: TIdIOHandler;
 begin
     FreeHash(fUrl);
-    cSSL:=fHttp.IOHandler;
     fHttp.IOHandler:=nil;
-    cSSL.Free;
+    fSSL.Free;
     fHttp.Free;
     inherited Destroy;
 end;
