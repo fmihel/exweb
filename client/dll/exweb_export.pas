@@ -26,18 +26,45 @@ end;
 
 procedure setParam(name:string;value:string);
 begin
-    if (name = 'script') or (name='url') then
+    name:=Trim(UpperCase(name));
+    if (name = 'SCRIPT') or (name='URL') then
         exweb.Script:=value;
+    if (name = 'KEY') then
+        exweb.Key:=value;
+
+    if (name = 'PROXYPASSWORD') then
+        exweb.Http.ProxyPassword:=value;
+    if (name = 'PROXYPORT') then
+        exweb.Http.ProxyPort:=StrToInt(value);
+    if (name = 'PROXYSERVER') then
+        exweb.Http.ProxyServer:=value;
+    if (name = 'PROXYUSERNAME') then
+        exweb.Http.ProxyUserName:=value;
+
 end;
 
 function getParam(name:string):string;
 begin
-    if (name = 'script') or (name='url') then
+    result:='';
+    name:=Trim(UpperCase(name));
+    if (name = 'SCRIPT') or (name='URL') then
         result := exweb.Script;
+    if (name = 'KEY') then
+        result:=exweb.Key;
+
+    if (name = 'PROXYPASSWORD') then
+        result:=exweb.Http.ProxyPassword;
+    if (name = 'PROXYPORT') then
+        result:=IntToStr(exweb.Http.ProxyPort);
+    if (name = 'PROXYSERVER') then
+        result:=exweb.Http.ProxyServer;
+    if (name = 'PROXYUSERNAME') then
+        result:=exweb.Http.ProxyUserName;
+
 end;
 
 initialization
-    exweb:=TExWeb.Create('http://windeco/exweb/server/');
+    exweb:=TExWeb.Create('https://windeco.su/exweb/');
 finalization
     exweb.Free;
 end.

@@ -22,9 +22,17 @@ type
         fEncode: Boolean;
         fhttp: TidHTTP;
         fread_block_name: string;
-        fSSL: TIdIOHandler;
         fScript: string;
+        fSSL: TIdIOHandler;
         fUrl: THash;
+        function getProxyPassword: string;
+        function getProxyPort: Integer;
+        function getProxyServer: string;
+        function getProxyUserName: string;
+        procedure setProxyPassword(const Value: string);
+        procedure setProxyPort(const Value: Integer);
+        procedure setProxyServer(const Value: string);
+        procedure setProxyUserName(const Value: string);
         procedure setScript(const Value: string);
     public
         constructor Create;
@@ -54,10 +62,15 @@ type
             overload;
         property Encode: Boolean read fEncode write fEncode;
         property http: TidHTTP read fhttp write fhttp;
+        property ProxyPassword: string read getProxyPassword write
+            setProxyPassword;
+        property ProxyPort: Integer read getProxyPort write setProxyPort;
+        property ProxyServer: string read getProxyServer write setProxyServer;
+        property ProxyUserName: string read getProxyUserName write
+            setProxyUserName;
         property read_block_name: string read fread_block_name write
             fread_block_name;
         property Script: string read fScript write setScript;
-        property Url: THash read fUrl write fUrl;
     end;
 
 
@@ -98,7 +111,7 @@ begin
     result:=hrError;
     try
     try
-        cUrl:=UUrl.Url.build(Url,NameValueParams,false,Encode);
+        cUrl:=UUrl.Url.build(fUrl,NameValueParams,false,Encode);
 
         Response:=Http.Get(cUrl);
         result:=hrOk;
@@ -135,7 +148,7 @@ begin
     try
     try
 
-        cUrl:=UUrl.Url.build(Url,aParams,false,Encode);
+        cUrl:=UUrl.Url.build(fUrl,aParams,false,Encode);
 
 
         aResponse:=Http.Get(cUrl);
@@ -164,6 +177,27 @@ begin
     end;
 end;
 
+function THttp.getProxyPassword: string;
+begin
+    result:=http.ProxyParams.ProxyPassword;
+
+end;
+
+function THttp.getProxyPort: Integer;
+begin
+    result:=http.ProxyParams.ProxyPort;
+end;
+
+function THttp.getProxyServer: string;
+begin
+    result:=http.ProxyParams.ProxyServer;
+end;
+
+function THttp.getProxyUserName: string;
+begin
+    result:=http.ProxyParams.ProxyUserName;
+end;
+
 function THttp.read(aParams:THash;aData:TStream): THttpResult;
 var
     cChar: AnsiChar;
@@ -186,7 +220,7 @@ begin
 
         aData.Size:=0;
         if (aParams<>nil) then
-            cUrl:=UUrl.Url.build(Url,aParams,false,Encode)
+            cUrl:=UUrl.Url.build(fUrl,aParams,false,Encode)
         else
             cUrl:=Script;
 
@@ -204,6 +238,26 @@ begin
         cPostStrings.Free;
         cPostStream.Free;
     end;
+end;
+
+procedure THttp.setProxyPassword(const Value: string);
+begin
+    http.ProxyParams.ProxyPassword:=Value;
+end;
+
+procedure THttp.setProxyPort(const Value: Integer);
+begin
+    http.ProxyParams.ProxyPort:=Value;
+end;
+
+procedure THttp.setProxyServer(const Value: string);
+begin
+    http.ProxyParams.ProxyServer:=Value;
+end;
+
+procedure THttp.setProxyUserName(const Value: string);
+begin
+    http.ProxyParams.ProxyUserName:=Value;
 end;
 
 procedure THttp.setScript(const Value: string);
@@ -227,7 +281,7 @@ begin
     try
     try
         if (aParams<>nil) then
-            cUrl:=UUrl.Url.build(Url,aParams,false,Encode)
+            cUrl:=UUrl.Url.build(fUrl,aParams,false,Encode)
         else
             cUrl:=Script;
 
@@ -277,7 +331,7 @@ begin
     try
         data.Position:=0;
         if (aParams<>nil) then
-            cUrl:=UUrl.Url.build(Url,aParams,false,Encode)
+            cUrl:=UUrl.Url.build(fUrl,aParams,false,Encode)
         else
             cUrl:=Script;
 
