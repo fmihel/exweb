@@ -4,7 +4,7 @@ interface
 
 uses
   SysUtils, Windows, Messages, Classes, Graphics, Controls, Forms, Dialogs,
-  exweb_type,UExWebType;
+  exweb_type,UExWebType, DB, DBClient;
 
 type
     TExweb_import = class(TObject)
@@ -14,6 +14,7 @@ type
         hRecv: TProcRecv;
         hSend: TProcSend;
         hSetParam: TProcSetParam;
+        hQuery: TProcQuery;
         function getConnected: Boolean;
     public
         constructor Create;
@@ -25,6 +26,7 @@ type
             TExWebState;
         function send(const str:string;data:TStream;prevState:TExWebState):
             TExWebState;
+        function query(const sql, base: string; outDS: TClientDataSet; const coding: string): Boolean;
         procedure setParam(name:string;value:string);
         property Connected: Boolean read getConnected;
     end;
@@ -62,6 +64,8 @@ begin
 
         hSend:=GetProcAddress(dll,strProcSend);
         hRecv:=GetProcAddress(dll,strProcRecv);
+        hQuery:=GetProcAddress(dll,strProcQuery);
+
         hSetParam:=GetProcAddress(dll,strProcSetParam);
         hGetParam:=GetProcAddress(dll,strProcGetParam);
 
@@ -88,6 +92,12 @@ end;
 function TExweb_import.getParam(name:string): string;
 begin
     result:=hGetParam(name);
+end;
+
+function TExweb_import.query(const sql, base: string;
+  outDS: TClientDataSet; const coding: string): Boolean;
+begin
+    result:=hQuery(sql, base,outDS,coding);
 end;
 
 function TExweb_import.recv(var str:string;data:TStream;prevState:TExWebState):

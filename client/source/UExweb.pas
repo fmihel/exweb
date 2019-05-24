@@ -4,7 +4,7 @@ interface
 
 uses
   SysUtils, Windows, Messages, Classes, Graphics, Controls, Forms, Dialogs,
-  UUrl,UHash,UHttp,UExWebType;
+  UUrl,UHash,UHttp,UExWebType, DB, DBClient;
 {-$define _log_}
 
 
@@ -24,6 +24,7 @@ type
         fBlockSize: Integer;
         fHttp: THttp;
         fKey: string;
+        fMaxDataSetFieldLen: Integer;
         procedure addKey(Params: THash);
         procedure ExceptionOtvet(var res:TExWebResult;otvet: THash;
             event:string; msg: string='');
@@ -49,6 +50,11 @@ type
             TExWebResult; overload;
         function post(Params: THash; data: TStream; Response: THash):
             TExWebResult; overload;
+        function query(const sql, base: string; const coding: string = ''):
+            Boolean; overload;
+        //1 Выполнение запроса к базе
+        function query(const sql, base: string; outDS: TClientDataSet; const
+            coding: string = ''): Boolean; overload;
         //1 чтение данных
         function recv(var str: string; data: TStream; prevState: TExWebState):
             TExWebState;
@@ -58,6 +64,9 @@ type
         property Http: THttp read fHttp write fHttp;
         //1 Ключ доступа к передачи
         property Key: string read fKey write fKey;
+        //1 Максимальная длина загружаемого поля (остаток обрезается) условие включается при значении >0
+        property MaxDataSetFieldLen: Integer read fMaxDataSetFieldLen write
+            fMaxDataSetFieldLen;
         property Script: string read getScript write setScript;
     end;
 
@@ -93,6 +102,7 @@ begin
     Script:=aScript;
     BlockSize:=1024;
     BlockLen:=1024;
+    fMaxDataSetFieldLen:=1024;
     Key:='test';
 end;
 
@@ -201,6 +211,87 @@ begin
         result:=httpResultToExWebResult(http.write(Params,data,Response))
     else
         result:=httpResultToExWebResult(http.write(Params,Response));
+end;
+
+function TExWeb.query(const sql, base: string; const coding: string = ''):
+    Boolean;
+begin
+    result:=query(sql,base,nil,coding);
+end;
+
+function TExWeb.query(const sql, base: string; outDS: TClientDataSet; const
+    coding: string = ''): Boolean;
+var
+    cStoryEncode: Boolean;
+    fields: THash;
+    i: Integer;
+    j: Integer;
+    len: Integer;
+    name: string;
+    otvet: THash;
+    res: TExWebResult;
+    return: string;
+    rows: THash;
+    stype: string;
+    value: string;
+begin
+    otvet:=Hash();
+    result:=false;
+    try
+    try
+        if (outDS = nil) then return:='bool' else return:='table';
+
+        cStoryEncode:=http.Encode;
+        http.Encode:=true;
+        res:=get(['event','query','sql',sql,'base',base,'return',return,'coding',coding],otvet);
+        http.Encode:=cStoryEncode;
+
+        if ((res = ewrOk) and (otvet['res']='1')) then begin
+
+            if (return = 'table') then begin
+
+                fields  :=otvet.Hash['data'].Hash['fields'];
+                rows    :=otvet.Hash['data'].Hash['rows'];
+                outDS.Active:=false;
+                outDS.FieldDefs.Clear;
+                outDS.Fields.Clear;
+
+                for i:=0 to fields.Count - 1 do begin
+                    stype   :=fields.Item[i].hash['type'];
+                    len     :=fields.Item[i].hash.Int['length'];
+                    name    :=fields.Item[i].hash['name'];
+
+                    if (((MaxDataSetFieldLen>0) and (len>MaxDataSetFieldLen) )or (stype='blob')) then
+                        len:=MaxDataSetFieldLen;
+                    outDS.FieldDefs.Add(name,ftString,len);
+                end;
+                outDS.CreateDataSet;
+
+                for i:=0 to rows.Count-1 do begin
+                    outDS.Append;
+                    for j:=0 to fields.Count - 1 do begin
+                        name    :=fields.Item[j].hash['name'];
+                        value:=rows.Item[i].hash[name];
+                        outDS.Fields.FieldByName(name).AsString:=value;
+                        //cds.fields..AsString:
+                    end;
+
+                    outDS.Post;
+                end;
+
+            end;
+
+            result:=true;
+        end;
+
+    except
+    on e:Exception do
+    begin
+    end;
+    end;
+    finally
+        otvet.Free();
+    end;
 end;
 
 function TExWeb.read(Params: THash; aData: TStream): TExWebResult;

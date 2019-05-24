@@ -2,12 +2,13 @@ unit exweb_export;
 
 
 interface
-uses SysUtils,Classes,UExWebType;
+uses SysUtils,Classes,UExWebType, DB, DBClient;
 
 function send(const str:string;data:TStream;prevState:TExWebState):TExWebState;exports send;
 function recv(var str:string;data:TStream;prevState:TExWebState):TExWebState;exports recv;
 procedure setParam(name:string;value:string);exports setParam;
 function getParam(name:string):string;exports getParam;
+function query(const sql, base: string; outDS: TClientDataSet; const coding: string): Boolean;
 
 implementation
 uses UExWeb;
@@ -22,6 +23,11 @@ end;
 function recv(var str:string;data:TStream;prevState:TExWebState):TExWebState;
 begin
     result:=exweb.recv(str,data,prevState);
+end;
+
+function query(const sql, base: string; outDS: TClientDataSet; const coding: string): Boolean;
+begin
+    result:=exweb.query(sql,base,outDS,coding);
 end;
 
 procedure setParam(name:string;value:string);
@@ -40,6 +46,8 @@ begin
         exweb.Http.ProxyServer:=value;
     if (name = 'PROXYUSERNAME') then
         exweb.Http.ProxyUserName:=value;
+    if (name = 'MAXDATASETFIELDLEN') then
+        exweb.MaxDataSetFieldLen:=StrToInt(value);
 
 end;
 
@@ -60,6 +68,9 @@ begin
         result:=exweb.Http.ProxyServer;
     if (name = 'PROXYUSERNAME') then
         result:=exweb.Http.ProxyUserName;
+
+    if (name = 'MAXDATASETFIELDLEN') then
+        result:=IntToStr(exweb.MaxDataSetFieldLen);
 
 end;
 

@@ -2,7 +2,7 @@
 
 namespace exweb;
 use exweb\source\{Utils,Result,exweb};
-use Complex\Exception;
+//use Complex\Exception;
 
 if(!isset($Application)){
     require_once '../../wsi/ide/ws/utils/application.php';
@@ -24,7 +24,7 @@ require SOURCE_ROOT.'exweb.php';
 
 //------------------------------------------------------------------------------------------
 // проверка наличия ключа авторизации
-Result::autorize();
+// Result::autorize();
 //------------------------------------------------------------------------------------------
 
 if (Utils::requestContains('event')){
@@ -238,6 +238,40 @@ if (Utils::requestContains('event')){
                 Result::error('set completed for id='.$_REQUEST['id'] );
             Result::ok();
         };break;    
+        //----------------------------------------------------------------------------------
+        // работа с таблицами
+        case "query":{
+                Result::requestContains('sql','return','base');
+
+                $q = $_REQUEST['sql'];
+                $base = $_REQUEST['base'];
+                $coding = ((!isset($_REQUEST['coding'])||$_REQUEST['coding']==='')?null:$_REQUEST['coding']);
+                
+                if ($_REQUEST['return'] === 'table'){
+                    
+                    $ds = \base::ds($q,$base,$coding);
+                    if ($ds){
+                        $info = \base::fields($ds,false);
+                        
+                        
+                        $fields=[];
+                        foreach($info as $v){
+                            $fields[] =['name'=>$v->name,'type'=>$v->stype,'length'=>$v->max_length];
+                        }
+                        $rows = \base::rows($ds);
+                        Result::ok(['fields'=>$fields,'rows'=>$rows]);
+                    }else
+                        Result::error(\base::error($base));
+                        
+                }else{
+                    if (\base::query($q,$base,$coding))
+                        Result::ok();
+                    else    
+                        Result::error(\base::error($base));
+                }
+                Result::ok();
+
+        };break;
         //----------------------------------------------------------------------------------
         // отображение последнего пакета для отладки
         case "view_last_ready":{
