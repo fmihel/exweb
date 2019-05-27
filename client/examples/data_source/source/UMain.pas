@@ -4,31 +4,39 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, DB, DBClient, Grids, DBGrids;
+  Dialogs, DB, DBClient, Grids, DBGrids, StdCtrls,exweb_import;
 
 type
-  TForm30 = class(TForm)
+  TfrmMain = class(TForm)
     DBGrid1: TDBGrid;
     ClientDataSet1: TClientDataSet;
+    Button1: TButton;
+    DataSource1: TDataSource;
+    procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
   public
     { Public declarations }
+    exweb:TExweb_import;
   end;
 
 var
-  Form30: TForm30;
+  frmMain: TfrmMain;
 
 implementation
 
-uses
-  exweb_import;
 
 {$R *.dfm}
 
-procedure TForm30.FormCreate(Sender: TObject);
-var exweb:TExweb_import;
+procedure TfrmMain.FormDestroy(Sender: TObject);
+begin
+    if (exweb<>nil) then
+        exweb.Free;
+end;
+
+procedure TfrmMain.FormCreate(Sender: TObject);
 begin
     exweb:=TExweb_import.Create;
     try
@@ -39,20 +47,23 @@ begin
         exweb.setParam('url','http://windeco/exweb/server/');
         exweb.setParam('key','jqwed67dec');
 
-        if (exweb.query('select * from rest_api where 1>0 limit 5','exweb',ClientDataSet1,'')) then
-            ClientDataSet1.Active:=true;
-
-
     except
     on e:Exception do
     begin
+        exweb.Free();
+        exweb:=nil;
         ShowMessage(e.Message);
     end;
     end;
     finally
-        exweb.Free;
     end;
 
+end;
+
+procedure TfrmMain.Button1Click(Sender: TObject);
+begin
+    if (exweb<>nil) and (exweb.query('select * from REST_API where 1>0 limit 5','exweb',ClientDataSet1,'')) then
+        ClientDataSet1.Active:=true;
 end;
 
 end.

@@ -41,7 +41,7 @@
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="..\source\UMain.pas">
-				<Form>Form30</Form>
+				<Form>frmMain</Form>
 			</DCCReference>
 			<DCCReference Include="..\..\..\dll\exweb_import.pas"/>
 			<DCCReference Include="..\..\..\dll\exweb_type.pas"/>

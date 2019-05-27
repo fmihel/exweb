@@ -2,7 +2,7 @@ program data_source;
 
 uses
   Forms,
-  UMain in '..\source\UMain.pas' {Form30},
+  UMain in '..\source\UMain.pas' {frmMain},
   exweb_import in '..\..\..\dll\exweb_import.pas',
   exweb_type in '..\..\..\dll\exweb_type.pas',
   UExWebType in '..\..\..\source\UExWebType.pas';
@@ -12,6 +12,6 @@ uses
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm30, Form30);
+  Application.CreateForm(TfrmMain, frmMain);
   Application.Run;
 end.

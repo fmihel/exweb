@@ -2,7 +2,7 @@
 Клиент-серверная библиотека для обмена между Apache и Windows, реализованная на PHP7 и Delphi
 
 ## Пример использования exweb.dll
-Кроме непосредственно библиотеки exweb.dll, для работы необходимы библиотеки работы с ssl - libey32.dll, ssleay32.dll.
+Кроме непосредственно библиотеки `exweb.dll`, для работы необходимы библиотеки работы с ssl - `libey32.dll`, `ssleay32.dll`.
 Для использования необходимо подключить к проекту файлы: `UExWebType.pas`, `exweb_import.pas`, `exweb_type.pas`;
 ```
 Uses  UExWebType, exweb_import, exweb_type ;
@@ -58,7 +58,18 @@ if (not state.result) then
 data.free();  
 ```
 ----
-**6) завершение работы**
+**6) выполнение запросов к базе**
+```
+var cds:TClientDataSet;
+...
+
+if ( exweb.query('select * from rest_api','exweb',cds) ) then
+    cds.Active:=true;
+
+```
+
+----
+**7) завершение работы**
 ```
 exweb.free();
 ```

@@ -2,16 +2,17 @@ unit exweb_export;
 
 
 interface
-uses SysUtils,Classes,UExWebType, DB, DBClient;
-
+uses SysUtils,Classes,UExWebType;
+{-$define _log_}
 function send(const str:string;data:TStream;prevState:TExWebState):TExWebState;exports send;
 function recv(var str:string;data:TStream;prevState:TExWebState):TExWebState;exports recv;
 procedure setParam(name:string;value:string);exports setParam;
 function getParam(name:string):string;exports getParam;
-function query(const sql, base: string; outDS: TClientDataSet; const coding: string): Boolean;
+//function query(const sql, base: string; outDS: TClientDataSet; const coding: string): Boolean;exports query;
+function query(const sql, base: string; outDS: TStrings; const coding: string): Boolean;exports query;
 
 implementation
-uses UExWeb;
+uses {$ifdef _log_}ULog,{$endif}UExWeb;
 var
     exweb:TExWeb;
 
@@ -25,8 +26,11 @@ begin
     result:=exweb.recv(str,data,prevState);
 end;
 
-function query(const sql, base: string; outDS: TClientDataSet; const coding: string): Boolean;
+function query(const sql, base: string; outDS: TStrings; const coding: string): Boolean;
+const
+    cFuncName = 'query';
 begin
+    {$ifdef _log_} ULog.Log('query',[],'',cFuncName);{$endif}
     result:=exweb.query(sql,base,outDS,coding);
 end;
 

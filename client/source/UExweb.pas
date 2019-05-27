@@ -50,10 +50,34 @@ type
             TExWebResult; overload;
         function post(Params: THash; data: TStream; Response: THash):
             TExWebResult; overload;
-        function query(const sql, base: string; const coding: string = ''):
-            Boolean; overload;
-        //1 Выполнение запроса к базе
-        function query(const sql, base: string; outDS: TClientDataSet; const
+        {:
+        Возвращает список outDS:TStringList. Список - упорядоченная структура и
+        данные.
+        1-я Строка - Кол-во полей (len)
+        2-я Строка - Длина первого поля
+        3-я Строка - Имя первого поля
+        4-я Строка - Длина второго поля
+        5-я Строка - Имя второго поля
+        ... и так len*2 строк
+        len*2+1 строка - значение 1-го поля в 1-й строке данных
+        len*2+2 строка - значение 2-го поля в 1-й строке данных
+        len*2+3 строка - значение 3-го поля в 1-й строке данных 
+        ...
+
+
+
+        }
+        function query(const sql, base: string; outDS: TStrings = nil; const
+            coding: string = ''): Boolean; overload;
+        {:
+        К сожалению данная ф-ция выдвет Exception заверешении работы 
+        exweb_import. (при работе через dll). Переполнение идет если 
+        вызывается метод ClientDataSet.FieldDefs :)
+        Поэтому саму ф-цию query заменяю, и часть логики переношу в
+        exweb_import. см query(..)
+        Оставляю как пример ошибки :(
+        }
+        function query1(const sql, base: string; outDS: TClientDataSet; const
             coding: string = ''): Boolean; overload;
         //1 чтение данных
         function recv(var str: string; data: TStream; prevState: TExWebState):
@@ -102,7 +126,7 @@ begin
     Script:=aScript;
     BlockSize:=1024;
     BlockLen:=1024;
-    fMaxDataSetFieldLen:=1024;
+    fMaxDataSetFieldLen:=256;
     Key:='test';
 end;
 
@@ -213,13 +237,7 @@ begin
         result:=httpResultToExWebResult(http.write(Params,Response));
 end;
 
-function TExWeb.query(const sql, base: string; const coding: string = ''):
-    Boolean;
-begin
-    result:=query(sql,base,nil,coding);
-end;
-
-function TExWeb.query(const sql, base: string; outDS: TClientDataSet; const
+function TExWeb.query(const sql, base: string; outDS: TStrings = nil; const
     coding: string = ''): Boolean;
 var
     cStoryEncode: Boolean;
@@ -234,6 +252,11 @@ var
     rows: THash;
     stype: string;
     value: string;
+    cFieldDefs: string;
+
+    const
+                cFuncName = 'query';
+
 begin
     otvet:=Hash();
     result:=false;
@@ -245,17 +268,13 @@ begin
         http.Encode:=true;
         res:=get(['event','query','sql',sql,'base',base,'return',return,'coding',coding],otvet);
         http.Encode:=cStoryEncode;
-
         if ((res = ewrOk) and (otvet['res']='1')) then begin
 
             if (return = 'table') then begin
-
                 fields  :=otvet.Hash['data'].Hash['fields'];
                 rows    :=otvet.Hash['data'].Hash['rows'];
-                outDS.Active:=false;
-                outDS.FieldDefs.Clear;
-                outDS.Fields.Clear;
-
+                cFieldDefs:='';
+                outDS.Add(IntToStr(fields.Count));
                 for i:=0 to fields.Count - 1 do begin
                     stype   :=fields.Item[i].hash['type'];
                     len     :=fields.Item[i].hash.Int['length'];
@@ -263,22 +282,97 @@ begin
 
                     if (((MaxDataSetFieldLen>0) and (len>MaxDataSetFieldLen) )or (stype='blob')) then
                         len:=MaxDataSetFieldLen;
-                    outDS.FieldDefs.Add(name,ftString,len);
+                    outDS.Add(IntToStr(len));
+                    outDS.Add(name);
+
                 end;
-                outDS.CreateDataSet;
 
                 for i:=0 to rows.Count-1 do begin
-                    outDS.Append;
+                    for j:=0 to fields.Count - 1 do begin
+                        name    :=fields.Item[j].hash['name'];
+                        value   :=rows.Item[i].hash[name];
+                        outDS.Add(value);
+                    end;
+                end;
+            end;
+
+            result:=true;
+        end;
+
+    except
+    on e:Exception do
+    begin
+    end;
+    end;
+    finally
+        otvet.Free();
+    end;
+end;
+
+function TExWeb.query1(const sql, base: string; outDS: TClientDataSet; const
+    coding: string = ''): Boolean;
+var
+    cStoryEncode: Boolean;
+    fields: THash;
+    i: Integer;
+    j: Integer;
+    len: Integer;
+    name: string;
+    otvet: THash;
+    res: TExWebResult;
+    return: string;
+    rows: THash;
+    stype: string;
+    value: string;
+
+    const
+                cFuncName = 'query';
+
+begin
+    otvet:=Hash();
+    result:=false;
+    try
+    try
+        if (outDS = nil) then return:='bool' else return:='table';
+
+        cStoryEncode:=http.Encode;
+        http.Encode:=true;
+        res:=get(['event','query','sql',sql,'base',base,'return',return,'coding',coding],otvet);
+        http.Encode:=cStoryEncode;
+        if ((res = ewrOk) and (otvet['res']='1')) then begin
+
+            if (return = 'table') then begin
+                fields  :=otvet.Hash['data'].Hash['fields'];
+                rows    :=otvet.Hash['data'].Hash['rows'];
+                outDS.Active:=false;
+                outDS.FieldDefs.Clear;
+                outDS.Fields.Clear;
+                for i:=0 to fields.Count - 1 do begin
+                    stype   :=fields.Item[i].hash['type'];
+                    len     :=fields.Item[i].hash.Int['length'];
+                    name    :=fields.Item[i].hash['name'];
+
+                    if (((MaxDataSetFieldLen>0) and (len>MaxDataSetFieldLen) )or (stype='blob')) then
+                        len:=MaxDataSetFieldLen;
+                    //outDS.FieldDefs.Add(name,ftString,len,true);
+
+                    {$ifdef _log_} ULog.Log('name %s len %d',[name,len],ClassName,cFuncName);{$endif}
+                    break;
+                end;
+
+                //outDS.CreateDataSet;
+
+                for i:=0 to rows.Count-1 do begin
+                    //outDS.Append;
                     for j:=0 to fields.Count - 1 do begin
                         name    :=fields.Item[j].hash['name'];
                         value:=rows.Item[i].hash[name];
-                        outDS.Fields.FieldByName(name).AsString:=value;
-                        //cds.fields..AsString:
+                        //outDS.Fields.FieldByName(name).AsString:=value;
+
                     end;
 
-                    outDS.Post;
+                    //outDS.Post;
                 end;
-
             end;
 
             result:=true;
@@ -784,6 +878,10 @@ begin
         FreeHash(otvet);
     end;
 end;
+
+
+
+
 
 
 
