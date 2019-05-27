@@ -26,7 +26,7 @@ exweb.setParam('url','http://site/exweb/');
 ----
 **3) установка ключа авторизации**
 ```
-exweb.setParam('url','http://site/exweb/');
+exweb.setParam('key','xxxxxxxxx');
 ```
 ----
 **4) отправка сообщения**
