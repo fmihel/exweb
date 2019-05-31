@@ -16,7 +16,7 @@
     define ('BASE_NAME2',   WS_CONF::GET('deco_base'));    
 
     base::connect(SERVER_NAME2,SERVER_USER2,SERVER_PASS2,BASE_NAME2,'deco');
-    base::charSet('cp1251','deco');
+    base::charSet('utf8','deco');
 
 
     

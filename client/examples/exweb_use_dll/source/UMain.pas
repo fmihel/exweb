@@ -30,14 +30,6 @@ type
     TabSheet4: TTabSheet;
     Button3: TButton;
     Url: TComboBox;
-    Label2: TLabel;
-    StrSend: TMemo;
-    Label3: TLabel;
-    StreamSend: TEdit;
-    DriveComboBox2: TDriveComboBox;
-    DirectoryListBox2: TDirectoryListBox;
-    FileListBox2: TFileListBox;
-    Button4: TButton;
     Button5: TButton;
     StrRecv: TMemo;
     Label4: TLabel;
@@ -46,13 +38,40 @@ type
     actSetKey: TAction;
     Key: TEdit;
     Button6: TButton;
+    PageControl2: TPageControl;
+    TabSheet5: TTabSheet;
+    str: TTabSheet;
+    StrSend: TMemo;
+    Panel1: TPanel;
+    Button7: TButton;
+    FileListBox2: TFileListBox;
+    DirectoryListBox2: TDirectoryListBox;
+    DriveComboBox2: TDriveComboBox;
+    Button4: TButton;
+    StreamSend: TEdit;
+    Panel2: TPanel;
+    TabSheet6: TTabSheet;
+    Memo1: TMemo;
+    Memo2: TMemo;
+    Button8: TButton;
+    Memo3: TMemo;
+    Button9: TButton;
+    Memo4: TMemo;
+    Button10: TButton;
+    Memo5: TMemo;
+    Button11: TButton;
     procedure actConnectExecute(Sender: TObject);
     procedure ActionList1Update(Action: TBasicAction; var Handled: Boolean);
     procedure actRecvExecute(Sender: TObject);
     procedure actSendExecute(Sender: TObject);
     procedure actSetKeyExecute(Sender: TObject);
     procedure actSetUrlExecute(Sender: TObject);
+    procedure Button10Click(Sender: TObject);
+    procedure Button11Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
+    procedure Button7Click(Sender: TObject);
+    procedure Button8Click(Sender: TObject);
+    procedure Button9Click(Sender: TObject);
     procedure FileListBox1Click(Sender: TObject);
     procedure FileListBox2Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -211,9 +230,34 @@ begin
     log('Путь к скрипту обмена: %s',[exweb.getParam('url')]);
 end;
 
+procedure TfrmMain.Button10Click(Sender: TObject);
+begin
+    StrSend.Lines.Text:=Memo4.Lines.Text;
+end;
+
+procedure TfrmMain.Button11Click(Sender: TObject);
+begin
+    StrSend.Lines.Text:=Memo5.Lines.Text;
+end;
+
 procedure TfrmMain.Button4Click(Sender: TObject);
 begin
     StreamSend.Clear;
+end;
+
+procedure TfrmMain.Button7Click(Sender: TObject);
+begin
+    StrSend.Lines.Text:=Memo1.Lines.Text;
+end;
+
+procedure TfrmMain.Button8Click(Sender: TObject);
+begin
+    StrSend.Lines.Text:=Memo2.Lines.Text;
+end;
+
+procedure TfrmMain.Button9Click(Sender: TObject);
+begin
+    StrSend.Lines.Text:=Memo3.Lines.Text;
 end;
 
 procedure TfrmMain.clear;
@@ -238,6 +282,7 @@ begin
     log('log..');
     // создание объекта для работы с протоколом обмена
     exweb:=TExweb_import.Create;
+    TabSheet6.TabVisible:=false;
 end;
 
 end.

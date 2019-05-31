@@ -1,6 +1,8 @@
 <?php
 namespace exweb\source;
 
+use PhpOffice\PhpSpreadsheet\Calculation\Exception;
+
 class exweb {
 
     /**
@@ -37,15 +39,12 @@ class exweb {
         $q = "select ID_REST_API,STR,SIZE from REST_API where OWNER='client' and STATE='ready' order by ID_REST_API";
         $row = \base::row($q,'exweb');
         if ($row === false)
-            throw new \Exception(\base::error('exweb'));
+            return false;
         
-        $result = [
-            'id'=>0,
-            'str'=>'',
-            'data'=>null
-        ];
-
         if ($row!=[]){
+
+            $result = [];
+    
             $result['id'] = $row['ID_REST_API'];
             $result['str'] = $row['STR'];
             if($row['SIZE']>0)
@@ -53,8 +52,9 @@ class exweb {
             
             if ($completed)
                 self::completed($row['ID_REST_API']);
-        }
 
+        }else
+            $result = false;    
 
         return $result;
     }
@@ -77,9 +77,18 @@ class exweb {
 
         return $id;
     }
+    
     public static function completed(int $id){
         $q = "update REST_API set STATE='completed' where ID_REST_API=$id";
         return \base::query($q,'exweb');
+    }
+
+    public static function setAsError(int $id,$msg=''){
+        $msg = str_replace(["'"],['"'],$msg);
+        $q = "update REST_API set STATE='error',ERROR_MSG='$msg' where ID_REST_API=$id";
+        if (!\base::query($q,'exweb')) 
+            throw new \Exception("error in setAsError($id)");
+            
     }
     
 }

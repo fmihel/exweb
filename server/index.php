@@ -1,7 +1,7 @@
 <?php
 
 namespace exweb;
-use exweb\source\{Utils,Result,exweb};
+use exweb\source\{Utils,Result,exweb,Handler};
 //use Complex\Exception;
 
 if(!isset($Application)){
@@ -19,7 +19,7 @@ require SOURCE_ROOT.'result.php';
 require SOURCE_ROOT.'connect.php';
 require SOURCE_ROOT.'stream.php';
 require SOURCE_ROOT.'exweb.php';
-
+require SOURCE_ROOT.'handler.php';
 
 
 //------------------------------------------------------------------------------------------
@@ -135,6 +135,11 @@ if (Utils::requestContains('event')){
             //Result::error();    
             $q = "update REST_API set STATE='ready' , LAST_UPDATE=CURRENT_TIMESTAMP where STATE<>'completed' and ID_REST_API=".$_REQUEST['id'];            
             Result::query($q);    
+
+            // ------------------------
+            // запуск обработчиков для сообщений
+            Handler::run();
+            // ------------------------
 
             Result::ok();
         };break;    

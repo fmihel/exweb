@@ -64,7 +64,48 @@ class Utils{
         $str = str_replace('{_ENT839ER_ALL_}',UNI_D.UNI_A,$str);
 
         return $str;
-
     }    
+
+    public static function RemoveXMLHeader($xml)  
+    {  
+          $pos = strpos($xml,'<?xml');
+          if ($pos !== false)        
+          {        
+                  $pos = strpos($xml,'?>');
+                  if ($pos!==false)
+                          $xml = substr($xml,$pos+2,strlen($xml));
+          };
+          return trim($xml);  
+    }
+
+    /**
+     * @return  SimpleXMLElement || false 
+     */    
+    public static function strToXml($str){
+
+        $str = utils::RemoveXMLHeader($str);
+        return @simplexml_load_string($str);
+        
+    }
+    /**  формирует строку длинной Count заполненную случайным образом */
+    public static function random_str($Count){
+        $result = '';
+        for($i = 0;$i<$Count;$i++){
+            if (rand(1,10) > 6)
+                $result.=chr(rand(48,57));
+            else
+                $result.=chr(rand(65,90));
+        }  
+        return $result;
+    }
+    public static function strToFloat($str,$result='asString'){
+        $str = str_replace(',','.',$str);
+        if ($result!=='asString')
+            $str = floatval($str);
+        return $str;
+    }
+
+    
+
 }
 ?>

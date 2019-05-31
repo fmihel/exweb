@@ -32,18 +32,37 @@ exweb.setParam('key','xxxxxxxxx');
 **4) отправка сообщения**
 ```
 var state:TExWebState;
+     xml:string;
+...
+
+xml:='<?xml version="1.0" encoding="unicode"?><Msg><Name>Mike</Name><Msg>';
+
+state:=exweb.send(xml,nil,state);
+if (not state.result) then
+  ShowMessage('error send');
+  
+
+```
+
+----
+**5) отправка сообщения и бинарных данных**
+```
+var state:TExWebState;
      data:TMemoryStream;
+     xml:string;
 ...
 data:=TMemoryStream.Create();
+data.LoadFromFile('file.jpg');
+xml:='<?xml version="1.0" encoding="unicode"?><Msg><Name>Mike</Name><Msg>';
 
-state:=exweb.send('message',data,state);
+state:=exweb.send(xml,data,state);
 if (not state.result) then
   ShowMessage('error send');
   
 data.free;  
 ```
 ----
-**5) прием сообщения**
+**6) прием сообщения**
 ```
 var state:TExWebState;
      data:TMemoryStream;
@@ -53,12 +72,12 @@ data:=TMemoryStream.Create();
 
 state:=exweb.recv(str,data,state);
 if (not state.result) then
-  ShowMessage('error send');
+  ShowMessage('error recv');
   
 data.free();  
 ```
 ----
-**6) выполнение запросов к базе**
+**7) выполнение запросов к базе**
 ```
 var cds:TClientDataSet;
 ...
@@ -69,7 +88,7 @@ if ( exweb.query('select * from rest_api','exweb',cds) ) then
 ```
 
 ----
-**7) завершение работы**
+**8) завершение работы**
 ```
 exweb.free();
 ```

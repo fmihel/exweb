@@ -5,7 +5,7 @@ interface
 uses
   SysUtils, Windows, Messages, Classes, Graphics, Controls, Forms, Dialogs,
   UUrl,UHash,UHttp,UExWebType, DB, DBClient;
-{-$define _log_}
+{$define _log_}
 
 
 type

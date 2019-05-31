@@ -1,6 +1,6 @@
 object frmMain: TfrmMain
-  Left = 825
-  Top = 42
+  Left = 1945
+  Top = 228
   Caption = 'exweb 2.0'
   ClientHeight = 690
   ClientWidth = 895
@@ -11,7 +11,7 @@ object frmMain: TfrmMain
   Font.Name = 'Courier New'
   Font.Style = []
   OldCreateOrder = False
-  Position = poDesigned
+  Position = poScreenCenter
   Scaled = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -35,9 +35,8 @@ object frmMain: TfrmMain
     ActivePage = TabSheet1
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 990
     object TabSheet1: TTabSheet
-      Caption = #1055#1086#1076#1082#1083#1102#1095#1077#1085#1080#1077
+      Caption = '1. '#1055#1086#1076#1082#1083#1102#1095#1077#1085#1080#1077
       DesignSize = (
         887
         386)
@@ -96,12 +95,8 @@ object frmMain: TfrmMain
       end
     end
     object TabSheet4: TTabSheet
-      Caption = #1055#1072#1088#1072#1084#1077#1090#1088#1099
+      Caption = '2. '#1055#1072#1088#1072#1084#1077#1090#1088#1099
       ImageIndex = 1
-      ExplicitLeft = 8
-      ExplicitTop = 25
-      ExplicitWidth = 941
-      ExplicitHeight = 354
       DesignSize = (
         887
         386)
@@ -145,110 +140,297 @@ object frmMain: TfrmMain
       end
     end
     object TabSheet2: TTabSheet
-      Caption = 'send'
+      Caption = '3. send'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 941
-      ExplicitHeight = 378
-      DesignSize = (
-        887
-        386)
-      object Label2: TLabel
-        Left = 248
-        Top = 16
-        Width = 144
-        Height = 16
-        Caption = #1057#1090#1088#1086#1082#1072' '#1082' '#1086#1090#1087#1088#1072#1074#1082#1077':'
-      end
-      object Label3: TLabel
-        Left = 536
-        Top = 16
-        Width = 280
-        Height = 16
-        Caption = #1060#1072#1081#1083' '#1082#1072#1082' '#1073#1080#1085#1072#1088#1085#1099#1077' '#1076#1072#1085#1085#1099#1077' '#1082' '#1086#1090#1087#1088#1072#1074#1082#1077
-      end
-      object Button2: TButton
-        Left = 16
-        Top = 32
-        Width = 177
-        Height = 41
-        Action = actSend
+      object PageControl2: TPageControl
+        Left = 187
+        Top = 0
+        Width = 700
+        Height = 386
+        ActivePage = TabSheet5
+        Align = alClient
         TabOrder = 0
+        object TabSheet5: TTabSheet
+          Caption = #1057#1090#1088#1086#1082#1072' '#1082' '#1086#1090#1087#1088#1072#1074#1082#1077':'
+          object StrSend: TMemo
+            Left = 121
+            Top = 0
+            Width = 571
+            Height = 355
+            Align = alClient
+            Lines.Strings = (
+              'This text will sending...'
+              #1069#1090#1086#1090' '#1090#1077#1082#1089#1090' '#1073#1091#1076#1077#1090' '#1086#1090#1087#1088#1072#1074#1083#1077#1085'..'
+              '01234567890'
+              '-+\/=!@#$%^&()[]{} "" '#39#39' ;:><?/_'
+              'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+              'abcdefghijklmnopqrstuvwxyz'
+              #1040#1041#1042#1043#1044#1045#1025#1046#1047#1048#1049#1050#1051#1052#1053#1054#1055#1056#1057#1058#1059#1060#1061#1062#1063#1064#1065#1066#1067#1068#1069#1070#1071
+              #1072#1073#1074#1075#1076#1077#1105#1078#1079#1080#1081#1082#1083#1084#1085#1086#1087#1088#1089#1090#1091#1092#1093#1094#1095#1096#1097#1098#1099#1100#1101#1102#1103)
+            ScrollBars = ssBoth
+            TabOrder = 0
+          end
+          object Panel1: TPanel
+            Left = 0
+            Top = 0
+            Width = 121
+            Height = 355
+            Align = alLeft
+            BevelOuter = bvNone
+            Caption = 'Panel1'
+            ShowCaption = False
+            TabOrder = 1
+            object Button7: TButton
+              Left = 2
+              Top = 0
+              Width = 113
+              Height = 25
+              Caption = 'Button7'
+              TabOrder = 0
+              OnClick = Button7Click
+            end
+            object Button8: TButton
+              Left = 2
+              Top = 31
+              Width = 113
+              Height = 25
+              Caption = 'clientUpdate'
+              TabOrder = 1
+              OnClick = Button8Click
+            end
+            object Button9: TButton
+              Left = 2
+              Top = 62
+              Width = 113
+              Height = 25
+              Caption = 'addr_dost'
+              TabOrder = 2
+              OnClick = Button9Click
+            end
+            object Button10: TButton
+              Left = 2
+              Top = 93
+              Width = 113
+              Height = 25
+              Caption = 'ostKarniz'
+              TabOrder = 3
+              OnClick = Button10Click
+            end
+            object Button11: TButton
+              Left = 2
+              Top = 124
+              Width = 113
+              Height = 25
+              Caption = 'ostTkani'
+              TabOrder = 4
+              OnClick = Button11Click
+            end
+          end
+        end
+        object str: TTabSheet
+          Caption = #1060#1072#1081#1083' '#1082#1072#1082' '#1073#1080#1085#1072#1088#1085#1099#1077' '#1076#1072#1085#1085#1099#1077' '#1082' '#1086#1090#1087#1088#1072#1074#1082#1077
+          ImageIndex = 1
+          DesignSize = (
+            692
+            355)
+          object FileListBox2: TFileListBox
+            Left = 3
+            Top = 164
+            Width = 541
+            Height = 176
+            Anchors = [akLeft, akTop, akRight, akBottom]
+            ItemHeight = 16
+            TabOrder = 0
+            OnClick = FileListBox2Click
+          end
+          object DirectoryListBox2: TDirectoryListBox
+            Left = 3
+            Top = 61
+            Width = 541
+            Height = 97
+            Anchors = [akLeft, akTop, akRight]
+            FileList = FileListBox2
+            ItemHeight = 16
+            TabOrder = 1
+          end
+          object DriveComboBox2: TDriveComboBox
+            Left = 3
+            Top = 33
+            Width = 541
+            Height = 22
+            Anchors = [akLeft, akTop, akRight]
+            DirList = DirectoryListBox2
+            TabOrder = 2
+          end
+          object Button4: TButton
+            Left = 598
+            Top = 33
+            Width = 91
+            Height = 25
+            Anchors = [akTop, akRight]
+            Caption = 'clear'
+            TabOrder = 3
+            OnClick = Button4Click
+          end
+          object StreamSend: TEdit
+            Left = 3
+            Top = 3
+            Width = 686
+            Height = 24
+            Anchors = [akLeft, akTop, akRight]
+            TabOrder = 4
+          end
+        end
+        object TabSheet6: TTabSheet
+          Caption = 'TabSheet6'
+          Font.Charset = RUSSIAN_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -8
+          Font.Name = 'Small Fonts'
+          Font.Style = []
+          ImageIndex = 2
+          ParentFont = False
+          object Memo1: TMemo
+            Left = 3
+            Top = 19
+            Width = 126
+            Height = 78
+            Font.Charset = RUSSIAN_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -8
+            Font.Name = 'Small Fonts'
+            Font.Style = []
+            Lines.Strings = (
+              '<?xml version="1.0" encoding="unicode"?>'#9
+              '<Msg Kind="3" Action="1" Ver='#8221'1">'#9
+              '<List>'#9
+              '<Tovar Id=" 33197" Ost="2" Kind='#8221'0'#8221' Deliv='#8221'01.03.2011'#8221'/>  '#9
+              '<Tovar Id=" 33193" Ost="0" Kind='#8221'1'#8221' Deliv='#8221'01.03.2011'#8221'/>'#9
+              ' </List>'
+              '</Msg>')
+            ParentFont = False
+            TabOrder = 0
+            WordWrap = False
+          end
+          object Memo2: TMemo
+            Left = 143
+            Top = 19
+            Width = 138
+            Height = 78
+            Font.Charset = RUSSIAN_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -8
+            Font.Name = 'Small Fonts'
+            Font.Style = []
+            Lines.Strings = (
+              '<?xml version="1.0" encoding="unicode" Ver="1"?>'
+              '<Msg Kind="2" Action="1" >'
+              #9'<KlientInfo>'
+              #9#9'<AdresatKind>3</AdresatKind>'
+              #9#9'<KlientId>175</KlientId>'
+              '                 '#9'<KlientName>ccccccc</KlientName>'
+              #9#9'<RemoteAccess>1</RemoteAccess>'
+              #9#9'<EMail>123@mail.ru</EMail>'
+              #9#9'< DecoRMail>123@mail.ru</DecoRMail >'
+              #9#9'<Arch>0</Arch>'
+              #9'</KlientInfo>'
+              '</Msg>')
+            ParentFont = False
+            TabOrder = 1
+            WordWrap = False
+          end
+          object Memo3: TMemo
+            Left = 287
+            Top = 19
+            Width = 146
+            Height = 78
+            Lines.Strings = (
+              '<?xml version="1.0" encoding="unicode"?>'#9
+              '<Msg Kind="2" Action="3" Ver="1">'#9
+              '<KlientName>"'#1055#1083#1072#1085#1077#1090#1072'"</KlientName>'#9
+              '<BossPost>'#1043#1077#1085#1077#1088#1072#1083#1100#1085#1099#1081' '#1076#1080#1088#1077#1082#1090#1086#1088'</BossPost>'#9
+              '<BossName>'#1048#1074#1072#1085#1086#1074' '#1048'.'#1048'.</BossName>'#9
+              '<KindOplata>1</KindOplata>'#9
+              '<DbNum>6</DbNum>'#9
+              '<List>'#9
+              
+                '  <Addr Id="9834" Txt="'#1075'.'#1058#1074#1077#1088#1100', '#1091#1083'. '#1053#1072#1073#1077#1088#1077#1078#1085#1072#1103' 25 '#1082' 4. '#1090#1077#1083' 123-4' +
+                '5-67 '#1054#1083#1077#1075'"/>'#9
+              
+                '  <Addr Id="9835" Txt="'#1075'.'#1058#1074#1077#1088#1100', '#1091#1083'. '#1053#1072#1073#1077#1088#1077#1078#1085#1072#1103' 25 '#1082' 4. '#1090#1077#1083' 123-4' +
+                '5-67 '#1054#1083#1077#1075'"/>'#9
+              
+                '  <Addr Id="9836" Txt="'#1075'.'#1058#1074#1077#1088#1100', '#1091#1083'. '#1053#1072#1073#1077#1088#1077#1078#1085#1072#1103' 25 '#1082' 4. '#1090#1077#1083' 123-4' +
+                '5-67 '#1054#1083#1077#1075'"/>'#9
+              '</List>'#9
+              '<EnableDiscont>1</EnableDiscont>'#9
+              '<ShowImmediatly>1</ShowImmediatly>'#9
+              '<UserId>17</UserId>'#9
+              '</Msg>'#9)
+            TabOrder = 2
+            WordWrap = False
+          end
+          object Memo4: TMemo
+            Left = 439
+            Top = 19
+            Width = 161
+            Height = 78
+            Lines.Strings = (
+              '<?xml version="1.0" encoding="unicode"?>'#9
+              '<Msg Kind="3" Action="1" Ver="1">'#9
+              ' <List>'#9
+              '<Tovar Id=" 33197" Ost="2" Kind="0" Deliv="01.03.2011"/>  '#9
+              '<Tovar Id=" 33198" Ost="5" Kind="1" Deliv="01.03.2011"/>  '#9
+              '<Tovar Id=" 33199" Ost="9" Kind="1" Deliv="01.03.2011"/>  '#9
+              '</List>'#9
+              '</Msg>'#9)
+            TabOrder = 3
+            WordWrap = False
+          end
+          object Memo5: TMemo
+            Left = 3
+            Top = 115
+            Width = 158
+            Height = 86
+            Lines.Strings = (
+              '<?xml version="1.0" encoding="unicode"?>'
+              '<Msg Kind="8" Action="1">'
+              ' <TxProductsList>'
+              '  <TxProduct IdTextile="15595" IdTxColor="27332" Ostatok="0">'
+              
+                '   <TxPiece IdTxPiece="213473" Nom="783" Ostatok="0" Bronir="24,' +
+                '5"/>'
+              '  </TxProduct>'
+              ' </TxProductsList>'
+              '</Msg>')
+            TabOrder = 4
+            WordWrap = False
+          end
+        end
       end
-      object StrSend: TMemo
-        Left = 248
-        Top = 40
-        Width = 273
-        Height = 329
-        Anchors = [akLeft, akTop, akBottom]
-        Lines.Strings = (
-          'This text will sending...'
-          #1069#1090#1086#1090' '#1090#1077#1082#1089#1090' '#1073#1091#1076#1077#1090' '#1086#1090#1087#1088#1072#1074#1083#1077#1085'..'
-          '01234567890'
-          '-+\/=!@#$%^&()[]{} "" '#39#39' ;:><?/_'
-          'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-          'abcdefghijklmnopqrstuvwxyz'
-          #1040#1041#1042#1043#1044#1045#1025#1046#1047#1048#1049#1050#1051#1052#1053#1054#1055#1056#1057#1058#1059#1060#1061#1062#1063#1064#1065#1066#1067#1068#1069#1070#1071
-          #1072#1073#1074#1075#1076#1077#1105#1078#1079#1080#1081#1082#1083#1084#1085#1086#1087#1088#1089#1090#1091#1092#1093#1094#1095#1096#1097#1098#1099#1100#1101#1102#1103)
-        ScrollBars = ssBoth
+      object Panel2: TPanel
+        Left = 0
+        Top = 0
+        Width = 187
+        Height = 386
+        Align = alLeft
+        BevelOuter = bvNone
+        Caption = 'Panel2'
+        ShowCaption = False
         TabOrder = 1
-      end
-      object StreamSend: TEdit
-        Left = 536
-        Top = 40
-        Width = 226
-        Height = 24
-        Anchors = [akLeft, akTop, akRight]
-        TabOrder = 2
-      end
-      object DriveComboBox2: TDriveComboBox
-        Left = 536
-        Top = 80
-        Width = 323
-        Height = 22
-        Anchors = [akLeft, akTop, akRight]
-        DirList = DirectoryListBox2
-        TabOrder = 3
-      end
-      object DirectoryListBox2: TDirectoryListBox
-        Left = 536
-        Top = 108
-        Width = 323
-        Height = 97
-        Anchors = [akLeft, akTop, akRight]
-        FileList = FileListBox2
-        ItemHeight = 16
-        TabOrder = 4
-      end
-      object FileListBox2: TFileListBox
-        Left = 536
-        Top = 211
-        Width = 323
-        Height = 158
-        Anchors = [akLeft, akTop, akRight, akBottom]
-        ItemHeight = 16
-        TabOrder = 5
-        OnClick = FileListBox2Click
-      end
-      object Button4: TButton
-        Left = 768
-        Top = 40
-        Width = 91
-        Height = 25
-        Anchors = [akTop, akRight]
-        Caption = 'clear'
-        TabOrder = 6
-        OnClick = Button4Click
+        object Button2: TButton
+          Left = 4
+          Top = 19
+          Width = 177
+          Height = 41
+          Action = actSend
+          TabOrder = 0
+        end
       end
     end
     object TabSheet3: TTabSheet
-      Caption = 'recv'
+      Caption = '4. recv'
       ImageIndex = 2
-      ExplicitLeft = 8
-      ExplicitTop = 25
-      ExplicitWidth = 936
-      ExplicitHeight = 354
       DesignSize = (
         887
         386)
@@ -311,7 +493,7 @@ object frmMain: TfrmMain
   end
   object ActionList1: TActionList
     OnUpdate = ActionList1Update
-    Left = 736
+    Left = 832
     Top = 8
     object actConnect: TAction
       Caption = 'Connect'
