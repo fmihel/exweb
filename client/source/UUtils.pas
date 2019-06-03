@@ -221,10 +221,13 @@ begin
             result:=result+'#1027;'
         else if (code = Ord(AnsiChar('¨'))) then
             result:=result+'#1028;'
+        else if (code = Ord(AnsiChar('”'))) then
+            result:=result+'"'
         else
             result:=result+c;
-
     end;
+
+
 end;
 
 class function Utils.rusEnCod(s: string): string;

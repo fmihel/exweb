@@ -30,6 +30,9 @@ define('ACT_DISCONT_CHANGE',5);
 define('ACT_DISCONT_REGISTERED',3);
 define('ACT_DISCONT_ORDER_TO_CARD',6);
 
+define('DELIVERY_NULL_DATE_IN_SELECT','30.12.1990');
+define('DELIVERY_NULL_DATE_TO_UPDATE','1990-12-30'); // update FDATA =  DATE_FORMAT('1990-12-30','%Y-%m-%d');
+
 
 /**
  * Обработчик для переданных по каналу exweb сообщений, 
@@ -52,7 +55,6 @@ class Handler{
                 throw new \Exception('xml is not valid , id_rest_api='.$msg['id']);
             
             // передача настроек удаленного доступа
-            
             if ($have = self::isAction('changeClientData',$xml))     
                 self::changeClientData($xml,$msg);
             else
@@ -130,46 +132,59 @@ class Handler{
      */
     static private function ostatkiKarniz($xml,$msg){
         
-        $list = $xml->List->children();//tag = LIST  
-        
-        for($i = 0;$i<count($list);$i++){  
+        \base::startTransaction('exweb');
+        try{    
             
-            $Rest = $list[$i]->attributes();
+            $list = $xml->List->children();//tag = LIST  
             
-            $OldRest = -1;
-            if (handler_utils::ExistsRest($Rest->Id,$OldRest/*,$DsRest*/))        
-            {        
-                        
-                if ((($Rest->Ost>0) && ($OldRest<=0)) || (($Rest->Ost<=0) && ($OldRest>0))){
-                                            
-                    if ($Rest->Ost>0){
-                        $LAST_FIELD = 'LAST_DELIVERY_DATE';                        
-                        $LAST_MEAN = 'CURRENT_DATE';
-                    }else{                    
-                        $LAST_FIELD = 'LAST_RESET_DATE';                        
-                        $LAST_MEAN = 'CURRENT_DATE';
-                    };
-                    $q = "update QID_REST set REST = $Rest->Ost,LAST_UPDATE=CURRENT_TIMESTAMP,KIND=$Rest->Kind,DELIV='$Rest->Deliv', $LAST_FIELD=$LAST_MEAN,ARCH=0 where TOVAR_ID=$Rest->Id";                                
-                }else{
-                    $q = "update QID_REST set REST = $Rest->Ost,LAST_UPDATE=CURRENT_TIMESTAMP,KIND=$Rest->Kind,DELIV='$Rest->Deliv', ARCH=0 where TOVAR_ID=$Rest->Id";                                            
-                };                                                
-            }else{
+            for($i = 0;$i<count($list);$i++)
+            {  
                 
-                if ($Rest->Ost<=0){
-                    $LAST_RESET = 'CURRENT_DATE';                    
-                    $LAST_DELIVERY = "DATE_FORMAT('".DELIVERY_NULL_DATE_TO_UPDATE."','%Y-%m-%d')";
-                }else{
-                    $LAST_RESET ="DATE_FORMAT('".DELIVERY_NULL_DATE_TO_UPDATE."','%Y-%m-%d')";                    
-                    $LAST_DELIVERY = 'CURRENT_DATE';
-                };                
+                $Rest = $list[$i]->attributes();
                 
-                $q = "insert into QID_REST (TOVAR_ID,REST,LAST_UPDATE,KIND,DELIV,LAST_RESET_DATE,LAST_DELIVERY_DATE,ARCH) values 
-                        ($Rest->Id,$Rest->Ost,CURRENT_TIMESTAMP,$Rest->Kind,'$Rest->Deliv',$LAST_RESET,$LAST_DELIVERY,0)";
+                $OldRest = -1;
+                if (handler_utils::ExistsRest($Rest->Id,$OldRest/*,$DsRest*/))        
+                {        
+                            
+                    if ((($Rest->Ost>0) && ($OldRest<=0)) || (($Rest->Ost<=0) && ($OldRest>0))){
+                                                
+                        if ($Rest->Ost>0){
+                            $LAST_FIELD = 'LAST_DELIVERY_DATE';                        
+                            $LAST_MEAN = 'CURRENT_DATE';
+                        }else{                    
+                            $LAST_FIELD = 'LAST_RESET_DATE';                        
+                            $LAST_MEAN = 'CURRENT_DATE';
+                        };
+                        $q = "update QID_REST set REST = $Rest->Ost,LAST_UPDATE=CURRENT_TIMESTAMP,KIND=$Rest->Kind,DELIV='$Rest->Deliv', $LAST_FIELD=$LAST_MEAN,ARCH=0 where TOVAR_ID=$Rest->Id";                                
+                    }else{
+                        $q = "update QID_REST set REST = $Rest->Ost,LAST_UPDATE=CURRENT_TIMESTAMP,KIND=$Rest->Kind,DELIV='$Rest->Deliv', ARCH=0 where TOVAR_ID=$Rest->Id";                                            
+                    };                                                
+                }else{
+                    
+                    if ($Rest->Ost<=0){
+                        $LAST_RESET = 'CURRENT_DATE';                    
+                        $LAST_DELIVERY = "DATE_FORMAT('".DELIVERY_NULL_DATE_TO_UPDATE."','%Y-%m-%d')";
+                    }else{
+                        $LAST_RESET ="DATE_FORMAT('".DELIVERY_NULL_DATE_TO_UPDATE."','%Y-%m-%d')";                    
+                        $LAST_DELIVERY = 'CURRENT_DATE';
+                    };                
+                    
+                    $q = "insert into QID_REST (TOVAR_ID,REST,LAST_UPDATE,KIND,DELIV,LAST_RESET_DATE,LAST_DELIVERY_DATE,ARCH) values 
+                            ($Rest->Id,$Rest->Ost,CURRENT_TIMESTAMP,$Rest->Kind,'$Rest->Deliv',$LAST_RESET,$LAST_DELIVERY,0)";
+                };
+            
+                if (!\base::query($q,'exweb'))
+                    throw new \Exception(\base::error('exweb'));
             };
-        
-            if (!\base::query($q,'exweb'))
-                throw new \Exception(\base::error('exweb'));
-          };
+
+            \base::commit('exweb');
+
+        }catch(\Exception $e){
+
+            \base::rollback('exweb');
+            throw new \Exception($e->getMessage());
+
+        }
         
     }
 
@@ -177,48 +192,56 @@ class Handler{
      * пришли остатки по тканям
      */
     static private function ostatkiTkan($xml,$msg){
-        $List = $xml->TxProductsList->children();
         
-        $cnt = count($List);
-
-        for($i=0;$i<$cnt;$i++){
-
-            $Textile = $List[$i];
-            $attr = $Textile->attributes();
-            $ID_TEXTILE = $attr->IdTextile;
-            $ID_TX_COLOR = $attr->IdTxColor;
-            $COLOR_OSTATOK = utils::strToFloat($attr->Ostatok,'asFloat');
+        \base::startTransaction('deco');
+        try{
             
-            
-            if (\base::val("select count(ID_TX_COLOR) from TX_COLOR where ID_TX_COLOR = $ID_TX_COLOR and ID_TEXTILE = $ID_TEXTILE",0,'deco')>0){
+            $List = $xml->TxProductsList->children();
+            $cnt = count($List);
+
+            for($i=0;$i<$cnt;$i++){
+    
+                $Textile = $List[$i];
+                $attr = $Textile->attributes();
+                $ID_TEXTILE = $attr->IdTextile;
+                $ID_TX_COLOR = $attr->IdTxColor;
+                $COLOR_OSTATOK = utils::strToFloat($attr->Ostatok,'asFloat');
                 
-                $q = "update TX_COLOR set OSTATOK = $COLOR_OSTATOK where ID_TX_COLOR = $ID_TX_COLOR and ID_TEXTILE = $ID_TEXTILE";
-                if (!\base::query($q,'deco'))
-                    throw new \Exception(\base::error('deco'));
                 
-                $TxPiece =  $Textile->children();   
-                for($j=0;$j<count($TxPiece);$j++)
-                {
-                    $piece          = $TxPiece[$j]->attributes();
-                    $ID_TX_PIECE    = $piece->IdTxPiece;
-                    $NOM            = $piece->Nom;
-                    $OSTATOK        = utils::strToFloat($piece->Ostatok,'asFloat');
-                    $BRONIR         = utils::strToFloat($piece->Bronir,'asFloat');
+                if (\base::val("select count(ID_TX_COLOR) from TX_COLOR where ID_TX_COLOR = $ID_TX_COLOR and ID_TEXTILE = $ID_TEXTILE",0,'deco')>0){
                     
-                    if ($OSTATOK !== 0){
-                        $q = "insert into TX_PIECE (ID_TX_COLOR,ID_TX_PIECE,NOM,OSTATOK,BRONIR,NOTE,D_LAST_CHANGE) values ($ID_TX_COLOR,$ID_TX_PIECE,$NOM,$OSTATOK,$BRONIR,'',CURRENT_TIMESTAMP) 
-                            on duplicate key update ID_TX_COLOR = $ID_TX_COLOR,NOM=$NOM,OSTATOK =$OSTATOK,BRONIR=$BRONIR" ;
-                        if (!\base::query($q,'deco'))
-                            throw new \Exception(\base::error('deco'));
-                    }else{
-                        $q = "delete from TX_PIECE where ID_TX_PIECE = $ID_TX_PIECE";
-                        if (!\base::query($q,'deco'))
-                            throw new \Exception(\base::error('deco'));
-                    }    
-                }//for($j=0;$j<$Textile->Count();$j++)
-            };//Count >0
-        }//for($i=0;$i<$List->Count();$i++)
-
+                    $q = "update TX_COLOR set OSTATOK = $COLOR_OSTATOK where ID_TX_COLOR = $ID_TX_COLOR and ID_TEXTILE = $ID_TEXTILE";
+                    if (!\base::query($q,'deco'))
+                        throw new \Exception(\base::error('deco'));
+                    
+                    $TxPiece =  $Textile->children();   
+                    for($j=0;$j<count($TxPiece);$j++)
+                    {
+                        $piece          = $TxPiece[$j]->attributes();
+                        $ID_TX_PIECE    = $piece->IdTxPiece;
+                        $NOM            = $piece->Nom;
+                        $OSTATOK        = utils::strToFloat($piece->Ostatok,'asFloat');
+                        $BRONIR         = utils::strToFloat($piece->Bronir,'asFloat');
+                        
+                        if ($OSTATOK !== 0){
+                            $q = "insert into TX_PIECE (ID_TX_COLOR,ID_TX_PIECE,NOM,OSTATOK,BRONIR,NOTE,D_LAST_CHANGE) values ($ID_TX_COLOR,$ID_TX_PIECE,$NOM,$OSTATOK,$BRONIR,'',CURRENT_TIMESTAMP) 
+                                on duplicate key update ID_TX_COLOR = $ID_TX_COLOR,NOM=$NOM,OSTATOK =$OSTATOK,BRONIR=$BRONIR" ;
+                            if (!\base::query($q,'deco'))
+                                throw new \Exception(\base::error('deco'));
+                        }else{
+                            $q = "delete from TX_PIECE where ID_TX_PIECE = $ID_TX_PIECE";
+                            if (!\base::query($q,'deco'))
+                                throw new \Exception(\base::error('deco'));
+                        }    
+                    }//for($j=0;$j<$Textile->Count();$j++)
+                };//Count >0
+            }//for($i=0;$i<$List->Count();$i++)
+            \base::commit('deco');
+        }catch(\Exception $e){
+            \base::rollback('deco');
+            throw new \Exception($e->getMessage());
+        }
+    
     }
 
 }
