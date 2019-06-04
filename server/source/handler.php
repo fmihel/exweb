@@ -92,7 +92,7 @@ class Handler{
             'changeClientData'=>['KIND'=>KIND_CLIENT,'ACTION'=>ACT_CLIENT_DATA],    // передача настроек удаленного доступа
             'requestAutorize'=>['KIND'=>KIND_CLIENT,'ACTION'=>4],                    // запрос на отправку клиенту данных авторизации в DecoR
             'ostatkiKarniz'=>['KIND'=>KIND_OST,'ACTION'=>ACT_OST_SEND_OST],         // пришли остатки по каринизам 
-            'zaprosPoOstatkam'=>['KIND'=>KIND_OST,'ACTION'=>ACT_OST_GET_OST],       // запрос по остаткам
+            //'zaprosPoOstatkam'=>['KIND'=>KIND_OST,'ACTION'=>ACT_OST_GET_OST],       // запрос по остаткам
             'ostatkiTkan'=>['KIND'=>KIND_OST_TKANI,'ACTION'=>1],                    // пришли остатки по тканям
             'addrDost'=>['KIND'=>KIND_CLIENT,'ACTION'=>3],                          // адреса доставки
 

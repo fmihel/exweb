@@ -4,7 +4,7 @@ interface
 
 uses
   UHash, SysUtils,Classes;
-{-$define _log_}
+{$define _log_}
 type
     Utils = class(TObject)
     private
