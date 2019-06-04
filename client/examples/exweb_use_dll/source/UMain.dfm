@@ -8,7 +8,7 @@ object frmMain: TfrmMain
   Font.Charset = RUSSIAN_CHARSET
   Font.Color = clWindowText
   Font.Height = -13
-  Font.Name = 'Courier New'
+  Font.Name = 'Arial'
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
@@ -43,7 +43,7 @@ object frmMain: TfrmMain
       object Label1: TLabel
         Left = 224
         Top = 21
-        Width = 96
+        Width = 74
         Height = 16
         Caption = 'DllFileName:'
       end
@@ -97,10 +97,6 @@ object frmMain: TfrmMain
     object TabSheet4: TTabSheet
       Caption = '2. '#1055#1072#1088#1072#1084#1077#1090#1088#1099
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         887
         386)
@@ -146,10 +142,6 @@ object frmMain: TfrmMain
     object TabSheet2: TTabSheet
       Caption = '3. send'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PageControl2: TPageControl
         Left = 187
         Top = 0
@@ -160,10 +152,6 @@ object frmMain: TfrmMain
         TabOrder = 0
         object TabSheet5: TTabSheet
           Caption = #1057#1090#1088#1086#1082#1072' '#1082' '#1086#1090#1087#1088#1072#1074#1082#1077':'
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object StrSend: TMemo
             Left = 145
             Top = 0
@@ -181,8 +169,6 @@ object frmMain: TfrmMain
               #1072#1073#1074#1075#1076#1077#1105#1078#1079#1080#1081#1082#1083#1084#1085#1086#1087#1088#1089#1090#1091#1092#1093#1094#1095#1096#1097#1098#1099#1100#1101#1102#1103)
             ScrollBars = ssBoth
             TabOrder = 0
-            ExplicitLeft = 121
-            ExplicitWidth = 571
           end
           object Panel1: TPanel
             Left = 0
@@ -304,10 +290,6 @@ object frmMain: TfrmMain
           Font.Style = []
           ImageIndex = 2
           ParentFont = False
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object Memo1: TMemo
             Left = 3
             Top = 19
@@ -463,24 +445,20 @@ object frmMain: TfrmMain
     object TabSheet3: TTabSheet
       Caption = '4. recv'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         887
         386)
       object Label4: TLabel
         Left = 240
         Top = 16
-        Width = 128
+        Width = 106
         Height = 16
         Caption = #1057#1095#1080#1090#1072#1085#1085#1072#1103' '#1089#1090#1088#1086#1082#1072
       end
       object Label5: TLabel
         Left = 240
         Top = 176
-        Width = 128
+        Width = 113
         Height = 16
         Caption = #1041#1080#1085#1072#1088#1085#1099#1077' '#1076#1072#1085#1085#1099#1077':'
       end
@@ -526,6 +504,7 @@ object frmMain: TfrmMain
       'MemoLog')
     ScrollBars = ssBoth
     TabOrder = 1
+    ExplicitTop = 423
   end
   object ActionList1: TActionList
     OnUpdate = ActionList1Update
