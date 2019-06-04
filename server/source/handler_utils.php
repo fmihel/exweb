@@ -9,9 +9,6 @@ class handler_utils{
     public static function UpdateDealer($id,$email,$enable,$arch,$klientname)
     {
         
-        $res = true;
-        $err = true;
-
         $ID_RIGHT  = 0;
         $PASS_DEFAULT = Utils::random_str(5);
 
@@ -187,6 +184,55 @@ class handler_utils{
           
         return ($row['cnt']>0);
     }
-    
+    /** отправка клиенту информации по его авторизации (напиминалка) */
+    public static function RequestAutorizeInfo($id_client,$send_type){
+        
+        $q = "select * from DEALER where ID_DEALER=$id_client";
+        $dealer = \base::rowE($q,'deco',null);
+
+        $s='Клиент: "'.\base::valE('select NAME from DEALER where ID_DEALER = '.$id_client.' order by NAME','','deco').'"<br><br>';
+            
+        $userDS =  \base::dsE("select * from USER where ID_DEALER = $id_client",'deco');
+        $user = [];
+        
+        $admin_email    = \WS_CONF::GET('admin_email');
+        $appName        = \WS_CONF::GET('appName');
+        $appUrl         = \WS_CONF::GET('APPLICATION_URL');
+
+        if ($send_type==1)
+        {
+            while(\base::by($userDS,$user))
+                $s.='Сотрудник: "'.$user['NAME'].'"    логин: "'.$user['EMAIL_LOGIN'].'" пароль: "'.$user['PASS'].'"<br>';
+                    
+            return utils::sendMail(
+                $dealer['EMAIL'],
+                $admin_email,
+                $appName.': Данные для входа.',
+                'Данное письмо сгенерировано автоматически, отвечать на него не надо.<br>'.
+                'Данные для входа в программу '.$appName.' ('.$appUrl.')<br><br>'.
+                $s.
+                '<br>С уважением<br>'.
+                'Cлужба поддержки компании '.$appName.'!'
+            );
+
+        }else{
+                    
+            while(\base::by($userDS,$user))
+            {
+                $s.='Сотрудник: "'.$user['NAME'].'"   логин: "'.$user['EMAIL_LOGIN'].'" пароль: "'.$user['PASS'].'"<br>';
+                if(trim($user['REL_EMAIL'])!=='')
+                    utils::sendMail(trim($user['REL_EMAIL']),$admin_email,$appName.': Данные для входа.',
+                        'Данное письмо сгенерировано автоматически, отвечать на него не надо.<br>'.
+                        "Данные для входа в программу $appName ($appUrl)<br><br>".
+                        $s.
+                        '<br>Вы можете самостоятельно изменить свой логин и пароль, - кнопка "Настройки" раздел "Личные данные"'.
+                        '<br>С уважением<br>'.
+                        "Cлужба поддержки компании $appName!"
+                    );                        
+            }
+                    
+        }
+        return true;
+    }    
 }
 ?>

@@ -1,6 +1,6 @@
 object frmMain: TfrmMain
-  Left = 1945
-  Top = 228
+  Left = 648
+  Top = 218
   Caption = 'exweb 2.0'
   ClientHeight = 690
   ClientWidth = 895
@@ -97,6 +97,10 @@ object frmMain: TfrmMain
     object TabSheet4: TTabSheet
       Caption = '2. '#1055#1072#1088#1072#1084#1077#1090#1088#1099
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         887
         386)
@@ -142,6 +146,10 @@ object frmMain: TfrmMain
     object TabSheet2: TTabSheet
       Caption = '3. send'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PageControl2: TPageControl
         Left = 187
         Top = 0
@@ -152,10 +160,14 @@ object frmMain: TfrmMain
         TabOrder = 0
         object TabSheet5: TTabSheet
           Caption = #1057#1090#1088#1086#1082#1072' '#1082' '#1086#1090#1087#1088#1072#1074#1082#1077':'
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object StrSend: TMemo
-            Left = 121
+            Left = 145
             Top = 0
-            Width = 571
+            Width = 547
             Height = 355
             Align = alClient
             Lines.Strings = (
@@ -169,11 +181,13 @@ object frmMain: TfrmMain
               #1072#1073#1074#1075#1076#1077#1105#1078#1079#1080#1081#1082#1083#1084#1085#1086#1087#1088#1089#1090#1091#1092#1093#1094#1095#1096#1097#1098#1099#1100#1101#1102#1103)
             ScrollBars = ssBoth
             TabOrder = 0
+            ExplicitLeft = 121
+            ExplicitWidth = 571
           end
           object Panel1: TPanel
             Left = 0
             Top = 0
-            Width = 121
+            Width = 145
             Height = 355
             Align = alLeft
             BevelOuter = bvNone
@@ -182,17 +196,17 @@ object frmMain: TfrmMain
             TabOrder = 1
             object Button7: TButton
               Left = 2
-              Top = 0
-              Width = 113
+              Top = 124
+              Width = 137
               Height = 25
-              Caption = 'Button7'
+              Caption = 'sendPassToClient'
               TabOrder = 0
               OnClick = Button7Click
             end
             object Button8: TButton
               Left = 2
-              Top = 31
-              Width = 113
+              Top = 0
+              Width = 137
               Height = 25
               Caption = 'clientUpdate'
               TabOrder = 1
@@ -200,8 +214,8 @@ object frmMain: TfrmMain
             end
             object Button9: TButton
               Left = 2
-              Top = 62
-              Width = 113
+              Top = 31
+              Width = 137
               Height = 25
               Caption = 'addr_dost'
               TabOrder = 2
@@ -209,8 +223,8 @@ object frmMain: TfrmMain
             end
             object Button10: TButton
               Left = 2
-              Top = 93
-              Width = 113
+              Top = 62
+              Width = 137
               Height = 25
               Caption = 'ostKarniz'
               TabOrder = 3
@@ -218,8 +232,8 @@ object frmMain: TfrmMain
             end
             object Button11: TButton
               Left = 2
-              Top = 124
-              Width = 113
+              Top = 93
+              Width = 137
               Height = 25
               Caption = 'ostTkani'
               TabOrder = 4
@@ -290,6 +304,10 @@ object frmMain: TfrmMain
           Font.Style = []
           ImageIndex = 2
           ParentFont = False
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Memo1: TMemo
             Left = 3
             Top = 19
@@ -406,6 +424,20 @@ object frmMain: TfrmMain
             TabOrder = 4
             WordWrap = False
           end
+          object Memo6: TMemo
+            Left = 184
+            Top = 115
+            Width = 185
+            Height = 89
+            Lines.Strings = (
+              '<?xml version="1.0" encoding="unicode" '
+              'Ver='#8221'1'#8221'?>'
+              '<Msg Kind="2" Action="4" >'
+              #9'<KlientId>175</KlientId>'
+              #9'<DestKind>1</ DestKind >'
+              '</Msg>')
+            TabOrder = 5
+          end
         end
       end
       object Panel2: TPanel
@@ -431,6 +463,10 @@ object frmMain: TfrmMain
     object TabSheet3: TTabSheet
       Caption = '4. recv'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         887
         386)

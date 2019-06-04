@@ -40,7 +40,7 @@ define('DELIVERY_NULL_DATE_TO_UPDATE','1990-12-30'); // update FDATA =  DATE_FOR
  */
 class Handler{
     
-    /**
+    /** 
      * запуск цикла обработки
      */
     static public function run(){
@@ -89,12 +89,11 @@ class Handler{
      */
     static private function isAction($name,$xml){
         $types = [
-            'changeClientData'=>['KIND'=>KIND_CLIENT,'ACTION'=>ACT_CLIENT_DATA],    // передача настроек удаленного доступа
-            'requestAutorize'=>['KIND'=>KIND_CLIENT,'ACTION'=>4],                    // запрос на отправку клиенту данных авторизации в DecoR
-            'ostatkiKarniz'=>['KIND'=>KIND_OST,'ACTION'=>ACT_OST_SEND_OST],         // пришли остатки по каринизам 
-            'zaprosPoOstatkam'=>['KIND'=>KIND_OST,'ACTION'=>ACT_OST_GET_OST],       // запрос по остаткам
-            'ostatkiTkan'=>['KIND'=>KIND_OST_TKANI,'ACTION'=>1],                    // пришли остатки по тканям
-            'addrDost'=>['KIND'=>KIND_CLIENT,'ACTION'=>3],                          // адреса доставки
+            'changeClientData'  =>['KIND'=>2,'ACTION'=>1],    // передача настроек удаленного доступа
+            'requestAutorize'   =>['KIND'=>2,'ACTION'=>4],    // запрос на отправку клиенту данных авторизации в DecoR
+            'ostatkiKarniz'     =>['KIND'=>3,'ACTION'=>1],    // пришли остатки по каринизам 
+            'ostatkiTkan'       =>['KIND'=>8,'ACTION'=>1],    // пришли остатки по тканям
+            'addrDost'          =>['KIND'=>2,'ACTION'=>3],    // адреса доставки
 
         ];
         $attr = $xml->attributes();
@@ -104,6 +103,7 @@ class Handler{
 
     /**
      * передача настроек удаленного доступа
+     * 'KIND'=>2,'ACTION'=>1
      */
     static private function changeClientData($xml,$msg){
 
@@ -116,19 +116,27 @@ class Handler{
         handler_utils::UpdateDealer($ID_DEALER,$Email,$Enable,$Arch,$Name);
 
     }
-    /** изменение/создание адреса доставки (c BOSS_POST) */
+    /** 
+     * изменение/создание адреса доставки (c BOSS_POST) 
+     * 'KIND'=>2,'ACTION'=>3
+    */
     static private function addrDost($xml,$msg){
         handler_utils::addr_dost_update($xml);        
     }
     /**
      * запрос на отправку клиенту данных авторизации в DecoR
+     * 'KIND'=>2,'ACTION'=>4
      */
     static private function requestAutorize($xml,$msg){
+        $id_client = $xml->KlientId;
+        $send_type = ($xml->DestKind!=2?1:2);
+        handler_utils::RequestAutorizeInfo($id_client,$send_type);
 
     }
 
     /**
-     * пришли остатки по каринизам 
+     * пришли остатки по каринизам
+     * 'KIND'=>3,'ACTION'=>1 
      */
     static private function ostatkiKarniz($xml,$msg){
         
@@ -190,6 +198,7 @@ class Handler{
 
     /**
      * пришли остатки по тканям
+     * 'KIND'=>8,'ACTION'=>1
      */
     static private function ostatkiTkan($xml,$msg){
         
