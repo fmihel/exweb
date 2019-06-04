@@ -104,7 +104,15 @@ class Utils{
             $str = floatval($str);
         return $str;
     }
+    /** отправка почты */
+    public static function sendMail($ToMail,$FromMail,$Theme,$Message){
+        return ;
+        $headers = 'From: '.$FromMail."\r\n" .'Reply-To: '.$FromMail."\r\n";
+        //$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";        
+        $headers .= 'Content-type: text/html; charset=windows-1251' . "\r\n";
+        return mail($ToMail, $Theme, $Message, $headers);
 
+    }
     
 
 }

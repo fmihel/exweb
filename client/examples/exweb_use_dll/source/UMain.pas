@@ -60,6 +60,7 @@ type
     Button10: TButton;
     Memo5: TMemo;
     Button11: TButton;
+    Memo6: TMemo;
     procedure actConnectExecute(Sender: TObject);
     procedure ActionList1Update(Action: TBasicAction; var Handled: Boolean);
     procedure actRecvExecute(Sender: TObject);
@@ -247,7 +248,7 @@ end;
 
 procedure TfrmMain.Button7Click(Sender: TObject);
 begin
-    StrSend.Lines.Text:=Memo1.Lines.Text;
+    StrSend.Lines.Text:=Memo6.Lines.Text;
 end;
 
 procedure TfrmMain.Button8Click(Sender: TObject);
