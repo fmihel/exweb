@@ -20,6 +20,7 @@ type
 
     TExWeb = class(TObject)
     private
+        fApp: TApplication;
         fBlockLen: Integer;
         fBlockSize: Integer;
         fHttp: THttp;
@@ -33,6 +34,7 @@ type
         function getScript: string;
         function httpResultToExWebResult(aHttpResult: THttpResult):
             TExWebResult;
+        procedure processMessages;
         function read(Params: THash; aData: TStream): TExWebResult;
         procedure setEnableLog(Value: Boolean);
         procedure setLogFileName(const Value: string);
@@ -86,6 +88,7 @@ type
         //1 отправка сообщения
         function send(const str: string; data: TStream; prevState:
             TExWebState): TExWebState;
+        property App: TApplication read fApp write fApp;
         property EnableLog: Boolean read getEnableLog write setEnableLog;
         property Http: THttp read fHttp write fHttp;
         //1 Ключ доступа к передачи
@@ -126,6 +129,16 @@ end;
 constructor TExWeb.Create(aScript: string);
 begin
     inherited Create;
+
+    fApp:=nil;
+    if (Application<>nil) then begin
+        fApp:=Application;
+        error_log('app NOT nil %s',[Application.ExeName]);
+
+    end else
+        error_log('app = nil');
+
+
     fHttp:=THttp.Create();
     Script:=aScript;
     BlockSize:=1024;
@@ -186,23 +199,25 @@ function TExWeb.get(Params, Response: THash): TExWebResult;
 begin
     addKey(Params);
     result:=httpResultToExWebResult(http.get(Params,Response));
+    processMessages();
+
 end;
 
 function TExWeb.getEnableLog: Boolean;
 begin
     {$ifdef _log_}
-        result:=LogMsg.EnableWriteToFile;
+    result:=LogMsg.EnableWriteToFile;
     {$else}
-        result:=false;
+    result:=false;
     {$endif}
 end;
 
 function TExWeb.getLogFileName: string;
 begin
     {$ifdef _log_}
-        result:=LogMsg.LogFileName;
+    result:=LogMsg.LogFileName;
     {$else}
-        result:='';
+    result:='';
     {$endif}
 end;
 
@@ -257,6 +272,18 @@ begin
         result:=httpResultToExWebResult(http.write(Params,data,Response))
     else
         result:=httpResultToExWebResult(http.write(Params,Response));
+    processMessages();
+end;
+
+procedure TExWeb.processMessages;
+begin
+    try
+        if (fApp<>nil) then
+            App.ProcessMessages();
+    except
+    on e:Exception do
+        fApp:=nil;
+    end;
 end;
 
 function TExWeb.query(const sql, base: string; outDS: TStrings = nil; const
@@ -555,7 +582,8 @@ var
     cMD5: string;
     cResult: TExWebResult;
     id: string;
-    csize:int64;
+    csize: Int64;
+
     const
         cFuncName = 'send';
 
@@ -676,7 +704,7 @@ end;
 procedure TExWeb.setLogFileName(const Value: string);
 begin
     {$ifdef _log_}
-        LogMsg.LogFileName:=Value;
+    LogMsg.LogFileName:=Value;
     {$endif}
 end;
 

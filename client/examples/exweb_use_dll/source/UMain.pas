@@ -71,7 +71,10 @@ type
     Label2: TLabel;
     Label3: TLabel;
     edCountAuto: TEdit;
+    Button14: TButton;
+    actDisconnect: TAction;
     procedure actConnectExecute(Sender: TObject);
+    procedure actDisconnectExecute(Sender: TObject);
     procedure ActionList1Update(Action: TBasicAction; var Handled: Boolean);
     procedure actRecvExecute(Sender: TObject);
     procedure actSendExecute(Sender: TObject);
@@ -112,15 +115,24 @@ var
 
 implementation
 
+uses
+  UMathUtils;
+
 {$R *.dfm}
 
 procedure TfrmMain.actConnectExecute(Sender: TObject);
 begin
+
     clear();
     if exweb.Connect(DllFileName.Text) then
         log('Connect to "%s" is Ok!',[DllFileName.Text])
      else
         log('ERROR: connect to "%s"',[DllFileName.Text]);
+end;
+
+procedure TfrmMain.actDisconnectExecute(Sender: TObject);
+begin
+    exweb.Disconnect;
 end;
 
 procedure TfrmMain.ActionList1Update(Action: TBasicAction; var Handled:
@@ -149,6 +161,7 @@ procedure TfrmMain.ActionUpdate;
 begin
 
     actConnect.Enabled:=not exweb.Connected and FileExists(DllFileName.Text);
+    actDisconnect.Enabled:=not actConnect.Enabled;
     actSend.Enabled:=exweb.Connected;
     actRecv.Enabled:=exweb.Connected;
     actSetUrl.Enabled:=exweb.Connected;
@@ -311,11 +324,11 @@ end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
+    TabSheet6.TabVisible:=false;
     clear();
     log('log..');
     // создание объекта для работы с протоколом обмена
     exweb:=TExweb_import.Create;
-    TabSheet6.TabVisible:=false;
 end;
 procedure TfrmMain.Send();
 var i:integer;

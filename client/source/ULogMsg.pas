@@ -79,12 +79,11 @@ begin
     inherited Create;
     if(Application<>nil) then begin
         fLogFileName:=ExtractFileDir(Application.ExeName)+'/error_log.txt';
-        fEnableWriteToFile:=true;
     end else begin
         fLogFileName:='';
-        fEnableWriteToFile:=false;
     end;
 
+    fEnableWriteToFile:=false;
     fSizeFile:=0;
     fClearSize:=1024*1024*10; // 10 mb
     fMaxLenWrite:=512*4;

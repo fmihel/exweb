@@ -10,6 +10,9 @@ type
     TExweb_import = class(TObject)
     private
         dll: THandle;
+        fDllFileName: string;
+        fParam: TStringList;
+        fTimeStart: Double;
         hGetParam: TProcGetParam;
         hQuery: TProcQuery;
         hRecv: TProcRecv;
@@ -24,6 +27,7 @@ type
         procedure Disconnect;
         //1 Получить параметры exweb
         function getParam(name:string): string;
+        function getTimeSec: Double;
         //1 Выполнить запрос к базе.
         {:
         sql - запрос ( не только select )
@@ -33,6 +37,10 @@ type
         }
         function query(const sql, base: string; outDS: TClientDataSet; const
             coding: string = ''): Boolean;
+        //1 Полное переподключение библиотеки
+        function reConnect: Boolean;
+        //1 Автоматическое переподключение 
+        procedure reConnectAuto;
         {:
         Прием данных с сервера.
         }
@@ -42,7 +50,7 @@ type
         Отправка данных на сервер.
         data можно указать nil.
         !!! Возвращаемый результат TExWebResult необходимо в том же виде
-        передавать в следующий вызов send, не зависимо от того прошла 
+        передавать в следующий вызов send, не зависимо от того прошла
         или нет передача
         }
         function send(const str: string; data: TStream; prevState:
@@ -52,7 +60,7 @@ type
         Доступны следующие параметры
         SCRIPT or URL - адрес скрипта exweb
         KEY  - ключ авторизации ( на сервере прописан в ws_conf.php)
-        PROXYPASSWORD 
+        PROXYPASSWORD
         PROXYPORT
         PROXYSERVER
         PROXYUSERNAME
@@ -64,6 +72,10 @@ type
     end;
 
 implementation
+var
+
+  ptPrecInit:boolean = false;
+  ptPrecRate:double;
 
 {
 ******************************** TExweb_import *********************************
@@ -72,6 +84,7 @@ constructor TExweb_import.Create(const aDllFileName: string = '');
 begin
     inherited Create;
     dll:=0;
+    fParam:=TStringList.Create();
     if (aDllFileName<>'') then
         Connect(aDllFileName);
 end;
@@ -79,12 +92,13 @@ end;
 destructor TExweb_import.Destroy;
 begin
     Disconnect();
+    fParam.Free();
     inherited Destroy;
 end;
 
 function TExweb_import.Connect(const aDllFileName: string): Boolean;
 var
-    cStr:string;
+    cStr: string;
 begin
     if Connected then
         Disconnect;
@@ -96,6 +110,9 @@ begin
 
 
     try
+        fDllFileName:=aDllFileName;
+        fTimeStart:=getTimeSec();
+
         dll := LoadLibrary(PChar(aDllFileName));
 
         hSend:=GetProcAddress(dll,strProcSend);
@@ -136,6 +153,24 @@ begin
     result:=hGetParam(name);
 end;
 
+function TExweb_import.getTimeSec: Double;
+var
+    ET: TLargeInteger;
+    l: LARGE_INTEGER;
+begin
+    if not ptPrecInit then
+    begin
+       ptPrecInit:=true;
+       QueryPerformanceFrequency(ET);
+       l:=LARGE_INTEGER(ET);
+       ptPrecRate:=L.QuadPart;
+    end;
+
+    QueryPerformanceCounter(ET);
+    l:=LARGE_INTEGER(ET);
+    Result := (l.QuadPart)/ptPrecRate;
+end;
+
 function TExweb_import.query(const sql, base: string; outDS: TClientDataSet;
     const coding: string = ''): Boolean;
 var
@@ -147,6 +182,7 @@ var
     len: Integer;
     cNames: TStringList;
 begin
+    reConnectAuto();
 
     if outDS<>nil then begin
         data:=TstringList.Create();
@@ -205,20 +241,51 @@ begin
     end;
 end;
 
+function TExweb_import.reConnect: Boolean;
+var
+    cName: string;
+    cValue: string;
+    i: Integer;
+begin
+    if (not Connected) then begin
+        result:=false;
+        exit;
+    end;
+    Disconnect();
+    if (Connect(fDllFileName)) then begin
+        // заново выставляем параметры
+        for i:=0 to fParam.Count - 1 do begin
+            cName:=fParam.Names[i];
+            cValue:=fParam.Values[cName];
+            setParam(cName,cValue);
+        end;
+    end;
+end;
+
+procedure TExweb_import.reConnectAuto;
+begin
+    if (Connected) and  (getTimeSec()-fTimeStart>3600) then
+        reConnect();
+end;
+
 function TExweb_import.recv(var str:string;data:TStream;prevState:TExWebState):
     TExWebState;
 begin
+    reConnectAuto();
     result:=hRecv(str,data,prevState);
 end;
 
 function TExweb_import.send(const str: string; data: TStream; prevState:
     TExWebState): TExWebState;
 begin
+    reConnectAuto();
     result:=hSend(str,data,prevState);
 end;
 
 procedure TExweb_import.setParam(name:string;value:string);
 begin
+    // сохраняем параметры ( для reConnect)
+    fParam.Values[name]:=value;
     hSetParam(name,value);
 end;
 

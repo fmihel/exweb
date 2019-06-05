@@ -99,6 +99,14 @@ object frmMain: TfrmMain
         TabOrder = 4
         OnClick = FileListBox1Click
       end
+      object Button14: TButton
+        Left = 16
+        Top = 96
+        Width = 177
+        Height = 41
+        Action = actDisconnect
+        TabOrder = 5
+      end
     end
     object TabSheet4: TTabSheet
       Caption = '2. '#1055#1072#1088#1072#1084#1077#1090#1088#1099
@@ -596,6 +604,10 @@ object frmMain: TfrmMain
     object actStopTest: TAction
       Caption = 'Stop Test'
       OnExecute = actStopTestExecute
+    end
+    object actDisconnect: TAction
+      Caption = 'Disconnect'
+      OnExecute = actDisconnectExecute
     end
   end
   object Timer1: TTimer
