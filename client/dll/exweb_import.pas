@@ -19,6 +19,9 @@ type
         hSend: TProcSend;
         hSetParam: TProcSetParam;
         function getConnected: Boolean;
+        function getTimeSec: Double;
+        //1 Автоматическое переподключение
+        procedure reConnectAuto;
     public
         constructor Create(const aDllFileName: string = '');
         destructor Destroy; override;
@@ -27,7 +30,6 @@ type
         procedure Disconnect;
         //1 Получить параметры exweb
         function getParam(name:string): string;
-        function getTimeSec: Double;
         //1 Выполнить запрос к базе.
         {:
         sql - запрос ( не только select )
@@ -39,8 +41,6 @@ type
             coding: string = ''): Boolean;
         //1 Полное переподключение библиотеки
         function reConnect: Boolean;
-        //1 Автоматическое переподключение 
-        procedure reConnectAuto;
         {:
         Прием данных с сервера.
         }

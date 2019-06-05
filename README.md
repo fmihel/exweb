@@ -94,68 +94,27 @@ exweb.free();
 ```
 ---
 
-## Пример использования протокола на Delphi без exweb.dll 
----
-### Отправка сообщения
-```
-Uses UExWebType,UExWeb;
+## API documentation ***TExWeb_import***
+### Functions
 
-var
-    exweb:TExWeb;
-    ExWebState:TExWebState;
-    cData:TMemoryStream;
-begin
+|name|notes|
+|-----|-----|
+|***Create***(aDllFileName:string = '')|Конструктор <br> aDllFileName - путь к библиотеке exweb.dll|
+|***Destroy***()|Деструктор|
+|***Connect***(const aDllFileName: string): Boolean|Загрузка библиотеки<br> aDllFileName - путь к библиотеке exweb.dll|
+|***Disconnect***()|Отключение библиотеки|
+|***reConnect***():Boolean|Полное переподключение библиотеки|
+|***send***(const str: string; data: TStream; prevState:TExWebState): TExWebState|Отправка данных на сервер<br>str - строка(xml)<br>data - бинарный поток данных<br> prevState - предыдущее состояние|
+|***recv***(var str: string; data: TStream; prevState:TExWebState): TExWebState|Прием данных с сервера<br>str - строка(xml)<br>data - бинарный поток данных<br> prevState - предыдущее состояние|
+|***getParam***(name:string):string|Получить параметры exweb<br> name - имя параметра|
+|***setParam***(name:string;value:string)|установка параметра exweb<br>name - имя параметра<br>value - значение<br><br> ***Доступны следующие параметры***<br> *Script* - адрес скрипта<br>*Key* - ключ авторизации<br>*ProxyPassword* - пароль прокси<br>*ProxyPort* - порт прокси<br>*ProxyServer* - адрес сервера прокси<br>*ProxyUserName* - имя пользователя прокси<br>*MaxDataSetFiedLen* -  Максимальная длина загружаемого поля<br>*EnableLog* - включение вывода  в лог<br>*LogFileName* - путь к log файлу |
+|***query***(const sql, base: string; outDS: TClientDataSet; const coding: string = ''): Boolean|выполнение запроса к базе<br>sql - запрос ( не только select )<br>base - алиас базы к которой выполняется запрос<br>outDS - ClientDataSet - с результатом запроса ( или nil)<br>coding - кодировка результат|
 
-    exweb:=TExWeb.Create('https://site/exweb/server/');
-    cData:=TMemoryStream.Create;
+### Propertyes
 
-    try
-        cData.LoadFromFile('c://file.jpg');
-
-        ExWebState:=exweb.send('My string for send...',cData,ExWebState);
-        if (ExWebState.result) then
-            ShowMessage('send: Ok');
-        else
-            ShowMessage('send: Error');
-    finally
-        cData.Free;
-        exweb.Free;
-    end;
-
-end;
-
-```
----
-### Прием сообщения
-```
-Uses UExWebType,UExWeb;
-
-var
-    exweb:TExWeb;
-    ExWebState:TExWebState;
-    cData:TMemoryStream;
-    cStr:string;
-begin
-
-    exweb:=TExWeb.Create('https://site/exweb/server/');
-    cData:=TMemoryStream.Create;
-
-    try
-
-        ExWebState:=exweb.recv(cStr,cData,ExWebState);
-        if (ExWebState.result) then begin
-            cData.SaveToFile('c://file.jpg');
-            ShowMessage(cStr);
-        end else
-            ShowMessage('recv: Error');
-    finally
-        cData.Free;
-        exweb.Free;
-    end;
-
-end;
-
-```
+|name|notes|
+|-----|-----|
+|***Connected***: Boolean|Признак того, что библиотека подключена|
 ---
 
 # Техническое описание
