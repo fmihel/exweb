@@ -1,6 +1,6 @@
 object frmMain: TfrmMain
-  Left = 648
-  Top = 218
+  Left = 893
+  Top = 207
   Caption = 'exweb 2.0'
   ClientHeight = 690
   ClientWidth = 895
@@ -34,12 +34,15 @@ object frmMain: TfrmMain
     Height = 417
     ActivePage = TabSheet1
     Align = alTop
+    ParentShowHint = False
+    ShowHint = True
+    Style = tsButtons
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = '1. '#1055#1086#1076#1082#1083#1102#1095#1077#1085#1080#1077
       DesignSize = (
         887
-        386)
+        383)
       object Label1: TLabel
         Left = 224
         Top = 21
@@ -60,6 +63,7 @@ object frmMain: TfrmMain
         Top = 78
         Width = 241
         Height = 22
+        Color = clInfoBk
         DirList = DirectoryListBox1
         TabOrder = 1
       end
@@ -73,11 +77,12 @@ object frmMain: TfrmMain
         Text = '*.dll'
       end
       object DirectoryListBox1: TDirectoryListBox
-        Left = 224
+        Left = 225
         Top = 106
         Width = 240
-        Height = 263
+        Height = 260
         Anchors = [akLeft, akTop, akBottom]
+        Color = clInfoBk
         FileList = FileListBox1
         ItemHeight = 16
         TabOrder = 3
@@ -86,8 +91,9 @@ object frmMain: TfrmMain
         Left = 480
         Top = 78
         Width = 367
-        Height = 291
+        Height = 288
         Anchors = [akLeft, akTop, akRight, akBottom]
+        Color = clInfoBk
         ItemHeight = 16
         Mask = '*.dll'
         TabOrder = 4
@@ -99,7 +105,7 @@ object frmMain: TfrmMain
       ImageIndex = 1
       DesignSize = (
         887
-        386)
+        383)
       object Button3: TButton
         Left = 16
         Top = 32
@@ -146,7 +152,7 @@ object frmMain: TfrmMain
         Left = 187
         Top = 0
         Width = 700
-        Height = 386
+        Height = 383
         ActivePage = TabSheet5
         Align = alClient
         TabOrder = 0
@@ -156,7 +162,7 @@ object frmMain: TfrmMain
             Left = 145
             Top = 0
             Width = 547
-            Height = 355
+            Height = 352
             Align = alClient
             Lines.Strings = (
               'This text will sending...'
@@ -174,7 +180,7 @@ object frmMain: TfrmMain
             Left = 0
             Top = 0
             Width = 145
-            Height = 355
+            Height = 352
             Align = alLeft
             BevelOuter = bvNone
             Caption = 'Panel1'
@@ -232,13 +238,14 @@ object frmMain: TfrmMain
           ImageIndex = 1
           DesignSize = (
             692
-            355)
+            352)
           object FileListBox2: TFileListBox
             Left = 3
             Top = 164
             Width = 541
-            Height = 176
+            Height = 173
             Anchors = [akLeft, akTop, akRight, akBottom]
+            Color = clInfoBk
             ItemHeight = 16
             TabOrder = 0
             OnClick = FileListBox2Click
@@ -249,6 +256,7 @@ object frmMain: TfrmMain
             Width = 541
             Height = 97
             Anchors = [akLeft, akTop, akRight]
+            Color = clInfoBk
             FileList = FileListBox2
             ItemHeight = 16
             TabOrder = 1
@@ -259,6 +267,7 @@ object frmMain: TfrmMain
             Width = 541
             Height = 22
             Anchors = [akLeft, akTop, akRight]
+            Color = clInfoBk
             DirList = DirectoryListBox2
             TabOrder = 2
           end
@@ -426,7 +435,7 @@ object frmMain: TfrmMain
         Left = 0
         Top = 0
         Width = 187
-        Height = 386
+        Height = 383
         Align = alLeft
         BevelOuter = bvNone
         Caption = 'Panel2'
@@ -447,7 +456,7 @@ object frmMain: TfrmMain
       ImageIndex = 2
       DesignSize = (
         887
-        386)
+        383)
       object Label4: TLabel
         Left = 240
         Top = 16
@@ -485,12 +494,62 @@ object frmMain: TfrmMain
         Left = 240
         Top = 208
         Width = 600
-        Height = 153
+        Height = 150
         Anchors = [akLeft, akTop, akRight, akBottom]
         Lines.Strings = (
           'StreamRecv')
         ScrollBars = ssBoth
         TabOrder = 2
+      end
+    end
+    object TabSheet7: TTabSheet
+      Caption = 'Auto test'
+      ImageIndex = 4
+      ExplicitLeft = 8
+      ExplicitTop = 28
+      object Label2: TLabel
+        Left = 208
+        Top = 32
+        Width = 103
+        Height = 16
+        Caption = #1055#1088#1086#1096#1083#1086' '#1074#1088#1077#1084#1077#1085#1080
+      end
+      object Label3: TLabel
+        Left = 208
+        Top = 80
+        Width = 71
+        Height = 16
+        Caption = #1054#1090#1087#1088#1072#1074#1083#1077#1085#1086
+      end
+      object Button12: TButton
+        Left = 24
+        Top = 32
+        Width = 161
+        Height = 49
+        Action = actStartTest
+        TabOrder = 0
+      end
+      object Button13: TButton
+        Left = 24
+        Top = 87
+        Width = 161
+        Height = 49
+        Action = actStopTest
+        TabOrder = 1
+      end
+      object edTime: TEdit
+        Left = 208
+        Top = 51
+        Width = 273
+        Height = 24
+        TabOrder = 2
+      end
+      object edCountAuto: TEdit
+        Left = 208
+        Top = 99
+        Width = 273
+        Height = 24
+        TabOrder = 3
       end
     end
   end
@@ -500,11 +559,11 @@ object frmMain: TfrmMain
     Width = 895
     Height = 263
     Align = alClient
+    Color = 15790320
     Lines.Strings = (
       'MemoLog')
     ScrollBars = ssBoth
     TabOrder = 1
-    ExplicitTop = 423
   end
   object ActionList1: TActionList
     OnUpdate = ActionList1Update
@@ -530,5 +589,19 @@ object frmMain: TfrmMain
       Caption = 'set autorize key'
       OnExecute = actSetKeyExecute
     end
+    object actStartTest: TAction
+      Caption = 'Start Test'
+      OnExecute = actStartTestExecute
+    end
+    object actStopTest: TAction
+      Caption = 'Stop Test'
+      OnExecute = actStopTestExecute
+    end
+  end
+  object Timer1: TTimer
+    Enabled = False
+    OnTimer = Timer1Timer
+    Left = 244
+    Top = 174
   end
 end

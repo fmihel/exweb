@@ -73,7 +73,7 @@ if (Utils::requestContains('event')){
 
             $q = "update REST_API set STR=CONCAT(STR,'".addslashes($_REQUEST['string'])."'), STATE='send_string', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$_REQUEST['id'];
             Result::query($q);
-
+            
             Result::ok(); 
         };break;
         //----------------------------------------------------------------------------------

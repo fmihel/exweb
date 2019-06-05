@@ -52,6 +52,15 @@ begin
         exweb.Http.ProxyUserName:=value;
     if (name = 'MAXDATASETFIELDLEN') then
         exweb.MaxDataSetFieldLen:=StrToInt(value);
+    if (name = 'ENABLELOG') then
+    begin
+        if (UpperCase(value) = 'TRUE') or (value='1') then
+            exweb.ENABLELOG:=true
+        else
+            exweb.ENABLELOG:=false;
+    end;
+    if (name = 'LOGFILENAME') then
+        exweb.LogFileName:=value;
 
 end;
 
@@ -75,6 +84,16 @@ begin
 
     if (name = 'MAXDATASETFIELDLEN') then
         result:=IntToStr(exweb.MaxDataSetFieldLen);
+
+    if (name = 'ENABLELOG') then
+    begin
+        if (exweb.ENABLELOG) then
+            result:='1'
+        else
+            result:='0';
+    end;
+    if (name = 'LOGFILENAME') then
+        result:=exweb.LogFileName;
 
 end;
 

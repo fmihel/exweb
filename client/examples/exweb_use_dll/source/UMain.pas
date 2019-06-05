@@ -61,12 +61,24 @@ type
     Memo5: TMemo;
     Button11: TButton;
     Memo6: TMemo;
+    TabSheet7: TTabSheet;
+    Button12: TButton;
+    actStartTest: TAction;
+    Button13: TButton;
+    actStopTest: TAction;
+    Timer1: TTimer;
+    edTime: TEdit;
+    Label2: TLabel;
+    Label3: TLabel;
+    edCountAuto: TEdit;
     procedure actConnectExecute(Sender: TObject);
     procedure ActionList1Update(Action: TBasicAction; var Handled: Boolean);
     procedure actRecvExecute(Sender: TObject);
     procedure actSendExecute(Sender: TObject);
     procedure actSetKeyExecute(Sender: TObject);
     procedure actSetUrlExecute(Sender: TObject);
+    procedure actStartTestExecute(Sender: TObject);
+    procedure actStopTestExecute(Sender: TObject);
     procedure Button10Click(Sender: TObject);
     procedure Button11Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
@@ -77,12 +89,17 @@ type
     procedure FileListBox2Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { Private declarations }
+    cStartAutoTime:double;
+    cCountAuto:integer;
     procedure log(template:string;val:array of TVarRec);overload;
     procedure log(template:string);overload;
     procedure clear();
     procedure ActionUpdate();
+    procedure Send;
+
   public
     { Public declarations }
     exweb:TExweb_import;
@@ -136,6 +153,8 @@ begin
     actRecv.Enabled:=exweb.Connected;
     actSetUrl.Enabled:=exweb.Connected;
     actSetKey.Enabled:=exweb.Connected;
+    actStartTest.Enabled:=not Timer1.Enabled;
+    actStopTest.Enabled:=Timer1.Enabled;
 
 end;
 
@@ -143,7 +162,7 @@ procedure TfrmMain.actRecvExecute(Sender: TObject);
 var
     data:TMemoryStream;
     cStr:string;
-    i,j,m:integer;
+    i,j:integer;
     cChar:AnsiChar;
 begin
 
@@ -161,7 +180,6 @@ begin
             StrRecv.Lines.Add(cStr);
             log('recv ok! id = %s',[recvState.id]);
             if (data.Size>0) then begin
-                m:=0;
                 for i:=0 to 10 do begin
                     cStr:='';
                     for j:=0 to 10 do begin
@@ -231,6 +249,20 @@ begin
     log('Путь к скрипту обмена: %s',[exweb.getParam('url')]);
 end;
 
+procedure TfrmMain.actStartTestExecute(Sender: TObject);
+begin
+    Timer1.Enabled:=true;
+    cStartAutoTime:=Now();
+    Timer1.Tag:=0;
+    cCountAuto:=0;
+
+end;
+
+procedure TfrmMain.actStopTestExecute(Sender: TObject);
+begin
+    Timer1.Enabled:=false;
+end;
+
 procedure TfrmMain.Button10Click(Sender: TObject);
 begin
     StrSend.Lines.Text:=Memo4.Lines.Text;
@@ -284,6 +316,49 @@ begin
     // создание объекта для работы с протоколом обмена
     exweb:=TExweb_import.Create;
     TabSheet6.TabVisible:=false;
+end;
+procedure TfrmMain.Send();
+var i:integer;
+begin
+    randomize();
+    i:=random(4);
+    if (i = 1) then
+        StrSend.Lines.Text:=Memo3.Lines.Text
+    else if (i = 2) then
+        StrSend.Lines.Text:=Memo4.Lines.Text
+    else if (i = 3) then
+        StrSend.Lines.Text:=Memo5.Lines.Text
+    else
+        StrSend.Text:='АБВГДЕ 123457678';
+    actSendExecute(nil);
+end;
+
+procedure TfrmMain.Timer1Timer(Sender: TObject);
+const
+    cFuncName = 'Timer1Timer';
+begin
+    if Timer1.Tag = 1 then
+        exit;
+
+    Timer1.Tag:=1;
+    {$ifdef _log_} SLog.Stack(ClassName,cFuncName);{$endif}
+    try
+    try
+        inc(cCountAuto);
+        edTime.Text:=TimeToStr(Now()-cStartAutoTime);
+        edCountAuto.Text:=IntToStr(cCountAuto);
+        Send();
+    except
+    on e:Exception do
+    begin
+    	{$ifdef _log_}error_log(e,ClassName,cFuncName);{$endif}
+    end;
+    end;
+    finally
+        Timer1.Tag:=0;
+    end;
+
+
 end;
 
 end.

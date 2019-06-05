@@ -7,6 +7,7 @@
 /client/__recovery/
 /client/projects/
 
+
 /server/_render/
 /server/_render/*
 /server/ws_conf.json
@@ -43,3 +44,4 @@
 *.ocx
 *.dsk
 *.stat
+*.log

@@ -28,10 +28,14 @@ type
         procedure addKey(Params: THash);
         procedure ExceptionOtvet(var res:TExWebResult;otvet: THash;
             event:string; msg: string='');
+        function getEnableLog: Boolean;
+        function getLogFileName: string;
         function getScript: string;
         function httpResultToExWebResult(aHttpResult: THttpResult):
             TExWebResult;
         function read(Params: THash; aData: TStream): TExWebResult;
+        procedure setEnableLog(Value: Boolean);
+        procedure setLogFileName(const Value: string);
         procedure setScript(const Value: string);
         function _recvBlock(data: TStream;id:string;count:integer):
             TExWebResult;
@@ -61,17 +65,14 @@ type
         ... и так len*2 строк
         len*2+1 строка - значение 1-го пол€ в 1-й строке данных
         len*2+2 строка - значение 2-го пол€ в 1-й строке данных
-        len*2+3 строка - значение 3-го пол€ в 1-й строке данных 
+        len*2+3 строка - значение 3-го пол€ в 1-й строке данных
         ...
-
-
-
         }
         function query(const sql, base: string; outDS: TStrings = nil; const
             coding: string = ''): Boolean; overload;
         {:
-          сожалению данна€ ф-ци€ выдвет Exception заверешении работы 
-        exweb_import. (при работе через dll). ѕереполнение идет если 
+          сожалению данна€ ф-ци€ выдвет Exception заверешении работы
+        exweb_import. (при работе через dll). ѕереполнение идет если
         вызываетс€ метод ClientDataSet.FieldDefs :)
         ѕоэтому саму ф-цию query замен€ю, и часть логики переношу в
         exweb_import. см query(..)
@@ -85,9 +86,11 @@ type
         //1 отправка сообщени€
         function send(const str: string; data: TStream; prevState:
             TExWebState): TExWebState;
+        property EnableLog: Boolean read getEnableLog write setEnableLog;
         property Http: THttp read fHttp write fHttp;
         //1  люч доступа к передачи
         property Key: string read fKey write fKey;
+        property LogFileName: string read getLogFileName write setLogFileName;
         //1 ћаксимальна€ длина загружаемого пол€ (остаток обрезаетс€) условие включаетс€ при значении >0
         property MaxDataSetFieldLen: Integer read fMaxDataSetFieldLen write
             fMaxDataSetFieldLen;
@@ -98,7 +101,8 @@ function TExWebStateToStr(aState:TExWebState):string;
 implementation
 
 uses
-{$ifdef _log_}ULog,  {$endif} umd5, UUtils;
+{$ifdef _log_}ULogMsg,  {$endif} umd5, UUtils;
+
 function TExWebStateToStr(aState:TExWebState):string;
 begin
 
@@ -108,12 +112,12 @@ begin
     else
         result:=result+'false';
 
-    result:=result+','+#13#10;
+    result:=result+', ';
 
-    result:=result+'id:'+aState.id+','+#13#10;
+    result:=result+'id:'+aState.id+', ';
     result:=result+'webResult:'+TExWebResultStr[integer(aState.webResult)];
 
-    result:='{'+#13#10+result+#13#10+'}';
+    result:='{'+result+'}';
 
 end;
 {
@@ -149,7 +153,7 @@ begin
 
     if (otvet.Int['res'] = 0) then begin
         res:=ewrRes0;
-        raise Exception.Create('event='+event+','+otvet['msg']+' '+msg);
+        raise Exception.Create('event='+event+', otvet='+otvet['msg']+' '+msg);
     end;
 
 end;
@@ -170,7 +174,7 @@ begin
     except
     on e:Exception do
     begin
-        {$ifdef _log_}ULog.Error('',e,ClassName,cFuncName);{$endif}
+        {$ifdef _log_}error_log(e,ClassName,cFuncName);{$endif}
     end;
     end;
     finally
@@ -182,6 +186,24 @@ function TExWeb.get(Params, Response: THash): TExWebResult;
 begin
     addKey(Params);
     result:=httpResultToExWebResult(http.get(Params,Response));
+end;
+
+function TExWeb.getEnableLog: Boolean;
+begin
+    {$ifdef _log_}
+        result:=LogMsg.EnableWriteToFile;
+    {$else}
+        result:=false;
+    {$endif}
+end;
+
+function TExWeb.getLogFileName: string;
+begin
+    {$ifdef _log_}
+        result:=LogMsg.LogFileName;
+    {$else}
+        result:='';
+    {$endif}
 end;
 
 function TExWeb.getScript: string;
@@ -219,7 +241,7 @@ begin
     except
     on e:Exception do
     begin
-        {$ifdef _log_}ULog.Error('',e,ClassName,cFuncName);{$endif}
+        {$ifdef _log_}error_log(e,ClassName,cFuncName);{$endif}
     end;
     end;
     finally
@@ -356,7 +378,6 @@ begin
                         len:=MaxDataSetFieldLen;
                     //outDS.FieldDefs.Add(name,ftString,len,true);
 
-                    {$ifdef _log_} ULog.Log('name %s len %d',[name,len],ClassName,cFuncName);{$endif}
                     break;
                 end;
 
@@ -407,7 +428,7 @@ var
     size: Integer;
 
     const
-        cFuncName = 'send';
+        cFuncName = 'recv';
 
 begin
 
@@ -430,7 +451,7 @@ begin
             if (otvet.Int['res'] = 0) then begin
                 result:=prevState;
                 result.result:=false;
-                raise Exception.Create('event=completed,'+otvet['msg']);
+                raise Exception.Create('event=completed, otvet='+otvet['msg']);
             end;
         end;
 
@@ -446,7 +467,7 @@ begin
         if (otvet.Int['res'] = 0) then begin
             result:=prevState;
             result.result:=false;
-            raise Exception.Create('event=init_recv,'+otvet['msg']);
+            raise Exception.Create('event=init_recv, otvet='+otvet['msg']);
         end;
 
         id          :=  otvet.Hash['data']['id'];
@@ -514,7 +535,10 @@ begin
     except
     on e:Exception do
     begin
-
+        if (e.Message<>'no messages') then begin
+            {$ifdef _log_}error_log(Format('state:%s',[TExWebStateToStr(prevState)]),e,ClassName,cFuncName);{$endif}
+            {$ifdef _log_}error_log(Format('key:%s, script:%s',[self.Key,self.Script]),e,ClassName,cFuncName);{$endif}
+        end;
     end;
     end;
     finally
@@ -531,7 +555,7 @@ var
     cMD5: string;
     cResult: TExWebResult;
     id: string;
-
+    csize:int64;
     const
         cFuncName = 'send';
 
@@ -556,13 +580,13 @@ begin
             if cResult<>ewrOk then begin
                 result:=prevState;
                 result.result:=false;
-                raise Exception.Create('event=ready');
+                raise Exception.Create('event=ready,result='+TExWebResultStr[integer(cResult)]);
             end;
 
             if (otvet.Int['res'] = 0) then begin
                 result:=prevState;
                 result.result:=false;
-                raise Exception.Create('event=ready,'+otvet['msg']);
+                raise Exception.Create('event=ready, otvet='+otvet['msg']);
             end;
         end;
 
@@ -573,13 +597,13 @@ begin
         if cResult<>ewrOk then begin
             result:=prevState;
             result.result:=false;
-            raise Exception.Create('event=init_send');
+            raise Exception.Create('event=init_send,result='+TExWebResultStr[integer(cResult)]);
         end;
 
         if (otvet.Int['res'] = 0) then begin
             result:=prevState;
             result.result:=false;
-            raise Exception.Create('event=init_send,'+otvet['msg']);
+            raise Exception.Create('event=init_send,otvet='+otvet['msg']);
         end;
 
 
@@ -593,7 +617,7 @@ begin
         if cResult<>ewrOk then begin
             result:=prevState;
             result.result:=false;
-            raise Exception.Create('_send(str)<>ewrOk');
+            raise Exception.Create('_send(str)<>ewrOk,result='+TExWebResultStr[integer(cResult)]);
         end;
 
 
@@ -605,7 +629,7 @@ begin
             if cResult<>ewrOk then begin
                 result:=prevState;
                 result.result:=false;
-                raise Exception.Create('_send(stream)<>ewrOk');
+                raise Exception.Create('_send(stream)<>ewrOk,result='+TExWebResultStr[integer(cResult)]);
             end;
         end;
 
@@ -630,12 +654,30 @@ begin
     except
     on e:Exception do
     begin
-        {$ifdef _log_}ULog.Error('',e,ClassName,cFuncName);{$endif}
+        cSize:=0;
+        if (data<>nil)then
+            cSize:=data.Size;
+        {$ifdef _log_}error_log(Format('str:%s',[str]),e,ClassName,cFuncName);{$endif}
+        {$ifdef _log_}error_log(Format('data:%d',[cSize]),e,ClassName,cFuncName);{$endif}
+        {$ifdef _log_}error_log(Format('state:%s',[TExWebStateToStr(prevState)]),e,ClassName,cFuncName);{$endif}
+        {$ifdef _log_}error_log(Format('key:%s,script:%s',[self.Key,self.Script]),e,ClassName,cFuncName);{$endif}
     end;
     end;
     finally
         FreeHash(otvet);
     end;
+end;
+
+procedure TExWeb.setEnableLog(Value: Boolean);
+begin
+    {$ifdef _log_}LogMsg.EnableWriteToFile:=Value;{$endif}
+end;
+
+procedure TExWeb.setLogFileName(const Value: string);
+begin
+    {$ifdef _log_}
+        LogMsg.LogFileName:=Value;
+    {$endif}
 end;
 
 procedure TExWeb.setScript(const Value: string);
@@ -683,7 +725,7 @@ begin
     except
     on e:Exception do
     begin
-        {$ifdef _log_}ULog.Error(TExWebResultStr[integer(result)],e,ClassName,cFuncName);{$endif}
+        {$ifdef _log_}error_log(TExWebResultStr[integer(result)],e,ClassName,cFuncName);{$endif}
     end;
     end;
     finally
@@ -732,7 +774,7 @@ begin
     except
     on e:Exception do
     begin
-        {$ifdef _log_}ULog.Error(TExWebResultStr[integer(result)],e,ClassName,cFuncName);{$endif}
+        {$ifdef _log_}error_log(TExWebResultStr[integer(result)],e,ClassName,cFuncName);{$endif}
     end;
     end;
     finally
@@ -796,7 +838,7 @@ begin
     except
     on e:Exception do
     begin
-        {$ifdef _log_}ULog.Error(TExWebResultStr[integer(result)],e,ClassName,cFuncName);{$endif}
+        {$ifdef _log_}error_log(TExWebResultStr[integer(result)],e,ClassName,cFuncName);{$endif}
     end;
     end;
     finally
@@ -854,7 +896,7 @@ begin
             except
             on e:Exception do
             begin
-                {$ifdef _log_}ULog.Error('',e,ClassName,cFuncName);{$endif}
+                {$ifdef _log_}error_log('',e,ClassName,cFuncName);{$endif}
             end;
             end;
             finally
@@ -870,7 +912,7 @@ begin
     except
     on e:Exception do
     begin
-        {$ifdef _log_} ULog.Log('ERROR: %s',[TExWebResultStr[integer(result)]],ClassName,cFuncName);{$endif}
+        {$ifdef _log_} error_log('ERROR: %s',[TExWebResultStr[integer(result)]],ClassName,cFuncName);{$endif}
     end;
     end;
     finally

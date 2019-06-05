@@ -83,6 +83,8 @@ begin
 end;
 
 function TExweb_import.Connect(const aDllFileName: string): Boolean;
+var
+    cStr:string;
 begin
     if Connected then
         Disconnect;
@@ -104,6 +106,12 @@ begin
         hGetParam:=GetProcAddress(dll,strProcGetParam);
 
         result:=true;
+
+        if (Application<>nil) then begin
+            cStr:=ExtractFileDir(Application.ExeName)+'\exweb_error.log';
+            setParam('LOGFILENAME',cStr);
+            setParam('ENABLELOG','1');
+        end;
     except
         result:=false;
         Disconnect();

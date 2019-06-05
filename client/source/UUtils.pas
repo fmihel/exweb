@@ -38,7 +38,7 @@ type
     end;
 
 implementation
-uses {$ifdef _log_}ULog,{$endif} IdURI;
+uses {$ifdef _log_}ULogMsg,{$endif} IdURI;
 {
 ************************************ Utils *************************************
 }
@@ -424,10 +424,8 @@ class function Utils.writeToStream(str: string; Stream: TStream): Integer;
 
 begin
     cStr:=ShortString(str);
-    //cLen := Length(str)*2;
     cLen:=Length(cStr);
     Stream.WriteBuffer(cLen,sizeof(Integer));
-    {$ifdef _log_} ULog.Log('LEN = %d',[sizeof(Integer)],ClassName,cFuncName);{$endif}
     Stream.WriteBuffer(cStr[1],cLen);
 end;
 
