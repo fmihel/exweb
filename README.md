@@ -6,30 +6,25 @@
 Для использования необходимо подключить к проекту файлы: `UExWebType.pas`, `exweb_import.pas`, `exweb_type.pas`;
 ```
 Uses  UExWebType, exweb_import, exweb_type ;
-
 ```
-----
-**1) создание и подключение**
+
+**1. создание и подключение**
 ```
 var exweb:TExweb_import;
 ....
 exweb := TExweb_import.create();
 if not exweb.Connect('exweb.dll') then
   ShowMessage('connect error');
-  
 ```
-----
-**2) установка адреса скрипта**
+**2. установка адреса скрипта**
 ```
 exweb.setParam('url','http://site/exweb/');
 ```
-----
-**3) установка ключа авторизации**
+**3. установка ключа авторизации**
 ```
 exweb.setParam('key','xxxxxxxxx');
 ```
-----
-**4) отправка сообщения**
+**4. отправка сообщения**
 ```
 var state:TExWebState;
      xml:string;
@@ -40,12 +35,8 @@ xml:='<?xml version="1.0" encoding="unicode"?><Msg><Name>Mike</Name><Msg>';
 state:=exweb.send(xml,nil,state);
 if (not state.result) then
   ShowMessage('error send');
-  
-
 ```
-
-----
-**5) отправка сообщения и бинарных данных**
+**5. отправка сообщения и бинарных данных**
 ```
 var state:TExWebState;
      data:TMemoryStream;
@@ -61,8 +52,7 @@ if (not state.result) then
   
 data.free;  
 ```
-----
-**6) прием сообщения**
+**6. прием сообщения**
 ```
 var state:TExWebState;
      data:TMemoryStream;
@@ -76,8 +66,7 @@ if (not state.result) then
   
 data.free();  
 ```
-----
-**7) выполнение запросов к базе**
+**7. выполнение запросов к базе**
 ```
 var cds:TClientDataSet;
 ...
@@ -86,9 +75,7 @@ if ( exweb.query('select * from rest_api','exweb',cds) ) then
     cds.Active:=true;
 
 ```
-
-----
-**8) завершение работы**
+**8. завершение работы**
 ```
 exweb.free();
 ```
@@ -117,7 +104,7 @@ exweb.free();
 |***Connected***: Boolean|Признак того, что библиотека подключена|
 ---
 
-# Техническое описание
+## Техническое описание
 ### Принцип работы протокола
 Протокол exweb предназначен для передачи и приема сообщений между клиентом windows и сервером Apache.
 Основной здачей протокола является наличие достоверной информации о факте приема противоположной стороной информации.

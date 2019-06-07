@@ -1,6 +1,6 @@
 object frmMain: TfrmMain
-  Left = 893
-  Top = 207
+  Left = 2370
+  Top = 237
   Caption = 'exweb 2.0'
   ClientHeight = 690
   ClientWidth = 895
@@ -364,6 +364,7 @@ object frmMain: TfrmMain
             Lines.Strings = (
               '<?xml version="1.0" encoding="unicode"?>'#9
               '<Msg Kind="2" Action="3" Ver="1">'#9
+              '<IdKlient>21039</IdKlient>'
               '<KlientName>"'#1055#1083#1072#1085#1077#1090#1072'"</KlientName>'#9
               '<BossPost>'#1043#1077#1085#1077#1088#1072#1083#1100#1085#1099#1081' '#1076#1080#1088#1077#1082#1090#1086#1088'</BossPost>'#9
               '<BossName>'#1048#1074#1072#1085#1086#1074' '#1048'.'#1048'.</BossName>'#9
@@ -513,8 +514,6 @@ object frmMain: TfrmMain
     object TabSheet7: TTabSheet
       Caption = 'Auto test'
       ImageIndex = 4
-      ExplicitLeft = 8
-      ExplicitTop = 28
       object Label2: TLabel
         Left = 208
         Top = 32

@@ -88,9 +88,10 @@ class handler_utils{
     
     public static function addr_dost_update($xml){
         
-        $ID_DEALER = $xml->KlientId;
 
-        $type = \base::val('select count(ID_DEALER) from DOST_CLIENTS where ID_DEALER='.$ID_DEALER,0,'deco') > 0?'update':'insert';
+        $ID_DEALER = $xml->IdKlient;
+
+        $type = \base::valE('select count(ID_DEALER) from DOST_CLIENTS where ID_DEALER='.$ID_DEALER,0,'deco') > 0?'update':'insert';
         $data = self::tagToFields('addr_dost',$xml);
         
         $params = ['types'=>$data['types']];
@@ -101,13 +102,10 @@ class handler_utils{
         if ($type==='update')
             $q.=" where ID_DEALER=$ID_DEALER";
             
-        if (!\base::query($q,'deco'))
-            throw new \Exception(\base::error('deco'));
+        \base::queryE($q,'deco');
 
-            
         $q = 'delete from DOST_CLIENTS_ADDRESS where ID_DEALER='.$ID_DEALER;
-        if (!\base::query($q,'deco'))
-            throw new \Exception(\base::error('deco'));
+        \base::queryE($q,'deco');
         
         $list = $xml->List->children();    
         for($i=0;$i<count($list);$i++){
@@ -115,17 +113,16 @@ class handler_utils{
             $ID   = $attr->Id;
             $ADDR = str_replace(array('"'),array("'"),$attr->Txt);
                 
-            if (\base::val('select count(ID) from DOST_ADDRESS where ID='.$ID,0,'deco')>0)
+            if (\base::valE('select count(ID) from DOST_ADDRESS where ID='.$ID,0,'deco')>0)
                 $q = 'update DOST_ADDRESS set ADDR="'.$ADDR.'" where ID='.$ID;
             else
                 $q = 'insert into DOST_ADDRESS (ID,ADDR) values ('.$ID.',"'.$ADDR.'")';
                 
-            if (!\base::query($q,'deco'))
-                throw new \Exception(\base::error('deco'));
+            \base::queryE($q,'deco');
                             
             $q = 'insert into DOST_CLIENTS_ADDRESS (ID_DEALER,ID) values ('.$ID_DEALER.','.$ID.')';    
-            if (!\base::query($q,'deco'))
-                throw new \Exception(\base::error('deco'));
+            \base::queryE($q,'deco');
+                
         }
         
     }
@@ -141,7 +138,7 @@ class handler_utils{
         // соотвествие tag полям в базе
         $tags = [
             'addr_dost'=>[
-                'KlientId'      =>'ID_DEALER',
+                'IdKlient'      =>'ID_DEALER',
                 'BossPost'      =>['BOSS_POST','string'],
                 'BossName'      =>['BOSS_NAME','string'],
                 'KindOplata'    =>'KIND_OPLATA',
