@@ -230,6 +230,45 @@ class handler_utils{
                     
         }
         return true;
-    }    
+    }
+
+    /** 
+     * получить список моделей/разделов куда входит товар
+     * @return array('model'=>array(int,int,...),'chapter'=>array(int,int,...))
+     */
+    public static function getModelsIdByID_K_TOVAR_DETAIL($ID_K_TOVAR_DETAIL){
+        $res =  array('model'=>array(),'chapter'=>array());
+        $q = "  select distinct
+                    ID_K_MODEL,
+                    ID_K_CHAPTER 
+                from
+                    ".\WS_CONF::GET('K_MODEL_TOVAR_DETAIL')." mtd
+                    join
+                    ".\WS_CONF::GET('K_MODEL_TOVAR')." mt
+                        on mtd.`ID_K_MODEL_TOVAR` = mt.`ID_K_MODEL_TOVAR`
+                where
+                    mtd.`ID_K_TOVAR_DETAIL` = $ID_K_TOVAR_DETAIL";
+
+        $ds = \base::dsE($q,'deco');
+        $row = array();
+        while(\base::by($ds,$row)){
+            if ($row['ID_K_CHAPTER']>0)
+                $res['chapter'][] = $row['ID_K_CHAPTER'];
+            if ($row['ID_K_MODEL']>0)
+                $res['model'][] = -$row['ID_K_MODEL']; // если значение part_id>0 то оно соотвествует ID_K_CHAPTER, если part_id<0 то - ID_K_MODEL
+        }
+
+        return $res;
+    }
+    /**
+     * очистка буффера исходя из условия
+     * @param $bufferTableName 
+     */
+    public static function clearBufferBy($part,$array_part_id){
+        $bufferTableName = \WS_CONF::GET('cacheTable');
+        $q = "delete from `$bufferTableName` where part = '$part' and part_id in (".implode(',',$array_part_id).")";
+        \base::queryE($q,'deco');
+        
+    }
 }
 ?>
