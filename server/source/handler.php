@@ -183,6 +183,20 @@ class Handler{
             
                 if (!\base::query($q,'exweb'))
                     throw new \Exception(\base::error('exweb'));
+                
+                // очитка буффера, в котором содержится данный товар
+                try{
+                    // получим список моделей или разделов в котором содержится товар
+                    $modelId = handler_utils::getModelsIdByID_K_TOVAR_DETAIL($Rest->Id);
+                    if ( ( count($modelId['model'])>0 ) || ( count($modelId['chapter'])>0 ) ){
+                        // очистим все строки буфера, которые содержат данные модели
+                        handler_utils::clearBufferBy('priceA',array_merge($modelId['model'],$modelId['chapter']));
+                        handler_utils::clearBufferBy('priceB',array_merge($modelId['model'],$modelId['chapter']));
+                    }
+
+                }catch(\Exception $e){
+
+                }
             };
 
             \base::commit('exweb');
