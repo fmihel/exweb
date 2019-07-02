@@ -5,7 +5,12 @@ use exweb\source\{Utils,Result,exweb,Handler};
 //use Complex\Exception;
 
 if(!isset($Application)){
-    require_once '../../wsi/ide/ws/utils/application.php';
+    
+    $file = '../../wsi/ide/ws/utils/application.php';
+    if (file_exists($file))
+        require_once $file;
+    else
+        require_once '../'.$file;
     
     $Application->LOG_ENABLE        = true;
     $Application->LOG_TO_ERROR_LOG  = false; 
