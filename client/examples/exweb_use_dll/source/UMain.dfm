@@ -1,6 +1,6 @@
 object frmMain: TfrmMain
-  Left = 2370
-  Top = 237
+  Left = 982
+  Top = 217
   Caption = 'exweb 2.0'
   ClientHeight = 690
   ClientWidth = 895
@@ -111,6 +111,10 @@ object frmMain: TfrmMain
     object TabSheet4: TTabSheet
       Caption = '2. '#1055#1072#1088#1072#1084#1077#1090#1088#1099
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         887
         383)
@@ -129,12 +133,11 @@ object frmMain: TfrmMain
         Height = 24
         Anchors = [akLeft, akTop, akRight]
         ItemHeight = 16
-        ItemIndex = 1
         TabOrder = 1
-        Text = 'http://windeco/exweb/server/'
+        Text = 'https://windeco.su/remote_access_api/exweb/server/'
         Items.Strings = (
-          'https://windeco.su/exweb'
-          'http://windeco/exweb/server/')
+          'http://windeco/exweb/server/'
+          'https://windeco.su/remote_access_api/exweb/server/index.php')
       end
       object Key: TEdit
         Left = 216
@@ -156,6 +159,10 @@ object frmMain: TfrmMain
     object TabSheet2: TTabSheet
       Caption = '3. send'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PageControl2: TPageControl
         Left = 187
         Top = 0
@@ -166,6 +173,10 @@ object frmMain: TfrmMain
         TabOrder = 0
         object TabSheet5: TTabSheet
           Caption = #1057#1090#1088#1086#1082#1072' '#1082' '#1086#1090#1087#1088#1072#1074#1082#1077':'
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object StrSend: TMemo
             Left = 145
             Top = 0
@@ -307,6 +318,10 @@ object frmMain: TfrmMain
           Font.Style = []
           ImageIndex = 2
           ParentFont = False
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Memo1: TMemo
             Left = 3
             Top = 19
@@ -463,6 +478,10 @@ object frmMain: TfrmMain
     object TabSheet3: TTabSheet
       Caption = '4. recv'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         887
         383)
