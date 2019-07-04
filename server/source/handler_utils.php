@@ -9,6 +9,7 @@ class handler_utils{
     public static function UpdateDealer($id,$email,$enable,$arch,$klientname)
     {
         
+
         $ID_RIGHT  = 0;
         $PASS_DEFAULT = Utils::random_str(5);
 
@@ -17,60 +18,51 @@ class handler_utils{
         
         $count = \base::val('select count(ID_DEALER) from DEALER where ID_DEALER='.$id,0,'deco');
         
-        if ($count == 0){
+        if ($count == 0){ // дилер отсутствует
 
-            // дилер отсутствует
             // создание дилера    
-            $id = \base::insert_uuid('DEALER','ID_DEALER','deco');
-            $q = "update DEALER set NAME='$klientname' , ENABLE=$enable , ARCH=$arch , EMAIL='$email' where ID_DEALER=$id ";
-            //$q = 'insert into DEALER (ID_DEALER,UUID,NAME,DATE_CREATE,ENABLE,LAST_MODIFY,ARCH,EMAIL,ID_USER_MAIN) value (:ID_DEALER,:UUID,:NAME,CURRENT_TIMESTAMP,:ENABLE,CURRENT_TIMESTAMP,:ARCH,:EMAIL,0)';
-            if (!\base::query($q,'deco'))
-                throw new \Exception(\base::error('deco'));
+            $q = "insert into DEALER (ID_DEALER,NAME,DATE_CREATE,ENABLE,LAST_MODIFY,ARCH,EMAIL,ID_USER_MAIN) value ($id,'$klientname',CURRENT_TIMESTAMP,$enable,CURRENT_TIMESTAMP,$arch,'$email',0)";
+            \base::queryE($q,'deco');
 
             // создание торговой точки    
             $id_place = \base::insert_uuid('PLACE','ID_PLACE','deco');
             $q = "update PLACE set CAPTION='no name', ID_DEALER=$id where ID_PLACE=$id_place";
             //$q = 'insert into PLACE (ID_DEALER,UUID,CAPTION,DATE_CREATE,LAST_MODIFY) value (:ID_DEALER,:UUID,:CAPTION,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)';
-            if (!\base::query($q,'deco'))
-                throw new \Exception(\base::error('deco'));
-            
+            \base::queryE($q,'deco');
+
             // установка торговой точки поумолчанию
             $q = "update DEALER set ID_PLACE=$id_place where ID_DEALER=$id";
-            if (!\base::query($q,'deco'))
-                throw new \Exception(\base::error('deco'));
-            
+            \base::queryE($q,'deco');
+
             // создаем пользователя
             $id_user = \base::insert_uuid('USER','ID_USER','deco');
             $q = "update USER set NAME='$email',PASS='$PASS_DEFAULT',ENABLE=1,REL_EMAIL='$email',IS_MAIN=1 where ID_USER=$id_user";
             //$q = 'insert into USER (ID_DEALER,UUID,NAME,DATE_CREATE,LAST_MODIFY,PASS,ENABLE,REL_EMAIL,IS_MAIN) value 
             //                      (:ID_DEALER,:UUID,:NAME,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,:PASS,:ENABLE,:REL_EMAIL,1)';
-            if (!\base::query($q,'deco'))
-                throw new \Exception(\base::error('deco'));
-            
+            \base::queryE($q,'deco');
+
             // устанавливаем права пользователя      
             $q = "insert into USER_RIGHT_PLACE (ID_USER,ID_RIGHT,ID_PLACE) value ($id_user,$ID_RIGHT,$id_place)";
-            if (!\base::query($q,'deco'))
-                throw new \Exception(\base::error('deco'));
+            \base::queryE($q,'deco');
+                
 
             // указываем созданного пользователя как главного
             $q = 'update DEALER set ID_USER_MAIN ='.$id_user.' where ID_DEALER='.$id;
-            if (!\base::query($q,'deco'))
-                throw new \Exception(\base::error('deco'));
-                                        
+            \base::queryE($q,'deco');
+
             
         };//count = 0;
 
         $q = "update DEALER set NAME='$klientname',EMAIL='$email',ENABLE=$enable,ARCH=$arch where ID_DEALER = $id";
-        if (!\base::query($q,'deco'))
-            throw new \Exception(\base::error('deco'));
-            
+        \base::queryE($q,'deco');
+
         // изменяем главного клиента если он есть
         $id_user = \base::val('select ID_USER_MAIN from DEALER where ID_DEALER = '.$id,0,'deco');
         if ($id_user!=0){
             if(\base::val('select BY_USER_MODIFY from USER where ID_USER = '.$id_user,0,'deco') != 1){
                 $q = "update USER set REL_EMAIL = '$email' where ID_USER=$id_user";
-                if (!\base::query($q,'deco'))
-                    throw new \Exception(\base::error('deco'));
+                \base::queryE($q,'deco');
+                    
             };
 
             if (\base::val('select EMAIL_LOGIN from USER where ID_USER = '.$id_user,0,'deco') == ''){
@@ -80,8 +72,7 @@ class handler_utils{
                         $email_login = $email.''.$id;
 
                     $q = "update USER set EMAIL_LOGIN='$email_login' where ID_USER=$id_user";
-                    if (!\base::query($q,'deco'))
-                        throw new \Exception(\base::error('deco'));
+                    \base::queryE($q,'deco');
             };
         };
     }

@@ -2,7 +2,6 @@
 
 namespace exweb;
 use exweb\source\{Utils,Result,exweb,Handler};
-//use Complex\Exception;
 
 if(!isset($Application)){
     
@@ -18,6 +17,12 @@ if(!isset($Application)){
     require_once UNIT('ws','ws.php');
 };
 
+if (\WS_CONF::GET('enable',0)==0){
+    echo '{res:0}';
+    exit;
+};
+    
+
 define('SOURCE_ROOT',dirname(__FILE__).'/source/');
 require SOURCE_ROOT.'utils.php';
 require SOURCE_ROOT.'result.php';
@@ -29,7 +34,7 @@ require SOURCE_ROOT.'handler.php';
 
 //------------------------------------------------------------------------------------------
 // проверка наличия ключа авторизации
-Result::autorize();
+//Result::autorize();
 //------------------------------------------------------------------------------------------
 
 if (Utils::requestContains('event')){
@@ -374,7 +379,11 @@ if (Utils::requestContains('event')){
 
         };break;
         //----------------------------------------------------------------------------------
-        
+        case "handler_run":{
+            _LOGF('handler_run','event',__FILE__,__LINE__);
+    
+            Handler::run();    
+        };break;
         default:
             Result::error('no data');
 
