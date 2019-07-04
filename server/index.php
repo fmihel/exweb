@@ -266,7 +266,7 @@ if (Utils::requestContains('event')){
                         
                         $fields=[];
                         foreach($info as $v){
-                            $fields[] =['name'=>$v->name,'type'=>$v->stype,'length'=>$v->max_length];
+                            $fields[] =['name'=>$v->name,'type'=>$v->stype,'length'=>($v->max_length<=0?1:$v->max_length)];
                         }
                         $rows = \base::rows($ds);
                         Result::ok(['fields'=>$fields,'rows'=>$rows]);
