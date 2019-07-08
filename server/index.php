@@ -162,9 +162,15 @@ if (Utils::requestContains('event')){
             $q = "select * from REST_API where STATE='ready' and OWNER='server' order by ID_REST_API";
             $row = Result::row($q);
             
-            if ($row===[])
+            if ($row===[]){
+                
+                // ------------------------
+                // запуск обработчиков для сообщений
+                Handler::run();
+                // ------------------------
+                
                 Result::ok(['id'=>-1]);
-            else
+            }else
                 $q = 'select count(*) count from REST_API_DATA where ID_REST_API = '.$row['ID_REST_API']; 
                 $count_blocks = Result::val($q,'count');
 

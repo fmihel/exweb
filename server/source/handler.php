@@ -107,7 +107,7 @@ class Handler{
      */
     static private function changeClientData($xml,$msg){
 
-        $ID_DEALER  =   (int)$xml->KlientInfo->IdKlient;
+        $ID_DEALER  =   (int)$xml->IdKlient;
         $Email      =   (string)$xml->KlientInfo->DecoRMail;
         $Enable     =   (int)$xml->KlientInfo->RemoteAccess;
         $Arch       =   (int)$xml->KlientInfo->Arch;

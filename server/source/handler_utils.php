@@ -6,9 +6,7 @@ namespace exweb\source;
 class handler_utils{
 
 
-    public static function UpdateDealer($id,$email,$enable,$arch,$klientname)
-    {
-        
+    public static function UpdateDealer($id,$email,$enable,$arch,$klientname){
 
         $ID_RIGHT  = 0;
         $PASS_DEFAULT = Utils::random_str(5);
@@ -16,8 +14,8 @@ class handler_utils{
         if ($enable ==='') 
             $enable = 0;
         
-        $count = \base::val('select count(ID_DEALER) from DEALER where ID_DEALER='.$id,0,'deco');
-        
+        $count = \base::valE('select count(ID_DEALER) from DEALER where ID_DEALER='.$id,0,'deco');
+
         if ($count == 0){ // дилер отсутствует
 
             // создание дилера    
@@ -25,7 +23,7 @@ class handler_utils{
             \base::queryE($q,'deco');
 
             // создание торговой точки    
-            $id_place = \base::insert_uuid('PLACE','ID_PLACE','deco');
+            $id_place = \base::insert_uuidE('PLACE','ID_PLACE','deco');
             $q = "update PLACE set CAPTION='no name', ID_DEALER=$id where ID_PLACE=$id_place";
             //$q = 'insert into PLACE (ID_DEALER,UUID,CAPTION,DATE_CREATE,LAST_MODIFY) value (:ID_DEALER,:UUID,:CAPTION,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)';
             \base::queryE($q,'deco');
@@ -35,8 +33,8 @@ class handler_utils{
             \base::queryE($q,'deco');
 
             // создаем пользователя
-            $id_user = \base::insert_uuid('USER','ID_USER','deco');
-            $q = "update USER set NAME='$email',PASS='$PASS_DEFAULT',ENABLE=1,REL_EMAIL='$email',IS_MAIN=1 where ID_USER=$id_user";
+            $id_user = \base::insert_uuidE('USER','ID_USER','deco');
+            $q = "update USER set ID_DEALER=$id, NAME='$email',PASS='$PASS_DEFAULT',ENABLE=1,REL_EMAIL='$email',IS_MAIN=1 where ID_USER=$id_user";
             //$q = 'insert into USER (ID_DEALER,UUID,NAME,DATE_CREATE,LAST_MODIFY,PASS,ENABLE,REL_EMAIL,IS_MAIN) value 
             //                      (:ID_DEALER,:UUID,:NAME,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,:PASS,:ENABLE,:REL_EMAIL,1)';
             \base::queryE($q,'deco');
@@ -158,8 +156,8 @@ class handler_utils{
     /**
      * Проверка сущесвования остака по RetsId
      */
-    public static function ExistsRest($RestId,&$OutRest/*,$DsRest*/)
-    {
+    public static function ExistsRest($RestId,&$OutRest/*,$DsRest*/){
+        
         $q = 'select count(*) cnt ,Rest from QID_REST where TOVAR_ID ='.$RestId;  
         $row = \base::row($q,'exweb');
         if (!$row)
