@@ -2,7 +2,6 @@
 
 namespace exweb;
 use exweb\source\{Utils,Result,exweb,Handler};
-//use Complex\Exception;
 
 if(!isset($Application)){
     
@@ -18,6 +17,12 @@ if(!isset($Application)){
     require_once UNIT('ws','ws.php');
 };
 
+if (\WS_CONF::GET('enable',0)==0){
+    echo '{res:0}';
+    exit;
+};
+    
+
 define('SOURCE_ROOT',dirname(__FILE__).'/source/');
 require SOURCE_ROOT.'utils.php';
 require SOURCE_ROOT.'result.php';
@@ -29,7 +34,7 @@ require SOURCE_ROOT.'handler.php';
 
 //------------------------------------------------------------------------------------------
 // проверка наличия ключа авторизации
-Result::autorize();
+//Result::autorize();
 //------------------------------------------------------------------------------------------
 
 if (Utils::requestContains('event')){
@@ -157,9 +162,15 @@ if (Utils::requestContains('event')){
             $q = "select * from REST_API where STATE='ready' and OWNER='server' order by ID_REST_API";
             $row = Result::row($q);
             
-            if ($row===[])
+            if ($row===[]){
+                
+                // ------------------------
+                // запуск обработчиков для сообщений
+                Handler::run();
+                // ------------------------
+                
                 Result::ok(['id'=>-1]);
-            else
+            }else
                 $q = 'select count(*) count from REST_API_DATA where ID_REST_API = '.$row['ID_REST_API']; 
                 $count_blocks = Result::val($q,'count');
 
@@ -266,7 +277,7 @@ if (Utils::requestContains('event')){
                         
                         $fields=[];
                         foreach($info as $v){
-                            $fields[] =['name'=>$v->name,'type'=>$v->stype,'length'=>$v->max_length];
+                            $fields[] =['name'=>$v->name,'type'=>$v->stype,'length'=>($v->max_length<=0?1:$v->max_length)];
                         }
                         $rows = \base::rows($ds);
                         Result::ok(['fields'=>$fields,'rows'=>$rows]);
@@ -374,7 +385,11 @@ if (Utils::requestContains('event')){
 
         };break;
         //----------------------------------------------------------------------------------
-        
+        case "handler_run":{
+            _LOGF('handler_run','event',__FILE__,__LINE__);
+    
+            Handler::run();    
+        };break;
         default:
             Result::error('no data');
 

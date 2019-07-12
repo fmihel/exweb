@@ -19,7 +19,7 @@ function tagToFields($name,$xml){
 	// соотвествие tag полям в базе
 	$tags = [
 		'addr_dost'=>[
-			'KlientId'      =>'ID_DEALER',
+			'IdKlient'      =>'ID_DEALER',
 			'BossPost'      =>['BOSS_POST','string'],
 			'BossName'      =>['BOSS_NAME','string'],
 			'KindOplata'    =>'KIND_OPLATA',

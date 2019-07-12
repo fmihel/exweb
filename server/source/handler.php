@@ -107,11 +107,11 @@ class Handler{
      */
     static private function changeClientData($xml,$msg){
 
-        $ID_DEALER  =   $xml->KlientInfo->KlientId;
-        $Email      =   $xml->KlientInfo->DecoRMail;
-        $Enable     =   $xml->KlientInfo->RemoteAccess;
-        $Arch       =   $xml->KlientInfo->Arch;
-        $Name       =   $xml->KlientInfo->KlientName;
+        $ID_DEALER  =   (int)$xml->IdKlient;
+        $Email      =   (string)$xml->KlientInfo->DecoRMail;
+        $Enable     =   (int)$xml->KlientInfo->RemoteAccess;
+        $Arch       =   (int)$xml->KlientInfo->Arch;
+        $Name       =   (string)$xml->KlientInfo->KlientName;
 
         handler_utils::UpdateDealer($ID_DEALER,$Email,$Enable,$Arch,$Name);
 
@@ -128,7 +128,7 @@ class Handler{
      * 'KIND'=>2,'ACTION'=>4
      */
     static private function requestAutorize($xml,$msg){
-        $id_client = $xml->KlientId;
+        $id_client = $xml->IdKlient;
         $send_type = ($xml->DestKind!=2?1:2);
         handler_utils::RequestAutorizeInfo($id_client,$send_type);
 

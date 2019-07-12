@@ -84,7 +84,7 @@ class exweb {
     }
 
     public static function setAsError(int $id,$msg=''){
-        $msg = str_replace(["'"],['"'],$msg);
+        $msg = str_replace(["'"],['"'],\base::real_escape($msg,'exweb'));
         $q = "update REST_API set STATE='error',ERROR_MSG='$msg' where ID_REST_API=$id";
         if (!\base::query($q,'exweb')) 
             throw new \Exception("error in setAsError($id)");
