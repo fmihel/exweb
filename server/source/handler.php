@@ -50,7 +50,7 @@ class Handler{
             return;
 
         try{
-            self::clear('completed');
+            exweb::clear('completed');
 
             $xml = utils::strToXml($msg['str']);
             if ($xml===false)
