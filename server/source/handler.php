@@ -49,7 +49,8 @@ class Handler{
             return;
 
         try{
-            
+            self::clear('completed');
+
             $xml = utils::strToXml($msg['str']);
             if ($xml===false)
                 throw new \Exception('xml is not valid , id_rest_api='.$msg['id']);
