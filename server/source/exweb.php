@@ -90,7 +90,64 @@ class exweb {
             throw new \Exception("error in setAsError($id)");
             
     }
-    
+    /** очистка отработанных сообщений
+     * Ex: exweb::clear("completed");
+     * 
+     * Алгоритм запускается в определенный интервал (по уолчанию с 09:00 до 10:00)
+     * можно переопределить в ws_confg.php.
+     * Очищаются все записи указанного state, на holdDay от сегодня.
+     * return: undfined | Exception
+     */
+    public static function clear($state=false,$o=[]){
+        if ($state == false)
+            return;
+
+        $a = \ARR::union($o,[
+            'holdDay' => \WS_CONF::GET('holdDay',2),  // кол-во дней для которых сохраненяем данные, все что старше удаляем
+            'start'=>\WS_CONF::GET('clear_start_time','09:00'),// время наала работы
+            'stop'=>\WS_CONF::GET('clear_stop_time','10:00'),// время конца работы работы
+
+        ]);
+
+        // алгоритм запскаем только в определенный интервал
+        $start = strtotime($a['start']);
+        $stop  = strtotime($a['stop']);
+        $current = time();
+        
+        if (($stop-$current<0) || ($current-$start<0) )
+            return;
+        // ------------------------------------------------
+
+        // поулчаем все записи к удалению
+        $q = 'select ID_REST_API from `REST_API` where (`STATE` = "'.$state.'") and ((TO_DAYS(NOW()) - TO_DAYS(`CREATE_DATE`))>'.$a['holdDay'].')';
+        $rest_api = \base::dsE($q,'exweb');
+        if(\base::isEmpty($rest_api))
+            return;
+
+        \base::startTransaction('exweb');
+        try{
+            $row = [];
+
+            while(\base::by($rest_api,$row)){
+                
+                $q = 'delete from `REST_API_DATA` where `ID_REST_API` = '.$row['ID_REST_API'];
+                \base::queryE($q,'exweb');
+
+            };
+            $q = 'delete from `REST_API` where (`STATE` = "'.$state.'") and ((TO_DAYS(NOW()) - TO_DAYS(`CREATE_DATE`))>'.$a['holdDay'].')';
+            \base::queryE($q,'exweb');
+
+            \base::commit('exweb');
+
+        }catch(\Exception $e){
+
+            \base::rollback('exweb');
+            throw new \Exception($e->getMessage());
+
+        }
+
+
+    }
 }
 
 ?>
