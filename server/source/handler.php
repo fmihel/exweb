@@ -1,5 +1,6 @@
 <?php
 namespace exweb\source;
+require_once __DIR__.'/handler_const.php';
 require_once __DIR__.'/handler_utils.php';
 
 define('KIND_ORDER',1);
@@ -53,6 +54,8 @@ class Handler{
             $xml = utils::strToXml($msg['str']);
             if ($xml===false)
                 throw new \Exception('xml is not valid , id_rest_api='.$msg['id']);
+            
+            self::decrypt($xml,$msg['id']);
             
             // передача настроек удаленного доступа
             if ($have = self::isAction('changeClientData',$xml))     
@@ -265,6 +268,26 @@ class Handler{
             throw new \Exception($e->getMessage());
         }
     
+    }
+    /**
+     * расшифровка xml и обновление информации в REST_API
+    */ 
+    static private function decrypt($xml,$id_rest_api){
+        $attr = $xml->attributes();
+        $action  = $attr['Action'];
+        $kind  = $attr['Kind'];
+        $info = handler_utils::xmlInfo($kind,$action);
+        
+        $replyId        = isset($attr['ReplyId'])?$attr['ReplyId']:false;
+        $replyIdText = ( ($info) && ($replyId) && (isset($info['REPLYID'])) )?$info['REPLYID'][$replyId]:'';
+        
+        
+
+        if ($info !== false){
+            
+            $q = "update `REST_API` set `DECRYPT` = '".$info['NOTE']."' where `ID_REST_API` = $id_rest_api";
+            \base::queryE($q,'exweb');
+        }
     }
 
 }

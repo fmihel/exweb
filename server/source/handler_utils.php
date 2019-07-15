@@ -1,9 +1,11 @@
 <?php
 namespace exweb\source;
+
+
 /**
  * вспомогательные ф-ции для handler
  */
-class handler_utils{
+  class handler_utils{
 
 
     public static function UpdateDealer($id,$email,$enable,$arch,$klientname){
@@ -254,10 +256,26 @@ class handler_utils{
      * @param $bufferTableName 
      */
     public static function clearBufferBy($part,$array_part_id){
+        
         $bufferTableName = \WS_CONF::GET('cacheTable');
         $q = "delete from `$bufferTableName` where part = '$part' and part_id in (".implode(',',$array_part_id).")";
         \base::queryE($q,'deco');
         
     }
+    
+    public static function xmlInfo($kind,$action){
+        global $XML_INFO;
+        
+    
+        foreach($XML_INFO as $out){
+            
+            if ( ($out['KIND'] == $kind) && ($out['ACTION'] == $action) )
+                return $out;
+                
+        };
+        
+        return false;
+    }
+    
 }
 ?>
