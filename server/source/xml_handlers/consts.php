@@ -1,7 +1,7 @@
 <?php
-namespace exweb\source;
+namespace exweb\source\xml_handlers;
 
-$XML_INFO = array(
+define('XML_INFO',[
     array('KIND'=>1,'ACTION'=>1,'NOTE'=>'Создание заказа'),
     array('KIND'=>1,'ACTION'=>2,'NOTE'=>'Информация о принятии заказа','REPLYID'=>array('1'=>'Успешно','2'=>'Дублирование','3'=>'Нет товаров','4'=>'Неизвестный отказ')),
     array('KIND'=>1,'ACTION'=>3,'NOTE'=>'Запрос состояния'),
@@ -46,7 +46,38 @@ $XML_INFO = array(
     array('KIND'=>6,'ACTION'=>2,'NOTE'=>'Передача данных по клиентам'),
     array('KIND'=>7,'ACTION'=>1,'NOTE'=>'Передача списка пользователей'),
     array('KIND'=>8,'ACTION'=>1,'NOTE'=>'Передача информации по рулонам')
-);
+]);
+
+define('KIND_ORDER',1);
+define('KIND_CLIENT',2);
+define('KIND_OST',3);
+define('KIND_DISCONT',5);
+define('KIND_OST_TKANI',8);
+
+define('ACT_ORDER_SEND',1);
+define('ACT_ORDER_ACCEPT',2);
+define('ACT_ORDER_GET_STATE',3);
+define('ACT_ORDER_STATE',4);
+define('ACT_ORDER_CANCEL',5);
+define('ACT_ORDER_CANCEL_RESULT',6);
+
+define('ACT_CLIENT_DATA',1);
+define('ACT_CLIENT_GET_ADDR_DOST',2);
+define('ACT_CLIENT_ADDR_DOST',3);
+
+
+define('ACT_OST_SEND_OST',1);
+define('ACT_OST_GET_OST',2);
+define('ACT_OST_OST',3);
+
+define('ACT_DISCONT_INFO_RECV',1);
+define('ACT_DISCONT_INFO_SEND',2);
+define('ACT_DISCONT_CHANGE',5);
+define('ACT_DISCONT_REGISTERED',3);
+define('ACT_DISCONT_ORDER_TO_CARD',6);
+
+define('DELIVERY_NULL_DATE_IN_SELECT','30.12.1990');
+define('DELIVERY_NULL_DATE_TO_UPDATE','1990-12-30'); // update FDATA =  DATE_FORMAT('1990-12-30','%Y-%m-%d');
 
 
 ?>
