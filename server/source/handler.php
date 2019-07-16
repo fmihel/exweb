@@ -1,6 +1,6 @@
 <?php
 namespace exweb\source;
-use exweb\source\xml_handlers\{Handlers,Utils};
+use exweb\source\xml_handlers\{Handlers,Utils as UT};
 require_once __DIR__.'/xml_handlers/load.php';
 
 
@@ -45,7 +45,7 @@ class Handler{
         $attr = $xml->attributes();
         $action  = $attr['Action'];
         $kind  = $attr['Kind'];
-        $info = Utils::xmlInfo($kind,$action);
+        $info = UT::xmlInfo($kind,$action);
         
         $replyId        = isset($attr['ReplyId'])?$attr['ReplyId']:false;
         $replyIdText = ( ($info) && ($replyId) && (isset($info['REPLYID'])) )?$info['REPLYID'][$replyId]:'';
