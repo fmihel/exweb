@@ -1,7 +1,7 @@
 <?php
 
 namespace exweb;
-use exweb\source\{Utils,Result,exweb,Handler};
+use exweb\source\{Utils,Result,exweb};
 
 if(!isset($Application)){
     
@@ -24,11 +24,14 @@ if (\WS_CONF::GET('enable',0)==0){
     
 
 define('SOURCE_ROOT',dirname(__FILE__).'/source/');
+require SOURCE_ROOT.'events.php';
 require SOURCE_ROOT.'utils.php';
 require SOURCE_ROOT.'result.php';
 require SOURCE_ROOT.'connect.php';
 require SOURCE_ROOT.'stream.php';
 require SOURCE_ROOT.'exweb.php';
+
+// дополнительный модуль, является внешним и в обмене непосредственно не учавствует
 require SOURCE_ROOT.'handler.php';
 
 
@@ -148,7 +151,7 @@ if (Utils::requestContains('event')){
 
             // ------------------------
             // запуск обработчиков для сообщений
-            Handler::run();
+            Events::do('onHandler');
             // ------------------------
 
             Result::ok();
@@ -166,7 +169,7 @@ if (Utils::requestContains('event')){
                 
                 // ------------------------
                 // запуск обработчиков для сообщений
-                Handler::run();
+                Events::do('onHandler');
                 // ------------------------
                 
                 Result::ok(['id'=>-1]);
@@ -387,8 +390,7 @@ if (Utils::requestContains('event')){
         //----------------------------------------------------------------------------------
         case "handler_run":{
             _LOGF('handler_run','event',__FILE__,__LINE__);
-    
-            Handler::run();    
+            Events::do('onHandler');
         };break;
         default:
             Result::error('no data');

@@ -1,6 +1,6 @@
 <?php
 namespace exweb\source\xml_handlers;
-
+use exweb\source\{Utils as UP};
 class Utils{
     /**
      * Проверка сущесвования остака по RetsId
@@ -109,5 +109,34 @@ class Utils{
         
         return false;
     }
+
+    /**
+     * расшифровка xml и обновление информации в REST_API
+     * $xml - undefined | simple_xml | string
+    */ 
+    static public function decrypt($id_rest_api,$xml=false){
+
+        if ($xml===false)
+            $xml  = \base::valE("select STR from REST_API where ID_REST_API=$id_rest_api",'','exweb');
+
+        if (gettype($xml)==='string')
+            $xml = UP::strToXml($xml);
+
+        $attr       = $xml->attributes();
+        $action     = $attr['Action'];
+        $kind       = $attr['Kind'];
+        $info       = self::xmlInfo($kind,$action);
+        
+        //$replyId        = isset($attr['ReplyId'])?$attr['ReplyId']:false;
+        //$replyIdText = ( ($info) && ($replyId) && (isset($info['REPLYID'])) )?$info['REPLYID'][$replyId]:'';
+
+        if ($info !== false){
+            
+            $q = "update `REST_API` set `DECRYPT` = '".$info['NOTE']."' where `ID_REST_API` = $id_rest_api";
+            \base::queryE($q,'exweb');
+
+        }
+    }
+
 }
 ?>

@@ -1,6 +1,6 @@
 <?php
 namespace exweb\source;
-use exweb\source\xml_handlers\{Handlers,Utils as UT};
+use exweb\source\xml_handlers\{Handlers,Utils as UT,Events};
 require_once __DIR__.'/xml_handlers/load.php';
 
 
@@ -13,7 +13,7 @@ class Handler{
     /** 
      * запуск цикла обработки
      */
-    static public function run(){
+    static public function onHandler(){
         $msg = exweb::recv(true);
 
         if ($msg===false)
@@ -26,11 +26,9 @@ class Handler{
             if ($xml===false)
                 throw new \Exception('xml is not valid , id_rest_api='.$msg['id']);
             
-            self::decrypt($xml,$msg['id']);
-            
             Handlers::run($xml);
 
-    
+            self::decrypt();
         }catch(\Exception $e){
             $error_msg = $e->getMessage();
             exweb::setAsError($msg['id'],$error_msg);
@@ -38,27 +36,13 @@ class Handler{
         }
     }
 
-    /**
-     * расшифровка xml и обновление информации в REST_API
-    */ 
-    static private function decrypt($xml,$id_rest_api){
-        $attr = $xml->attributes();
-        $action  = $attr['Action'];
-        $kind  = $attr['Kind'];
-        $info = UT::xmlInfo($kind,$action);
-        
-        $replyId        = isset($attr['ReplyId'])?$attr['ReplyId']:false;
-        $replyIdText = ( ($info) && ($replyId) && (isset($info['REPLYID'])) )?$info['REPLYID'][$replyId]:'';
-        
-        
-
-        if ($info !== false){
-            
-            $q = "update `REST_API` set `DECRYPT` = '".$info['NOTE']."' where `ID_REST_API` = $id_rest_api";
-            \base::queryE($q,'exweb');
-        }
+    static public function onCompleted($a){
+            UT::decrypt($a['id_rest_api']);
     }
-
 }
+
+Events::add('onHandler','Handler::onHandler');
+Events::add('onComplete','Handler::onCompleted');
+
 
 ?>

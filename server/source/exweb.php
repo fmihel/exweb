@@ -78,7 +78,11 @@ class exweb {
     
     public static function completed(int $id){
         $q = "update REST_API set STATE='completed' where ID_REST_API=$id";
-        return \base::query($q,'exweb');
+        if (\base::query($q,'exweb')){
+            Events::do('onCompleted',['id_rest_api'=>$id]);
+            return true;
+        }
+        return false;
     }
 
     public static function setAsError(int $id,$msg=''){
