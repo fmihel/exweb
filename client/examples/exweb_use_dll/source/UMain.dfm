@@ -1,8 +1,8 @@
 object frmMain: TfrmMain
-  Left = 982
-  Top = 217
+  Left = 2529
+  Top = 185
   Caption = 'exweb 2.0'
-  ClientHeight = 690
+  ClientHeight = 678
   ClientWidth = 895
   Color = clBtnFace
   Font.Charset = RUSSIAN_CHARSET
@@ -111,10 +111,6 @@ object frmMain: TfrmMain
     object TabSheet4: TTabSheet
       Caption = '2. '#1055#1072#1088#1072#1084#1077#1090#1088#1099
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         887
         383)
@@ -133,8 +129,9 @@ object frmMain: TfrmMain
         Height = 24
         Anchors = [akLeft, akTop, akRight]
         ItemHeight = 16
+        ItemIndex = 0
         TabOrder = 1
-        Text = 'https://windeco.su/remote_access_api/exweb/server/'
+        Text = 'http://windeco/exweb/server/'
         Items.Strings = (
           'http://windeco/exweb/server/'
           'https://windeco.su/remote_access_api/exweb/server/index.php')
@@ -159,24 +156,16 @@ object frmMain: TfrmMain
     object TabSheet2: TTabSheet
       Caption = '3. send'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PageControl2: TPageControl
         Left = 187
         Top = 0
         Width = 700
         Height = 383
-        ActivePage = TabSheet5
+        ActivePage = TabSheet6
         Align = alClient
         TabOrder = 0
         object TabSheet5: TTabSheet
           Caption = #1057#1090#1088#1086#1082#1072' '#1082' '#1086#1090#1087#1088#1072#1074#1082#1077':'
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object StrSend: TMemo
             Left = 145
             Top = 0
@@ -318,10 +307,6 @@ object frmMain: TfrmMain
           Font.Style = []
           ImageIndex = 2
           ParentFont = False
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object Memo1: TMemo
             Left = 3
             Top = 19
@@ -335,6 +320,7 @@ object frmMain: TfrmMain
             Lines.Strings = (
               '<?xml version="1.0" encoding="unicode"?>'#9
               '<Msg Kind="3" Action="1" Ver='#8221'1">'#9
+              '<IdKlient>21039</IdKlient>'
               '<List>'#9
               '<Tovar Id=" 33197" Ost="2" Kind='#8221'0'#8221' Deliv='#8221'01.03.2011'#8221'/>  '#9
               '<Tovar Id=" 33193" Ost="0" Kind='#8221'1'#8221' Deliv='#8221'01.03.2011'#8221'/>'#9
@@ -357,15 +343,16 @@ object frmMain: TfrmMain
             Lines.Strings = (
               '<?xml version="1.0" encoding="unicode" Ver="1"?>'
               '<Msg Kind="2" Action="1" >'
-              #9'<KlientInfo>'
-              #9#9'<AdresatKind>3</AdresatKind>'
-              #9#9'<KlientId>175</KlientId>'
-              '                 '#9'<KlientName>ccccccc</KlientName>'
-              #9#9'<RemoteAccess>1</RemoteAccess>'
-              #9#9'<EMail>123@mail.ru</EMail>'
-              #9#9'< DecoRMail>123@mail.ru</DecoRMail >'
-              #9#9'<Arch>0</Arch>'
-              #9'</KlientInfo>'
+              '  <IdKlient>21039</IdKlient>'
+              '  <KlientInfo>'
+              '    <AdresatKind>3</AdresatKind>'
+              '    <IdKlient>21039</IdKlient>'
+              '    <KlientName>ccccccc</KlientName>'
+              '    <RemoteAccess>1</RemoteAccess>'
+              '    <EMail>123@mail.ru</EMail>'
+              '    <DecoRMail>123@mail.ru</DecoRMail>'
+              '     <Arch>0</Arch>'
+              '</KlientInfo>'
               '</Msg>')
             ParentFont = False
             TabOrder = 1
@@ -411,6 +398,7 @@ object frmMain: TfrmMain
             Lines.Strings = (
               '<?xml version="1.0" encoding="unicode"?>'#9
               '<Msg Kind="3" Action="1" Ver="1">'#9
+              '<IdKlient>21039</IdKlient>'
               ' <List>'#9
               '<Tovar Id=" 33197" Ost="2" Kind="0" Deliv="01.03.2011"/>  '#9
               '<Tovar Id=" 33198" Ost="5" Kind="1" Deliv="01.03.2011"/>  '#9
@@ -428,6 +416,7 @@ object frmMain: TfrmMain
             Lines.Strings = (
               '<?xml version="1.0" encoding="unicode"?>'
               '<Msg Kind="8" Action="1">'
+              '<IdKlient>21039</IdKlient>'
               ' <TxProductsList>'
               '  <TxProduct IdTextile="15595" IdTxColor="27332" Ostatok="0">'
               
@@ -448,8 +437,8 @@ object frmMain: TfrmMain
               '<?xml version="1.0" encoding="unicode" '
               'Ver='#8221'1'#8221'?>'
               '<Msg Kind="2" Action="4" >'
-              #9'<KlientId>175</KlientId>'
-              #9'<DestKind>1</ DestKind >'
+              '<IdKlient>21039</IdKlient>'#9
+              '<DestKind>1</ DestKind >'
               '</Msg>')
             TabOrder = 5
           end
@@ -478,10 +467,6 @@ object frmMain: TfrmMain
     object TabSheet3: TTabSheet
       Caption = '4. recv'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         887
         383)
@@ -583,13 +568,14 @@ object frmMain: TfrmMain
     Left = 0
     Top = 427
     Width = 895
-    Height = 263
+    Height = 251
     Align = alClient
     Color = 15790320
     Lines.Strings = (
       'MemoLog')
     ScrollBars = ssBoth
     TabOrder = 1
+    ExplicitHeight = 263
   end
   object ActionList1: TActionList
     OnUpdate = ActionList1Update

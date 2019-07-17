@@ -14,6 +14,6 @@ require_once $dir_handlers.'/k3_a1_KarnizOstatki.php';
 require_once $dir_handlers.'/k2_a4_RequestAutorize.php';
 require_once $dir_handlers.'/k2_a3_AddrDost.php';
 require_once $dir_handlers.'/k2_a1_ChangeClientData.php';
-require_once $dir_handlers.'/k1_a2_PredvaritPrinyt.php';
+//require_once $dir_handlers.'/k1_a2_PredvaritPrinyt.php';
 
 ?>

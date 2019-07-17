@@ -1,6 +1,6 @@
 <?php
 namespace exweb\source;
-use exweb\source\xml_handlers\{Handlers,Utils as UT,Events};
+use exweb\source\xml_handlers\{Handlers,Utils as UT};
 require_once __DIR__.'/xml_handlers/load.php';
 
 
@@ -28,7 +28,6 @@ class Handler{
             
             Handlers::run($xml);
 
-            self::decrypt();
         }catch(\Exception $e){
             $error_msg = $e->getMessage();
             exweb::setAsError($msg['id'],$error_msg);
@@ -41,8 +40,8 @@ class Handler{
     }
 }
 
-Events::add('onHandler','Handler::onHandler');
-Events::add('onComplete','Handler::onCompleted');
+Events::add('onHandler',__NAMESPACE__.'\Handler::onHandler');
+Events::add('onCompleted',__NAMESPACE__.'\Handler::onCompleted');
 
 
 ?>

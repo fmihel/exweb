@@ -10,15 +10,14 @@ class Events{
      * 
      * Ex: если просто ф-ция
      * function mm(){..}
-     * Events::add('onComplete','mm');
-     * Events::add('onComplete',mm);
+     * Events::add('onComplete',__NAMESPACE__.'\mm');
      * 
      * Ex: если метод
      * $t->func();
      * Events::add('onComplete',[$t,'func']);
      *  
      * t::ff();
-     * Events::add('onComplete','t::ff');
+     * Events::add('onComplete',__NAMESPACE__.'\t::ff');
      */
     public static function add(string $event,$func){
         self::$list[$event][] = $func;

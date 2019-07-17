@@ -1,7 +1,7 @@
 <?php
 
 namespace exweb;
-use exweb\source\{Utils,Result,exweb};
+use exweb\source\{Utils,Result,exweb,Events};
 
 if(!isset($Application)){
     
