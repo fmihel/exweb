@@ -144,8 +144,12 @@ class Utils{
         if ($xml===false)
             $xml  = \base::valE("select STR from REST_API where ID_REST_API=$id_rest_api",'','exweb');
 
-        if (gettype($xml)==='string')
+        if (gettype($xml)==='string'){
+            $xml = \STR::to_utf($xml);
             $xml = UP::strToXml($xml);
+        }    
+        if (!$xml)
+            throw new \Exception('decrypt: xml is null');
 
         $attr       = $xml->attributes();
         $action     = $attr['Action'];
