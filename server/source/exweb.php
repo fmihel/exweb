@@ -56,21 +56,28 @@ class exweb {
     }
     /**
      * отправка сообщения клиенту(в офис)
+     * будет сформировано событие
+     * onReady
      */
     public static function send(string $str,$data = null){
+        $id  = -1;
         
-        // создаем строку в таблице REST_API
-        $id = \base::insert_uuid('REST_API','ID_REST_API','exweb');
+        try{
+            
+            // создаем строку в таблице REST_API
+            $id = \base::insert_uuid('REST_API','ID_REST_API','exweb');
+    
+            if ($id===false)
+                Result::error('Error create row in REST_API');
+            
+            $q = "update REST_API set OWNER='server', STATE='init', STR = '".$str."', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$id;
+            Result::query($q);
+    
+            exweb::state(['id'=>$id,'state'=>'ready']);
 
-        if ($id===false)
-            Result::error('Error create row in REST_API');
-        
-        $q = "update REST_API set OWNER='server', STATE='init', STR = '".$str."', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$id;
-        Result::query($q);
-
-        $q = "update REST_API set STATE='ready', LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=".$id;
-        Result::query($q);
-
+        }catch(\Exception $e){
+            Result::error($e->getMessage());
+        }
         return $id;
     }
     /**

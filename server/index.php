@@ -149,6 +149,7 @@ if (Utils::requestContains('event')){
             $q = "update REST_API set STATE='ready' , LAST_UPDATE=CURRENT_TIMESTAMP where STATE<>'completed' and ID_REST_API=".$_REQUEST['id'];            
             Result::query($q);    
 
+            Events::do('onReady',['id_rest_api'=>$_REQUEST['id']]);
             // ------------------------
             // запуск обработчиков для сообщений
             Events::do('onHandler');

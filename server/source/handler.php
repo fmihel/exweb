@@ -9,7 +9,12 @@ require_once __DIR__.'/xml_handlers/load.php';
  * запускается по событию ready (см. index.php)
  */
 class Handler{
-    
+
+    static public function onReady($a){
+        // расшифруем название xml
+        UT::decrypt($a['id_rest_api']);
+    }
+
     /** 
      * запуск цикла обработки
      */
@@ -26,15 +31,12 @@ class Handler{
 
             $xml = utils::strToXml($msg['str']);
 
-            // расшифруем название xml
-            UT::decrypt($msg['id'],$xml);
-
             if ($xml===false)
                 throw new \Exception('xml is not valid , id_rest_api='.$msg['id']);
             
             Handlers::run($xml);
 
-            exweb::completed($msg['id']);
+            exweb::state(['id'=>$msg['id'],'state'=>'completed','needCallHandler'=>false]);
         }catch(\Exception $e){
             $error_msg = $e->getMessage();
             exweb::setAsError($msg['id'],$error_msg);
@@ -47,13 +49,9 @@ class Handler{
         }
     }
 
-    static public function onCompleted($a){
-            UT::decrypt($a['id_rest_api']);
-    }
 }
-
+Events::add('onReady',__NAMESPACE__.'\Handler::onReady');
 Events::add('onHandler',__NAMESPACE__.'\Handler::onHandler');
-
 //Events::add('onCompleted',__NAMESPACE__.'\Handler::onCompleted');
 
 
