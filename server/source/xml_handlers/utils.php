@@ -162,7 +162,7 @@ class Utils{
         if ($info !== false){
             
             $q = "update `REST_API` set `DECRYPT` = '".$info['NOTE']."' where `ID_REST_API` = $id_rest_api";
-            \base::queryE($q,'exweb');
+            \base::queryE($q,'exweb','utf8');
 
         }
     }
