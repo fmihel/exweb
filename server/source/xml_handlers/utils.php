@@ -19,7 +19,15 @@ class Utils{
           
         return ($row['cnt']>0);
     }
-
+    private static function hpDate($mean){
+        $d = explode('.',$mean);
+        
+        if (count($d)>2)
+            return $d[2].'-'.$d[1].'-'.$d[0];
+        else
+            return '';
+    }
+    
     /** преобразует теги xml в соотвествующие теги базы
      * @return array('data'=>array(),'types'=>array())
      */
@@ -37,6 +45,16 @@ class Utils{
                 'BossName'      =>['BOSS_NAME','string'],
                 'KindOplata'    =>'KIND_OPLATA',
                 'EnableDiscont' =>'ENABLE_DISCONT'
+            ],
+            'OrderInfo'=>[
+                'IdKlient'      =>'ID_DEALER',
+                'LocalOrderId'  =>'ID_ORDER',
+                'MainZakazId'   =>'MAIN_ZAKAZ_ID',
+                'MainZakazNom'   =>'MAIN_ZAKAZ_NOM',
+                "MainZakazDate" =>["MAIN_ZAKAZ_DATE",'date'],
+                "MainZakazState"=>"MAIN_ZAKAZ_STATE",
+                "MainZakazDDostavka"=>["MAIN_ZAKAZ_D_DOSTAVKA",'date'],
+                "MainZakazDReady"=>["MAIN_ZAKAZ_D_READY",'date']
             ]
         ];
 
@@ -52,13 +70,20 @@ class Utils{
             }
 
             if (property_exists($xml,$k)){
-                $result['data'][$name]=$xml->{$k}->__toString();
+                $val = $xml->{$k}->__toString();
+                if ($type === 'date')
+                    $val=self::hpDate($val);    
+                    
+                $result['data'][$name]=$val;
                 $result['types'][$name]=$type;
             }
         }
         return $result;
     }
-/** 
+
+
+
+    /** 
      * получить список моделей/разделов куда входит товар
      * @return array('model'=>array(int,int,...),'chapter'=>array(int,int,...))
      */
@@ -137,6 +162,35 @@ class Utils{
 
         }
     }
+    /**
+     * возвращает значение тега xml 
+     * если default установлен, то при отсутствии элемента вернет default
+     * если default неопределен, то сгенерируется исключение
+     */
+    static public function xmlVal($xml,$tag/*,$default*/){
+        if (isset($xml->{$tag}))
+            return $xml->{$tag};
 
+        if (func_num_args()>2)
+            return func_get_arg(2);
+         
+        throw new \Exception("tag [$tag] is not exists in xml ");
+    }
+    /**
+     * возвращает значение атрибута xml
+     * если default установлен, то при отсутствии элемента вернет default
+     * если default неопределен, то сгенерируется исключение
+     */
+    static public function xmlAttr($xml,$attr){
+        $attrs = $xml->attributes();
+        
+        if ($attrs->{$attr}!==null)
+            return $attrs->{$attr};
+
+        if (func_num_args()>2)
+            return func_get_arg(2);
+         
+        throw new \Exception("attr [$attr] is not exists in xml ");
+    }
 }
 ?>

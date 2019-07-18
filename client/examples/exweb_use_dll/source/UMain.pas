@@ -41,26 +41,12 @@ type
     PageControl2: TPageControl;
     TabSheet5: TTabSheet;
     str: TTabSheet;
-    StrSend: TMemo;
-    Panel1: TPanel;
-    Button7: TButton;
     FileListBox2: TFileListBox;
     DirectoryListBox2: TDirectoryListBox;
     DriveComboBox2: TDriveComboBox;
     Button4: TButton;
     StreamSend: TEdit;
     Panel2: TPanel;
-    TabSheet6: TTabSheet;
-    Memo1: TMemo;
-    Memo2: TMemo;
-    Button8: TButton;
-    Memo3: TMemo;
-    Button9: TButton;
-    Memo4: TMemo;
-    Button10: TButton;
-    Memo5: TMemo;
-    Button11: TButton;
-    Memo6: TMemo;
     TabSheet7: TTabSheet;
     Button12: TButton;
     actStartTest: TAction;
@@ -73,23 +59,37 @@ type
     edCountAuto: TEdit;
     Button14: TButton;
     actDisconnect: TAction;
+    actSaveXMLAs: TAction;
+    actSaveXML: TAction;
+    actClear: TAction;
+    actNew: TAction;
+    SaveDialog1: TSaveDialog;
+    Edit1: TEdit;
+    Button19: TButton;
+    Memo8: TMemo;
+    FileListBox3: TFileListBox;
+    DirectoryListBox3: TDirectoryListBox;
+    DriveComboBox3: TDriveComboBox;
+    Button18: TButton;
+    Button17: TButton;
+    Button16: TButton;
+    procedure actClearExecute(Sender: TObject);
     procedure actConnectExecute(Sender: TObject);
     procedure actDisconnectExecute(Sender: TObject);
     procedure ActionList1Update(Action: TBasicAction; var Handled: Boolean);
+    procedure actNewExecute(Sender: TObject);
     procedure actRecvExecute(Sender: TObject);
+    procedure actSaveXMLAsExecute(Sender: TObject);
+    procedure actSaveXMLExecute(Sender: TObject);
     procedure actSendExecute(Sender: TObject);
     procedure actSetKeyExecute(Sender: TObject);
     procedure actSetUrlExecute(Sender: TObject);
     procedure actStartTestExecute(Sender: TObject);
     procedure actStopTestExecute(Sender: TObject);
-    procedure Button10Click(Sender: TObject);
-    procedure Button11Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
-    procedure Button7Click(Sender: TObject);
-    procedure Button8Click(Sender: TObject);
-    procedure Button9Click(Sender: TObject);
     procedure FileListBox1Click(Sender: TObject);
     procedure FileListBox2Click(Sender: TObject);
+    procedure FileListBox3DblClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -119,6 +119,11 @@ uses
   UMathUtils;
 
 {$R *.dfm}
+
+procedure TfrmMain.actClearExecute(Sender: TObject);
+begin
+    Memo8.Lines.Clear;
+end;
 
 procedure TfrmMain.actConnectExecute(Sender: TObject);
 begin
@@ -171,6 +176,12 @@ begin
 
 end;
 
+procedure TfrmMain.actNewExecute(Sender: TObject);
+begin
+    Memo8.Lines.Clear;
+    Edit1.Text:='';
+end;
+
 procedure TfrmMain.actRecvExecute(Sender: TObject);
 var
     data:TMemoryStream;
@@ -217,6 +228,60 @@ begin
     end;
 end;
 
+procedure TfrmMain.actSaveXMLAsExecute(Sender: TObject);
+var cFileName:string;
+begin
+    if (Memo8.Lines.Text <> '') then begin
+        cFileName:='';
+
+        SaveDialog1.InitialDir:= DirectoryListBox3.Directory;
+        if (SaveDialog1.Execute) then begin
+            cFileName:=SaveDialog1.FileName;
+            FileListBox3.Update;
+        end;
+
+        if (cFileName<>'') then begin
+            Edit1.Text:=cFileName;
+            Memo8.Lines.SaveToFile(cFileName);
+            self.log('save to ['+cFileName+'} : ok.');
+            FileListBox3.Update;
+        end else
+            self.log('FileName is not set');
+
+    end else
+        self.log('Xml is empty..');
+
+end;
+
+procedure TfrmMain.actSaveXMLExecute(Sender: TObject);
+var cFileName:string;
+begin
+    if (Memo8.Lines.Text <> '') then begin
+        cFileName:='';
+        if (Edit1.Text = '') or (Edit1.Text = '*.xml') then
+        begin
+            SaveDialog1.InitialDir:= DirectoryListBox3.Directory;
+            if (SaveDialog1.Execute) then begin
+                cFileName:=SaveDialog1.FileName;
+                FileListBox3.Update;
+
+            end;
+        end else
+            cFileName:=Edit1.Text;
+
+
+        if (cFileName<>'') then begin
+            Edit1.Text:=cFileName;
+            Memo8.Lines.SaveToFile(cFileName);
+            self.log('save to ['+cFileName+'} : ok.');
+            FileListBox3.Update;
+        end else
+            self.log('FileName is not set');
+
+    end else
+        self.log('Xml is empty..');
+end;
+
 procedure TfrmMain.actSendExecute(Sender: TObject);
 var
     data:TMemoryStream;
@@ -230,15 +295,19 @@ begin
             data.LoadFromFile(StreamSend.Text);
 
         if (data.Size>0) then
-            sendState:=exweb.send(StrSend.Text,data,sendState)
+            sendState:=exweb.send(Memo8.Text,data,sendState)
         else
-            sendState:=exweb.send(StrSend.Text,nil,sendState);
+            sendState:=exweb.send(Memo8.Text,nil,sendState);
 
         if (sendState.result) then begin
-            log('send ok! id = %s',[sendState.id]);
+            log('ok: id = %s',[sendState.id]);
         end else begin
-            log('ERROR send!');
+            log('Error: %s "%s"',[TExWebResultStr[integer(sendState.webResult)],TExWebResultNotes[integer(sendState.webResult)]]);
+
         end;
+
+
+
     except
     on e:Exception do
     begin
@@ -276,34 +345,9 @@ begin
     Timer1.Enabled:=false;
 end;
 
-procedure TfrmMain.Button10Click(Sender: TObject);
-begin
-    StrSend.Lines.Text:=Memo4.Lines.Text;
-end;
-
-procedure TfrmMain.Button11Click(Sender: TObject);
-begin
-    StrSend.Lines.Text:=Memo5.Lines.Text;
-end;
-
 procedure TfrmMain.Button4Click(Sender: TObject);
 begin
     StreamSend.Clear;
-end;
-
-procedure TfrmMain.Button7Click(Sender: TObject);
-begin
-    StrSend.Lines.Text:=Memo6.Lines.Text;
-end;
-
-procedure TfrmMain.Button8Click(Sender: TObject);
-begin
-    StrSend.Lines.Text:=Memo2.Lines.Text;
-end;
-
-procedure TfrmMain.Button9Click(Sender: TObject);
-begin
-    StrSend.Lines.Text:=Memo3.Lines.Text;
 end;
 
 procedure TfrmMain.clear;
@@ -322,27 +366,39 @@ begin
 
 end;
 
-procedure TfrmMain.FormCreate(Sender: TObject);
+procedure TfrmMain.FileListBox3DblClick(Sender: TObject);
 begin
-    TabSheet6.TabVisible:=false;
+    Edit1.Text:=FileListBox3.FileName;
+    Memo8.Lines.LoadFromFile(Edit1.Text);
+end;
+
+procedure TfrmMain.FormCreate(Sender: TObject);
+var
+  cdir: string;
+begin
     clear();
     log('log..');
     // создание объекта для работы с протоколом обмена
     exweb:=TExweb_import.Create;
+    PageControl1.ActivePage := TabSheet1;
+    cdir:='E:\work\windeco\exweb\client\examples\xml\';
+    if (SysUtils.DirectoryExists(cDir)) then
+        DirectoryListBox3.Directory:=cDir;
+
 end;
 procedure TfrmMain.Send();
 var i:integer;
 begin
     randomize();
     i:=random(4);
-    if (i = 1) then
-        StrSend.Lines.Text:=Memo3.Lines.Text
-    else if (i = 2) then
-        StrSend.Lines.Text:=Memo4.Lines.Text
-    else if (i = 3) then
-        StrSend.Lines.Text:=Memo5.Lines.Text
-    else
-        StrSend.Text:='АБВГДЕ 123457678';
+    if (i = 1) then begin
+        Memo8.Lines.Text:='qwkjedqjkw';
+    end else if (i = 2) then begin
+        Memo8.Lines.Text:='jhedjkqwehd';
+    end else if (i = 3) then begin
+        Memo8.Lines.Text:='hdjwhqe';
+    end else
+        Memo8.Text:='АБВГДЕ 123457678';
     actSendExecute(nil);
 end;
 

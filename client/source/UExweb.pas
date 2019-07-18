@@ -133,7 +133,7 @@ begin
     fApp:=nil;
     if (Application<>nil) then begin
         fApp:=Application;
-        error_log('app NOT nil %s',[Application.ExeName]);
+        //error_log('app NOT nil %s',[Application.ExeName]);
 
     end else
         error_log('app = nil');

@@ -1,6 +1,8 @@
 <?php
 namespace exweb\source;
 
+use PhpOffice\PhpSpreadsheet\Reader\DefaultReadFilter;
+
 class exweb {
 
     /**
@@ -30,10 +32,10 @@ class exweb {
     }
     /**
      * получение сообщения (из офиса)
-     * при указании $completed = true сообщение, после прочтения будет помечено как 'completed'
      * @return ['id'=>int,'str'=>string,'data'=>stream]
      */
-    public static function recv(bool $completed = false){
+    public static function recv(){
+
         $q = "select ID_REST_API,STR,SIZE from REST_API where OWNER='client' and STATE='ready' order by ID_REST_API";
         $row = \base::row($q,'exweb');
         if ($row === false)
@@ -47,10 +49,6 @@ class exweb {
             $result['str'] = $row['STR'];
             if($row['SIZE']>0)
                 $result['data'] = self::getBlock($row['ID_REST_API']);
-            
-            if ($completed)
-                self::completed($row['ID_REST_API']);
-
         }else
             $result = false;    
 
@@ -75,22 +73,76 @@ class exweb {
 
         return $id;
     }
+    /**
+     * управление состояниями
+     * 
+     * Получить состояние:
+     * exweb:state(['id'=>10]);
+     * 
+     * Установить состояние:
+     * exweb::state(['id'=>10,'state'=>'error']);
+     */
+    public static function state($o){
+        $a = \ARR::union([
+            'id'=>-1,
+            'state'=>'',
+            'msg'=>'',
+            'needCallHandler'=>true,
+        ],$o);
+
+        if ($a['id']==-1) 
+            throw new \Exception("exweb::state need set id");
+            
+        $id = $a['id'];
+        $msg = '';
+
+        if ($a['state']==''){
+            return \base::valE("select STATE from REST_API where  ID_REST_API = $id",'exweb');
+        }else{
+
+            switch ($a['state']) {
+                case 'ready':
+                    $q = "update REST_API set STATE='ready',ERROR_MSG = '',LAST_UPDATE=CURRENT_TIMESTAMP where STATE<>'completed' and ID_REST_API=$id";
+                    break;
+                case 'completed':
+                    $q = "update REST_API set STATE='completed',ERROR_MSG = '',LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=$id";
+                    break;
+                case 'error':
+                    $msg = str_replace(["'"],['"'],\base::real_escape($a['msg'],'exweb'));
+                    $q = "update REST_API set STATE='error',ERROR_MSG = '$msg',LAST_UPDATE=CURRENT_TIMESTAMP where ID_REST_API=$id";
+                    break;
+                default:
+                    throw new Exception('no defined handler for state ['.$a['state'].'] in exweb::state');
+            };
+
+            \base::queryE($q);
+
+            if ($a['needCallHandler']){
+                switch ($a['state']) {
+                    case 'ready':
+                        Events::do('onReady',['id_rest_api'=>$id]);                        
+                        break;
+                    case 'completed':
+                        Events::do('onCompleted',['id_rest_api'=>$id]);                        
+                        break;
+                    case 'error':
+                        Events::do('onError',['id_rest_api'=>$id,'msg'=>$msg]);                        
+                        break;
+                };
     
-    public static function completed(int $id){
-        $q = "update REST_API set STATE='completed' where ID_REST_API=$id";
-        if (\base::query($q,'exweb')){
-            Events::do('onCompleted',['id_rest_api'=>$id]);
-            return true;
-        }
-        return false;
+            }
+        }    
+
+        
     }
 
+    public static function completed(int $id){
+        self::state(['id'=>$id,'state'=>'completed']);
+        return true;
+    }
+    
     public static function setAsError(int $id,$msg=''){
-        $msg = str_replace(["'"],['"'],\base::real_escape($msg,'exweb'));
-        $q = "update REST_API set STATE='error',ERROR_MSG='$msg' where ID_REST_API=$id";
-        if (!\base::query($q,'exweb')) 
-            throw new \Exception("error in setAsError($id)");
-            
+        self::state(['id'=>$id,'state'=>'error','msg'=>$msg]);
     }
     /** очистка отработанных сообщений
      * Ex: exweb::clear("completed");

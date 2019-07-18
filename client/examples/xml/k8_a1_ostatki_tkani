@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="unicode"?>
+<Msg Kind="8" Action="1">
+	<IdKlient>21039</IdKlient>
+	<TxProductsList>
+		<TxProduct IdTextile="15595" IdTxColor="27332" Ostatok="0">
+			<TxPiece IdTxPiece="213473" Nom="783" Ostatok="0" Bronir="24,5"/>
+		</TxProduct>
+	</TxProductsList>
+</Msg>

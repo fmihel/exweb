@@ -14,24 +14,36 @@ class Handler{
      * запуск цикла обработки
      */
     static public function onHandler(){
-        $msg = exweb::recv(true);
+        $msg = exweb::recv();
 
         if ($msg===false)
             return;
 
         try{
-            exweb::clear('completed');
+
+            // выставим состояние в error 
+            exweb::state(['id'=>$msg['id'],'state'=>'error','msg'=>'ошибка в обработчике xml','needCallHandler'=>false]);
 
             $xml = utils::strToXml($msg['str']);
+
+            // расшифруем название xml
+            UT::decrypt($msg['id'],$xml);
+
             if ($xml===false)
                 throw new \Exception('xml is not valid , id_rest_api='.$msg['id']);
             
             Handlers::run($xml);
 
+            exweb::completed($msg['id']);
         }catch(\Exception $e){
             $error_msg = $e->getMessage();
             exweb::setAsError($msg['id'],$error_msg);
             error_log($error_msg);
+        }finally{
+
+            // очистка предыдущих отработанных сообщений
+            exweb::clear('completed');
+
         }
     }
 
@@ -41,7 +53,8 @@ class Handler{
 }
 
 Events::add('onHandler',__NAMESPACE__.'\Handler::onHandler');
-Events::add('onCompleted',__NAMESPACE__.'\Handler::onCompleted');
+
+//Events::add('onCompleted',__NAMESPACE__.'\Handler::onCompleted');
 
 
 ?>

@@ -79,5 +79,37 @@ define('ACT_DISCONT_ORDER_TO_CARD',6);
 define('DELIVERY_NULL_DATE_IN_SELECT','30.12.1990');
 define('DELIVERY_NULL_DATE_TO_UPDATE','1990-12-30'); // update FDATA =  DATE_FORMAT('1990-12-30','%Y-%m-%d');
 
+define('ORDER_STATE_STR',[
+    'Формируется',              //0
+    'Отправлен',                //1
+    'Предварительно принят',    //2
+    'Подтвержден',              //3
+    'Просчитан',                //4
+    'Товары заказа списаны',    //5
+    'Принято в производство',   //6
+    'Отгружен',                 //7
+    'Завершен',                 //8
+    'Не принят',                //9
+    'не используется',          //10
+    'Отменен',                  //11
+    'Отмена запрещена',         //12
+    'Аннулирован'               //13
+]);
+
+define('OS_FORMIRUETSY',0);
+define('OS_OTPRAVLEN',1);
+define('OS_PREDVARITELNO_PRINYT',2);
+define('OS_PODTVERJDEN',3);
+define('OS_PROSCHITAN',4);
+define('OS_TOVARI_SPISANI',5);
+define('OS_PRINYTO_V_PROIZVODSTVO',6);
+define('OS_OTGRUJEN',7);
+define('OS_ZAVERSHEN',8);
+define('OS_NE_PRINYT',9);
+define('OS_OTMENEN',11);
+define('OS_OTMENA_ZAPRESHENA',12);
+define('OS_ANNULIROVAN',13);
+
+    
 
 ?>
