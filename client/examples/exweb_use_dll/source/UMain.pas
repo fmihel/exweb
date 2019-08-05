@@ -285,6 +285,7 @@ end;
 procedure TfrmMain.actSendExecute(Sender: TObject);
 var
     data:TMemoryStream;
+    cLogMsg:string;
 begin
 
     data:=TMemoryStream.Create;
@@ -299,15 +300,12 @@ begin
         else
             sendState:=exweb.send(Memo8.Text,nil,sendState);
 
-        if (sendState.result) then begin
-            log('ok: id = %s',[sendState.id]);
-        end else begin
-            log('Error: %s "%s"',[TExWebResultStr[integer(sendState.webResult)],TExWebResultNotes[integer(sendState.webResult)]]);
+        if (sendState.result) then
+            cLogMsg:='ok: '
+        else
+            cLogMsg:='ERROR: ';
 
-        end;
-
-
-
+        log(cLogMsg+'id:%s , %s:"%s"',[sendState.id,TExWebResultStr[integer(sendState.webResult)],TExWebResultNotes[integer(sendState.webResult)]]);
     except
     on e:Exception do
     begin

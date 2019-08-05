@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls, ComCtrls, ActnList, FileCtrl, UExWebType;
-{-$define _log_}
+{$define _log_}
 type
   TfrmMain = class(TForm)
     GroupBox1: TGroupBox;
@@ -126,9 +126,9 @@ begin
         {$ifdef _log_} ULog.Log('%s',[TExWebStateToStr(ExWebState)],ClassName,cFuncName);{$endif}
 
         if (ExWebState.result) then
-            ShowMessage('send ok')
+            _Log('send ok')
         else
-            ShowMessage('ERROR send');
+            _Log('ERROR send');
 
     except
     on e:Exception do
