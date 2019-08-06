@@ -37,18 +37,21 @@ class TkaniOstatki extends Handler{
                     {
                         $piece          = $TxPiece[$j]->attributes();
                         $ID_TX_PIECE    = $piece->IdTxPiece;
-                        $NOM            = $piece->Nom;
-                        $OSTATOK        = UT::strToFloat($piece->Ostatok,'asFloat');
-                        $BRONIR         = UT::strToFloat($piece->Bronir,'asFloat');
+                        if ($ID_TX_PIECE != ''){
+                            
+                            $NOM            = $piece->Nom;
+                            $OSTATOK        = UT::strToFloat($piece->Ostatok,'asFloat');
+                            $BRONIR         = UT::strToFloat($piece->Bronir,'asFloat');
                         
-                        if ($OSTATOK !== 0){
-                            $q = "insert into TX_PIECE (ID_TX_COLOR,ID_TX_PIECE,NOM,OSTATOK,BRONIR,NOTE,D_LAST_CHANGE) values ($ID_TX_COLOR,$ID_TX_PIECE,$NOM,$OSTATOK,$BRONIR,'',CURRENT_TIMESTAMP) 
-                                on duplicate key update ID_TX_COLOR = $ID_TX_COLOR,NOM=$NOM,OSTATOK =$OSTATOK,BRONIR=$BRONIR" ;
-                            \base::queryE($q,'deco');
-                        }else{
-                            $q = "delete from TX_PIECE where ID_TX_PIECE = $ID_TX_PIECE";
-                            \base::queryE($q,'deco');
-                        }    
+                            if ($OSTATOK !== 0){
+                                $q = "insert into TX_PIECE (ID_TX_COLOR,ID_TX_PIECE,NOM,OSTATOK,BRONIR,NOTE,D_LAST_CHANGE) values ($ID_TX_COLOR,$ID_TX_PIECE,$NOM,$OSTATOK,$BRONIR,'',CURRENT_TIMESTAMP) 
+                                    on duplicate key update ID_TX_COLOR = $ID_TX_COLOR,NOM=$NOM,OSTATOK =$OSTATOK,BRONIR=$BRONIR" ;
+                                \base::queryE($q,'deco');
+                            }else{
+                                $q = "delete from TX_PIECE where ID_TX_PIECE = $ID_TX_PIECE";
+                                \base::queryE($q,'deco');
+                            }    
+                        };
                     }//for($j=0;$j<$Textile->Count();$j++)
                 };//Count >0
             }//for($i=0;$i<$List->Count();$i++)

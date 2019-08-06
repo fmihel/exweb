@@ -10,7 +10,8 @@ uses
   UMD5 in '..\..\..\source\UMD5.pas',
   UUrl in '..\..\..\source\UUrl.pas',
   UUtils in '..\..\..\source\UUtils.pas',
-  UExWebType in '..\..\..\source\UExWebType.pas';
+  UExWebType in '..\..\..\source\UExWebType.pas',
+  ULogMsg in '..\..\..\source\ULogMsg.pas';
 
 {$R *.res}
 

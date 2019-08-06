@@ -51,6 +51,7 @@
 			<DCCReference Include="..\..\..\source\UUrl.pas"/>
 			<DCCReference Include="..\..\..\source\UUtils.pas"/>
 			<DCCReference Include="..\..\..\source\UExWebType.pas"/>
+			<DCCReference Include="..\..\..\source\ULogMsg.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
