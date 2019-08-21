@@ -14,13 +14,13 @@ type
         fParam: TStringList;
         fTimeStart: Double;
         hGetParam: TProcGetParam;
+        hPrepare: TProcPrepare;
         hQuery: TProcQuery;
         hRecv: TProcRecv;
         hSend: TProcSend;
         hSetParam: TProcSetParam;
         function getConnected: Boolean;
         function getTimeSec: Double;
-        //1 Автоматическое переподключение
         procedure reConnectAuto;
     public
         constructor Create(const aDllFileName: string = '');
@@ -121,6 +121,8 @@ begin
 
         hSetParam:=GetProcAddress(dll,strProcSetParam);
         hGetParam:=GetProcAddress(dll,strProcGetParam);
+
+        hPrepare:=GetProcAddress(dll,strProcPrepare);
 
         result:=true;
 

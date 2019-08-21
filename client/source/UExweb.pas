@@ -594,6 +594,7 @@ function TExWeb.send(const str: string; data: TStream; prevState: TExWebState):
 var
     otvet: THash;
     cMD5: string;
+  cPrepare: Integer;
     cResult: TExWebResult;
     id: string;
     csize: Int64;
@@ -609,6 +610,7 @@ begin
 
     try
     try
+
 
         if (data<>nil) and (data.size>0) then begin
             data.Position:=0;
@@ -630,6 +632,15 @@ begin
                 result.result:=false;
                 raise Exception.Create('event=ready, otvet='+otvet['msg']);
             end;
+        end;
+
+        cPrepare:=UUtils.Utils.prepare(str);
+        if (cPrepare<>0) then begin
+            cResult := ewrErrorPrepare;
+            result.id       := '-1';
+            result.webResult:=cResult;
+            result.result   :=false;
+            raise Exception.Create('prepare pos:'+IntToStr(cPrepare)+' char:['+str[cPrepare]+'] code:['+IntToStr(Ord(str[cPrepare]))+'] ,result='+TExWebResultStr[integer(cResult)]);
         end;
 
         // инициализируем передачу и получаем настрйки сервера
@@ -802,6 +813,8 @@ begin
     try
     try
         cStr:=str;
+
+
 
         cStr:=Utils.rusCod(cStr);
 

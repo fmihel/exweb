@@ -1,4 +1,4 @@
-unit UUtils;
+п»їunit UUtils;
 
 interface
 
@@ -12,24 +12,26 @@ type
     public
         class procedure concat(A: string; B, Target: TStream); overload; static;
         class procedure concat(A, B, Target: TStream); overload; static;
-        //1 Преобразует строку с разделителями glue в hash
+        //1 РџСЂРµРѕР±СЂР°Р·СѓРµС‚ СЃС‚СЂРѕРєСѓ СЃ СЂР°Р·РґРµР»РёС‚РµР»СЏРјРё glue РІ hash
         class function explode(str, glue: string; toHash: THash = nil): THash;
             static;
-        //1 Пребразует число в строку валидную к json
+        //1 РџСЂРµР±СЂР°Р·СѓРµС‚ С‡РёСЃР»Рѕ РІ СЃС‚СЂРѕРєСѓ РІР°Р»РёРґРЅСѓСЋ Рє json
         class function FloatToStr(f: Double): string; static;
-        //1 преобразует значения hash (value) в строку с разделителями
+        //1 РїСЂРµРѕР±СЂР°Р·СѓРµС‚ Р·РЅР°С‡РµРЅРёСЏ hash (value) РІ СЃС‚СЂРѕРєСѓ СЃ СЂР°Р·РґРµР»РёС‚РµР»СЏРјРё
         class function implode(fromHash: THash; glue: string = ';'): string;
             static;
         class function isFloat(const aStr: string): Boolean; static;
         class function isInt(const aStr:string): Boolean; static;
         class function isNumeric(const aStr: string): Boolean; static;
+        //1 РџСЂРѕРІРµСЂРєР° СЃС‚СЂРѕРєРё РЅР° РЅРµРґРѕРїСѓСЃС‚РёРјС‹Рµ СЃРёРјРІРѕР»С‹. Р’РѕР·РІСЂР°С‰Р°РµС‚ 0 РµСЃР»Рё РІСЃРµ РІ РїРѕСЂСЏРґРєРµ, Р»РёР±Рѕ РїРѕР·РёС†РёСЋ РЅРµРґРѕРїСѓСЃС‚РёРјРѕРіРѕ СЃРёРјРІРѕР»Р° (РїРѕР·РёС†РёСЏ РїРµСЂРІРѕРіРѕ СЃРёРјРІРѕР»Р° 1)
+        class function prepare(str: string): Integer; static;
         class function randomStr(aLen: integer=10): string; static;
         class function readFromStream(Stream: TStream): string; static;
-        //1 Кодирует все кириличиские символы
+        //1 РљРѕРґРёСЂСѓРµС‚ РІСЃРµ РєРёСЂРёР»РёС‡РёСЃРєРёРµ СЃРёРјРІРѕР»С‹
         class function rusCod(s: string): string; static;
-        //1 Декодирует все коды в их кириличиское представление
+        //1 Р”РµРєРѕРґРёСЂСѓРµС‚ РІСЃРµ РєРѕРґС‹ РІ РёС… РєРёСЂРёР»РёС‡РёСЃРєРѕРµ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёРµ
         class function rusEnCod(s: string): string; static;
-        //1 Преобразует вещественное из строки ( с учетом что разделитель и точка и запятая)
+        //1 РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РІРµС‰РµСЃС‚РІРµРЅРЅРѕРµ РёР· СЃС‚СЂРѕРєРё ( СЃ СѓС‡РµС‚РѕРј С‡С‚Рѕ СЂР°Р·РґРµР»РёС‚РµР»СЊ Рё С‚РѕС‡РєР° Рё Р·Р°РїСЏС‚Р°СЏ)
         class function StrToFloat(str: string): Double; static;
         class function UrlDecode(Str: AnsiString): AnsiString; static;
         class function UrlEncode(Str: AnsiString): AnsiString; static;
@@ -175,6 +177,71 @@ begin
     result:= ( isInt(aStr) or isFloat(aStr) );
 end;
 
+class function Utils.prepare(str: string): Integer;
+var
+    len,pos,i,c:integer;
+    stop:boolean;
+
+const
+    lim : array[0..7,0..1] of integer = (
+    (9,10),         //tab,coret
+    (13,13),        //enter
+    (32,126),       //space !"#$%&'()*+,-./0..9:;<=>?@A..Z[\]^_`a..z{|}
+    (8221,8221),      // вЂќ
+    (8470,8470),      // в„–
+    (1040,1103),    // Рђ..РЇР°..СЏ
+    (1105,1105),    //С‘
+    (1025,1025)   //РЃ
+    );
+
+begin
+//
+// 0033| 0034| 0035| 0036| 0037| 0038| 0039| 0040| 0041| 0042| 0043| 0044| 0045| 0046| 0047| 0048|
+// !   | "   | #   | $   | %   | &   | '   | (   | )   | *   | +   | ,   | -   | .   | /   | 0   |
+// 0049| 0050| 0051| 0052| 0053| 0054| 0055| 0056| 0057| 0058| 0059| 0060| 0061| 0062| 0063| 0064|
+// 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 9   | :   | ;   | <   | =   | >   | ?   | @   |
+// 0065| 0066| 0067| 0068| 0069| 0070| 0071| 0072| 0073| 0074| 0075| 0076| 0077| 0078| 0079| 0080|
+// A   | B   | C   | D   | E   | F   | G   | H   | I   | J   | K   | L   | M   | N   | O   | P   |
+// 0081| 0082| 0083| 0084| 0085| 0086| 0087| 0088| 0089| 0090| 0091| 0092| 0093| 0094| 0095| 0096|
+// Q   | R   | S   | T   | U   | V   | W   | X   | Y   | Z   | [   | \   | ]   | ^   | _   | `   |
+// 0097| 0098| 0099| 0100| 0101| 0102| 0103| 0104| 0105| 0106| 0107| 0108| 0109| 0110| 0111| 0112|
+// a   | b   | c   | d   | e   | f   | g   | h   | i   | j   | k   | l   | m   | n   | o   | p   |
+// 0113| 0114| 0115| 0116| 0117| 0118| 0119| 0120| 0121| 0122| 0123| 0124| 0125| 0126| 0127| 0128|
+// q   | r   | s   | t   | u   | v   | w   | x   | y   | z   | {   | |   | }    | ~   |     |     |
+
+// 1025| 1026| 1027| 1028| 1029| 1030| 1031| 1032| 1033| 1034| 1035| 1036| 1037| 1038| 1039| 1040|
+// РЃ   | Р‚   | Рѓ   | Р„   | Р…   | Р†   | Р‡   | Р€   | Р‰   | РЉ   | Р‹   | РЊ   | РЌ   | РЋ   | РЏ   | Рђ   |
+// 1041| 1042| 1043| 1044| 1045| 1046| 1047| 1048| 1049| 1050| 1051| 1052| 1053| 1054| 1055| 1056|
+// Р‘   | Р’   | Р“   | Р”   | Р•   | Р–   | Р—   | Р   | Р™   | Рљ   | Р›   | Рњ   | Рќ   | Рћ   | Рџ   | Р    |
+// 1057| 1058| 1059| 1060| 1061| 1062| 1063| 1064| 1065| 1066| 1067| 1068| 1069| 1070| 1071| 1072|
+// РЎ   | Рў   | РЈ   | Р¤   | РҐ   | Р¦   | Р§   | РЁ   | Р©   | РЄ   | Р«   | Р¬   | Р­   | Р®   | РЇ   | Р°   |
+// 1073| 1074| 1075| 1076| 1077| 1078| 1079| 1080| 1081| 1082| 1083| 1084| 1085| 1086| 1087| 1088|
+// Р±   | РІ   | Рі   | Рґ   | Рµ   | Р¶   | Р·   | Рё   | Р№   | Рє   | Р»   | Рј   | РЅ   | Рѕ   | Рї   | СЂ   |
+// 1089| 1090| 1091| 1092| 1093| 1094| 1095| 1096| 1097| 1098| 1099| 1100| 1101| 1102| 1103| 1104|
+// СЃ   | С‚   | Сѓ   | С„   | С…   | С†   | С‡   | С€   | С‰   | СЉ   | С‹   | СЊ   | СЌ   | СЋ   | СЏ   | Сђ   |
+// 1105| 1106| 1107| 1108| 1109| 1110| 1111| 1112| 1113| 1114| 1115| 1116| 1117| 1118| 1119| 1120|
+// С‘   | С’   | С“   | С”   | С•   | С–   | С—   | С   | С™   | Сљ   | С›   | Сњ   | Сќ   | Сћ   | Сџ   | С    |
+
+
+    len:=length(str);
+    result:=0;
+    for pos:=1 to len do begin
+        c:=Ord(Char(str[pos]));
+        stop:=true;
+        for i:=0 to 7 do begin
+            if (c>=lim[i][0]) and (c<=lim[i][1]) then begin
+                stop:=false;
+                break;
+            end;
+        end;
+        if (stop) then begin
+            result:=pos;
+            break;
+        end;
+
+    end;
+end;
+
 class function Utils.randomStr(aLen: integer=10): string;
 var
     i: Integer;
@@ -204,10 +271,10 @@ var
     ansi: AnsiString;
 begin
 
-    LMin:=Ord(AnsiChar('а'));
-    LMax:=Ord(AnsiChar('я'));
-    HMin:=Ord(AnsiChar('А'));
-    HMax:=Ord(AnsiChar('Я')) ;
+    LMin:=Ord(AnsiChar('Р°'));
+    LMax:=Ord(AnsiChar('СЏ'));
+    HMin:=Ord(AnsiChar('Рђ'));
+    HMax:=Ord(AnsiChar('РЇ')) ;
     ansi:=AnsiString(s);
 
     result:='';
@@ -217,12 +284,16 @@ begin
         if ((code>=HMin) and (code<=HMax)) or
            ((code>=LMin) and (code<=LMax)) then
                 result:=result+'#'+IntToStr(code)+';'
-        else if (code = Ord(AnsiChar('ё'))) then
+        else if (code = Ord(AnsiChar('С‘'))) then
             result:=result+'#1027;'
-        else if (code = Ord(AnsiChar('Ё'))) then
+        else if (code = Ord(AnsiChar('РЃ'))) then
             result:=result+'#1028;'
-        else if (code = Ord(AnsiChar('”'))) then
+        else if (code = Ord(AnsiChar('вЂќ'))) then
             result:=result+'"'
+        else if (code = Ord(AnsiChar('в„–'))) then
+            result:=result+'N'
+        else if (code = Ord(AnsiChar('&'))) then
+            result:=result+'+'
         else
             result:=result+c;
     end;
@@ -238,10 +309,10 @@ var
     LMax, LMin, HMax, HMin: Integer;
 begin
 
-    LMin:=Ord(AnsiChar('а'));
-    LMax:=Ord(AnsiChar('я'));
-    HMin:=Ord(AnsiChar('А'));
-    HMax:=Ord(AnsiChar('Я'));
+    LMin:=Ord(AnsiChar('Р°'));
+    LMax:=Ord(AnsiChar('СЏ'));
+    HMin:=Ord(AnsiChar('Рђ'));
+    HMax:=Ord(AnsiChar('РЇ'));
 
     cStr:=AnsiString(s);
 
@@ -256,8 +327,8 @@ begin
         cStr:=StringReplace(cStr,code,AnsiChar(chr(i)),[rfReplaceAll]);
     end;
 
-    cStr:=StringReplace(cStr,'#1027;',AnsiChar('ё'),[rfReplaceAll]);
-    cStr:=StringReplace(cStr,'#1028;',AnsiChar('Ё'),[rfReplaceAll]);
+    cStr:=StringReplace(cStr,'#1027;',AnsiChar('С‘'),[rfReplaceAll]);
+    cStr:=StringReplace(cStr,'#1028;',AnsiChar('РЃ'),[rfReplaceAll]);
 
     result:=cStr;
 end;

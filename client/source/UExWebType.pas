@@ -6,7 +6,7 @@ uses
   SysUtils, Windows, Messages, Classes, Graphics, Controls, Forms, Dialogs;
 
 type
-    TExWebResult = (ewrOk,ewrUnknownError,ewrNoResponse,ewrNoValidJSON,ewrErrorCreateHash,ewrRes0,ewrNeedConfirm,ewrHashSumNotCompare);
+    TExWebResult = (ewrOk,ewrUnknownError,ewrNoResponse,ewrNoValidJSON,ewrErrorCreateHash,ewrRes0,ewrNeedConfirm,ewrHashSumNotCompare,ewrErrorPrepare);
     TExWebState = record
     public
         //1 идентификатор сообщения
@@ -17,8 +17,8 @@ type
     end;
 
 const
-    TExWebResultStr:array[0..7] of string = ('ewrOk','ewrUnknownError','ewrNoResponse','ewrNoValidJSON','ewrErrorCreateHash','ewrRes0','ewrNeedConfirm','ewrHashSumNotCompare');
-    TExWebResultNotes:array[0..7] of string = (
+    TExWebResultStr:array[0..8] of string = ('ewrOk','ewrUnknownError','ewrNoResponse','ewrNoValidJSON','ewrErrorCreateHash','ewrRes0','ewrNeedConfirm','ewrHashSumNotCompare','ewrErrorPrepare');
+    TExWebResultNotes:array[0..8] of string = (
         'Ok',
         'Неизвестная ошибка',
         'Нет ответа (возможно нет интернета)',
@@ -26,7 +26,8 @@ const
         'Ошибка создания HASH',
         'Сервер обработал запрос с ошибкой',
         'Требуется подтверждение закрытия',
-        'Бинарные данные, сохраненные на сервере не совпадают с отправленными'
+        'Бинарные данные, сохраненные на сервере не совпадают с отправленными',
+        'Строка содержит недопустимые символы'
     );
 
 implementation
