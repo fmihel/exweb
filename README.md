@@ -33,8 +33,17 @@ var state:TExWebState;
 xml:='<?xml version="1.0" encoding="unicode"?><Msg><Name>Mike</Name><Msg>';
 
 state:=exweb.send(xml,nil,state);
-if (not state.result) then
+if (not state.result) then 
+begin
+  if (state.webResult = ewrRes0) then begin
+    // сервер не может обработать сообщение
+    // отправлять его повторно нельзя !!!
+  end else 
+  if (state.webResult = ewrErrorPrepare) then begin 
+    // в сообщении содержаться недопустимые символы
+  end;
   ShowMessage('error send');
+end
 ```
 **5. отправка сообщения и бинарных данных**
 ```
@@ -47,8 +56,17 @@ data.LoadFromFile('file.jpg');
 xml:='<?xml version="1.0" encoding="unicode"?><Msg><Name>Mike</Name><Msg>';
 
 state:=exweb.send(xml,data,state);
-if (not state.result) then
+if (not state.result) then 
+begin
+  if (state.webResult = ewrRes0) then begin
+    // сервер не может обработать сообщение
+    // отправлять его повторно нельзя !!!
+  end else 
+  if (state.webResult = ewrErrorPrepare) then begin 
+    // в сообщении содержаться недопустимые символы
+  end;
   ShowMessage('error send');
+end
   
 data.free;  
 ```
@@ -102,6 +120,34 @@ exweb.free();
 |name|notes|
 |-----|-----|
 |***Connected***: Boolean|Признак того, что библиотека подключена|
+
+### Возвращаемый результат
+
+
+**TExWebState** : *record*
+
+|prop|type|notes|
+|-----|-----|-----|
+|id|string[16]| идентификатор сообщения, если был получен соотвествует **WWW_MSG_ID** на клиенте и **ID_REST_API** на сервере|
+|webResult|**TExWebResult**|текущее состояние передачи|
+|result|boolean| общий конечный результат|
+
+
+**TExWebResult** : *set* 
+
+|name|notes|
+|-----|-----|
+|ewrOk| передача/прием прошли успешно| 
+|ewrUnknownError|неизвестная ошибка (**не рекомендуется повторная отсылка данного сообщения**)|
+|ewrNoResponse|нет ответа  (возможно нет интернета)|
+|ewrNoValidJSON|Считанный JSON не валидный|
+|ewrErrorCreateHash|Не удалось создать HASH|
+|ewrRes0|Сервер обработал запрос с ошибкой (**не рекомендуется повторная отсылка данного сообщения**)|
+|ewrNeedConfirm|Передача прошла, но требует подтверждения|
+|ewrHashSumNotCompare|Бинарные данные, сохраненные на сервере не совпадают с отправленными|
+|ewrErrorPrepare|Содержит недопустимый символ|
+
+
 ---
 
 ## Техническое описание

@@ -18,6 +18,7 @@ class Result{
         if (count($data))
             $request.=',"data":'.\ARR::to_json($data);    
         echo '{'.$request.'}';
+        error_log('{'.$request.'}');        
         exit;    
     }
 

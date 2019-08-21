@@ -144,7 +144,7 @@ begin
     BlockSize:=1024;
     BlockLen:=1024;
     fMaxDataSetFieldLen:=256;
-    Key:='test';
+    Key:='jqwed67dec';
 end;
 
 destructor TExWeb.Destroy;
@@ -486,21 +486,27 @@ begin
         cResult:=get(['event','recv_get_id'],otvet);
 
         if cResult<>ewrOk then begin
-            result:=prevState;
-            result.result:=false;
+            //result:=prevState;
+            result.webResult:=cResult;
+            result.id       :='-1';
+            result.result   :=false;
             raise Exception.Create('event=recv_get_id');
         end;
 
         if (otvet.Int['res'] = 0) then begin
-            result:=prevState;
-            result.result:=false;
+            //result:=prevState;
+            result.webResult:=cResult;
+            result.id       :='-1';
+            result.result   :=false;
             raise Exception.Create('event=init_recv, otvet='+otvet['msg']);
         end;
 
         id          :=  otvet.Hash['data']['id'];
         if (id = '-1') then begin
-            result:=prevState;
-            result.result:=false;
+            //result:=prevState;
+            result.webResult:=cResult;
+            result.id       :='-1';
+            result.result   :=false;
             raise Exception.Create('no messages');
         end;
 
@@ -513,8 +519,10 @@ begin
             cResult:=get(['event','recv_string','id',id],otvet);
 
             if cResult<>ewrOk then begin
-                result:=prevState;
-                result.result:=false;
+                //result:=prevState;
+                result.webResult:=cResult;
+                result.id       :=id;
+                result.result   :=false;
                 raise Exception.Create('event=recv_str');
             end;
 
@@ -530,18 +538,24 @@ begin
             cResult:=_recvBlock(data,id,count);
 
             if cResult<>ewrOk then begin
-                result:=prevState;
-                result.result:=false;
+                //result:=prevState;
+                result.webResult:=cResult;
+                result.id       :=id;
+                result.result   :=false;
+
                 data.Size:=0;
                 raise Exception.Create('_recvBlock<>ewrOk');
             end;
 
             cMD5Recv := UpperCase(MD5(data));
             if (cMD5<>cMD5Recv) then begin
-                result:=prevState;
-                result.result:=false;
+                //result:=prevState;
+                result.webResult:=ewrHashSumNotCompare;
+                result.id       :=id;
+                result.result   :=false;
+
                 data.Size:=0;
-                raise Exception.Create('hesh sum recv and sending is not equal');
+                raise Exception.Create('hash sum recv and sending is not equal');
             end;
 
         end;
@@ -580,6 +594,7 @@ function TExWeb.send(const str: string; data: TStream; prevState: TExWebState):
 var
     otvet: THash;
     cMD5: string;
+  cPrepare: Integer;
     cResult: TExWebResult;
     id: string;
     csize: Int64;
@@ -595,6 +610,7 @@ begin
 
     try
     try
+
 
         if (data<>nil) and (data.size>0) then begin
             data.Position:=0;
@@ -618,19 +634,32 @@ begin
             end;
         end;
 
+        cPrepare:=UUtils.Utils.prepare(str);
+        if (cPrepare<>0) then begin
+            cResult := ewrErrorPrepare;
+            result.id       := '-1';
+            result.webResult:=cResult;
+            result.result   :=false;
+            raise Exception.Create('prepare pos:'+IntToStr(cPrepare)+' char:['+str[cPrepare]+'] code:['+IntToStr(Ord(str[cPrepare]))+'] ,result='+TExWebResultStr[integer(cResult)]);
+        end;
+
         // инициализируем передачу и получаем настрйки сервера
         cResult:=get(['event','init_send'],otvet);
 
         //if (1>0) then begin
         if cResult<>ewrOk then begin
-            result:=prevState;
-            result.result:=false;
+            //result:=prevState;
+            result.webResult:=cResult;
+            result.id       := '-1';
+            result.result   :=false;
             raise Exception.Create('event=init_send,result='+TExWebResultStr[integer(cResult)]);
         end;
 
         if (otvet.Int['res'] = 0) then begin
-            result:=prevState;
-            result.result:=false;
+            //result:=prevState;
+            result.webResult:=ewrRes0;
+            result.id       := '-1';
+            result.result   :=false;
             raise Exception.Create('event=init_send,otvet='+otvet['msg']);
         end;
 
@@ -643,8 +672,10 @@ begin
         cResult:=_send(str,id);
 
         if cResult<>ewrOk then begin
-            result:=prevState;
-            result.result:=false;
+            //result:=prevState;
+            result.id       := id;
+            result.webResult:=cResult;
+            result.result   :=false;
             raise Exception.Create('_send(str)<>ewrOk,result='+TExWebResultStr[integer(cResult)]);
         end;
 
@@ -655,7 +686,9 @@ begin
             cResult:=_send(data,id);
 
             if cResult<>ewrOk then begin
-                result:=prevState;
+                //result:=prevState;
+                result.id := id;
+                result.webResult:=cResult;
                 result.result:=false;
                 raise Exception.Create('_send(stream)<>ewrOk,result='+TExWebResultStr[integer(cResult)]);
             end;
@@ -780,6 +813,8 @@ begin
     try
     try
         cStr:=str;
+
+
 
         cStr:=Utils.rusCod(cStr);
 

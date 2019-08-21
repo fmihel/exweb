@@ -8,11 +8,12 @@ function send(const str:string;data:TStream;prevState:TExWebState):TExWebState;e
 function recv(var str:string;data:TStream;prevState:TExWebState):TExWebState;exports recv;
 procedure setParam(name:string;value:string);exports setParam;
 function getParam(name:string):string;exports getParam;
+function prepare(str:string):integer;exports prepare;
 //function query(const sql, base: string; outDS: TClientDataSet; const coding: string): Boolean;exports query;
 function query(const sql, base: string; outDS: TStrings; const coding: string): Boolean;exports query;
 
 implementation
-uses {$ifdef _log_}ULog,{$endif}UExWeb;
+uses {$ifdef _log_}ULog,{$endif}UExWeb, UUtils;
 var
     exweb:TExWeb;
 
@@ -32,6 +33,11 @@ const
 begin
     {$ifdef _log_} ULog.Log('query',[],'',cFuncName);{$endif}
     result:=exweb.query(sql,base,outDS,coding);
+end;
+
+function prepare(str:string):integer;
+begin
+    result:=UUtils.Utils.prepare(str);
 end;
 
 procedure setParam(name:string;value:string);

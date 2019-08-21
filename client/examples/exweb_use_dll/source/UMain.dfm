@@ -32,7 +32,7 @@ object frmMain: TfrmMain
     Top = 0
     Width = 908
     Height = 417
-    ActivePage = TabSheet4
+    ActivePage = TabSheet2
     Align = alTop
     ParentShowHint = False
     ShowHint = True
@@ -40,8 +40,6 @@ object frmMain: TfrmMain
     ExplicitWidth = 895
     object TabSheet1: TTabSheet
       Caption = '1. '#1055#1086#1076#1082#1083#1102#1095#1077#1085#1080#1077
-      ExplicitLeft = 8
-      ExplicitTop = 25
       DesignSize = (
         900
         386)
@@ -77,7 +75,6 @@ object frmMain: TfrmMain
         Anchors = [akLeft, akTop, akRight]
         TabOrder = 2
         Text = '*.xml'
-        ExplicitWidth = 623
       end
       object DirectoryListBox1: TDirectoryListBox
         Left = 225
@@ -101,7 +98,6 @@ object frmMain: TfrmMain
         Mask = '*.dll'
         TabOrder = 4
         OnClick = FileListBox1Click
-        ExplicitWidth = 367
       end
       object Button14: TButton
         Left = 16
@@ -115,7 +111,10 @@ object frmMain: TfrmMain
     object TabSheet4: TTabSheet
       Caption = '2. '#1055#1072#1088#1072#1084#1077#1090#1088#1099
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 887
+      ExplicitHeight = 0
       DesignSize = (
         900
         386)
@@ -162,7 +161,10 @@ object frmMain: TfrmMain
     object TabSheet2: TTabSheet
       Caption = '3. send'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 887
+      ExplicitHeight = 0
       object PageControl2: TPageControl
         Left = 150
         Top = 0
@@ -173,7 +175,6 @@ object frmMain: TfrmMain
         TabOrder = 0
         object TabSheet5: TTabSheet
           Caption = #1057#1090#1088#1086#1082#1072' '#1082' '#1086#1090#1087#1088#1072#1074#1082#1077':'
-          ExplicitWidth = 692
           DesignSize = (
             742
             355)
@@ -185,7 +186,6 @@ object frmMain: TfrmMain
             Anchors = [akLeft, akTop, akRight]
             TabOrder = 0
             Text = '*.xml'
-            ExplicitWidth = 665
           end
           object Button19: TButton
             Left = 648
@@ -195,7 +195,6 @@ object frmMain: TfrmMain
             Action = actNew
             Anchors = [akTop, akRight]
             TabOrder = 1
-            ExplicitLeft = 674
           end
           object Memo8: TMemo
             Left = 3
@@ -214,7 +213,6 @@ object frmMain: TfrmMain
             TabOrder = 2
             WantTabs = True
             WordWrap = False
-            ExplicitWidth = 555
           end
           object FileListBox3: TFileListBox
             Left = 538
@@ -226,7 +224,6 @@ object frmMain: TfrmMain
             Mask = '*.xml'
             TabOrder = 3
             OnDblClick = FileListBox3DblClick
-            ExplicitLeft = 564
           end
           object DirectoryListBox3: TDirectoryListBox
             Left = 538
@@ -237,7 +234,6 @@ object frmMain: TfrmMain
             FileList = FileListBox3
             ItemHeight = 16
             TabOrder = 4
-            ExplicitLeft = 564
           end
           object DriveComboBox3: TDriveComboBox
             Left = 538
@@ -247,7 +243,6 @@ object frmMain: TfrmMain
             Anchors = [akRight, akBottom]
             DirList = DirectoryListBox1
             TabOrder = 5
-            ExplicitLeft = 564
           end
           object Button18: TButton
             Left = 443
@@ -257,7 +252,6 @@ object frmMain: TfrmMain
             Action = actClear
             Anchors = [akRight, akBottom]
             TabOrder = 6
-            ExplicitLeft = 469
           end
           object Button17: TButton
             Left = 103
@@ -281,7 +275,6 @@ object frmMain: TfrmMain
         object str: TTabSheet
           Caption = #1060#1072#1081#1083' '#1082#1072#1082' '#1073#1080#1085#1072#1088#1085#1099#1077' '#1076#1072#1085#1085#1099#1077' '#1082' '#1086#1090#1087#1088#1072#1074#1082#1077
           ImageIndex = 1
-          ExplicitWidth = 692
           DesignSize = (
             742
             355)
@@ -326,7 +319,6 @@ object frmMain: TfrmMain
             Caption = 'clear'
             TabOrder = 3
             OnClick = Button4Click
-            ExplicitLeft = 598
           end
           object StreamSend: TEdit
             Left = 3
@@ -335,7 +327,6 @@ object frmMain: TfrmMain
             Height = 24
             Anchors = [akLeft, akTop, akRight]
             TabOrder = 4
-            ExplicitWidth = 686
           end
         end
       end
@@ -362,7 +353,10 @@ object frmMain: TfrmMain
     object TabSheet3: TTabSheet
       Caption = '4. recv'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 887
+      ExplicitHeight = 0
       DesignSize = (
         900
         386)
@@ -398,7 +392,6 @@ object frmMain: TfrmMain
           'StrRecv')
         ScrollBars = ssBoth
         TabOrder = 1
-        ExplicitWidth = 600
       end
       object StreamRecv: TMemo
         Left = 240
@@ -410,13 +403,11 @@ object frmMain: TfrmMain
           'StreamRecv')
         ScrollBars = ssBoth
         TabOrder = 2
-        ExplicitWidth = 600
       end
     end
     object TabSheet7: TTabSheet
       Caption = 'Auto test'
       ImageIndex = 4
-      ExplicitWidth = 887
       object Label2: TLabel
         Left = 208
         Top = 32
@@ -474,7 +465,6 @@ object frmMain: TfrmMain
       'MemoLog')
     ScrollBars = ssBoth
     TabOrder = 1
-    ExplicitWidth = 895
   end
   object ActionList1: TActionList
     OnUpdate = ActionList1Update
