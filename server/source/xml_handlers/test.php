@@ -9,44 +9,63 @@ require_once __DIR__.'../../Utils.php';
 \base::connect('localhost','root','','_wd_test','deco');
 \base::charSet('cp1251','deco');
 
+/*
+$xmlString = '
+<?xml version=”1.0” encoding =”unicode”?>
+<Msg Kind="2" Action="1">
+    <IdKlient>999999</IdKlient>
+    <KlientInfo>
+        <AdresatKind>3</AdresatKind>
+        <KlientName><![CDATA[Menegers]]></KlientName>
+        <EMail>fmihel76@gmail.com</EMail>
+        <RemoteAccess>1</RemoteAccess>
+        <DecoRMail>fmihel76@gmail.com</DecoRMail>
+        <Arch>0</Arch>
+    </KlientInfo>
+</Msg>';
+*/
 
 $xmlString = '
 <?xml version=”1.0” encoding =”unicode”?>
 <Msg Kind="9" Action="1">
 <Tables>
-    <Table Name="NEWS" IdFieldName="ID_NEWS" Base="deco">git 
-        <Row Id="15">
-            <Field Name="msG"><![CDATA[Русские]]></Field>
+    <Table Name="DE_RIGHT">
+        <Row Id="1">
+            <Field Name="CAPTION"><![CDATA[Описание]]></Field>
         </Row>
-        <Row Id="17">
-            <Field Name="Msg"><![CDATA[qhwjejhqwjhwgjhwdjhwg ]]></Field>
+        <Row Id="2">
+            <Field Name="CAPTION"><![CDATA[Изображение]]></Field>
+        </Row>
+        <Row Id="3">
+            <Field Name="CAPTION"><![CDATA[Прайс]]></Field>
+        </Row>
+        <Row Id="4">
+            <Field Name="CAPTION"><![CDATA[Заказ]]></Field>
+        </Row>
+        <Row Id="5">
+            <Field Name="CAPTION"><![CDATA[Цены]]></Field>
         </Row>
     </Table>
-    <Table Name="NEWS" IdFieldName="ID_NEWS" Base="deco">
-        <Row Id="16">
-            <Field Name="msG"><![CDATA[2l3k4oi3i23j4oij]]></Field>
-            <Field Name="permissioN"><![CDATA[ [2,3,4] ]]></Field>
+    <Table Name="DE_USER">
+        <Row Id="4">
+            <Field Name="FIO">Morra</Field>
+            <Field Name="LOGIN">Morra</Field>
+            <Field Name="PWD">Morra1</Field>
         </Row>
-        <Row Id="18">
-            <Field Name="Msg"><![CDATA[2i34i 2j34oijoi23j i 23oioi j34]]></Field>
-        </Row>
+
     </Table>
-    <Table Name="NEWS" IdFieldName="ID_NEWS">
-        <Row Id="18" Type="delete"/>
-    </Table>
+
 </Tables>
 </Msg>';
-
-var_dump(\base::fieldsInfo('NEWS','types','deco'));
 echo '<xmp>';
-
 
 
 echo $xmlString;
 $xml = UT::strToXml($xmlString);
 echo "\n";
-Handlers::run($xml);
 echo '</xmp>';
+
+Handlers::run($xml);
 
 
 
