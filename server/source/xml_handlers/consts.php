@@ -45,7 +45,9 @@ define('XML_INFO',[
     array('KIND'=>6,'ACTION'=>1,'NOTE'=>'Запрос данных по клиентам'),
     array('KIND'=>6,'ACTION'=>2,'NOTE'=>'Передача данных по клиентам'),
     array('KIND'=>7,'ACTION'=>1,'NOTE'=>'Передача списка пользователей'),
-    array('KIND'=>8,'ACTION'=>1,'NOTE'=>'Передача информации по рулонам')
+    array('KIND'=>8,'ACTION'=>1,'NOTE'=>'Передача информации по рулонам'),
+    array('KIND'=>9,'ACTION'=>1,'NOTE'=>'Модификация таблиц'),
+
 ]);
 
 define('KIND_ORDER',1);
