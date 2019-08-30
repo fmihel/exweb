@@ -47,11 +47,12 @@ $xmlString = '
         </Row>
     </Table>
     <Table Name="DE_USER">
-        <Row Id="4">
+        <Row Id="1">
             <Field Name="FIO">Morra</Field>
             <Field Name="LOGIN">Morra</Field>
             <Field Name="PWD">Morra1</Field>
         </Row>
+        <Row Id="2" Action ="delete"/>
 
     </Table>
 

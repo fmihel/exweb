@@ -205,20 +205,27 @@ class ModifTable extends Handler{
         $msg = '';
 
         if ($countLogin>0){
-            $login = $this->generate('EMAIL_LOGIN',$ID_USER);
             $msg.="login `$login` for user ID_USER=$ID_USER is exists\n";
+            $login = $this->generate('EMAIL_LOGIN',$ID_USER);
             $msg.="generate new login = `$login`\n";
         };
 
         if ($countPass>0){
             
-            $pass = $this->generate('PASS',$ID_USER);
             $msg.="password `$pass` for user ID_USER=$ID_USER is exists\n";
+            $pass = $this->generate('PASS',$ID_USER);
             $msg.="generate new pass = `$pass`\n";
         };
         
-        //if ($msg!=='')
-        //    Utils::sendMail($this->adminEmail,'info@windeco.su','Windeco: Not unique login password',$msg);
+        if ($msg!==''){
+            // поставил в try т.к. в условиях localhost не работает :( 
+            // но как таковым это не является ошибкой    
+            try{
+                Utils::sendMail($this->adminEmail,'info@windeco.su','Windeco: Not unique login password',$msg);
+            }catch(\Exception $e){
+                error_log($e->getMessage());
+            }
+        }    
 
         return ['login'=>$login,'pass'=>$pass];
 

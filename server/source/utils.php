@@ -109,7 +109,7 @@ class Utils{
         $headers = 'From: '.$FromMail."\r\n" .'Reply-To: '.$FromMail."\r\n";
         //$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";        
         $headers .= 'Content-type: text/html; charset=windows-1251' . "\r\n";
-        return mail($ToMail, $Theme, $Message, $headers);
+        return @mail($ToMail, $Theme, $Message, $headers);
 
     }
     
