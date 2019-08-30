@@ -15,6 +15,7 @@
 /server/node_modules/
 .vscode/
 /server/clearOrders.php
+/server/source/xml_handlers/test.php
 
 *.exe
 *.dcu

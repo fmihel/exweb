@@ -19,15 +19,18 @@ class ModifTable extends Handler{
         
         'NEWS'          =>'ID_NEWS', // пока для тестов добавил 
     ];
-    private $adminEmail = ['fmihel76@gmail.com','george@windeco.ru'];
+    private $adminEmail;//['fmihel76@gmail.com','george@windeco.ru'];
 
-    private $ID_DEALER_MENAGER = 1; // дилер для менеджеров
+    private $ID_DEALER_MENAGER; // дилер для менеджеров
     
     public function __construct()
     {
         parent::__construct();
         $this->kind     =   9;
         $this->action   =   1; 
+        $this->adminEmail       = \WS_CONF::GET('emailForKind9Action1',['fmihel76@gmail.com','george@windeco.ru']);
+        $this->ID_DEALER_MENAGER = \WS_CONF::GET('ID_DEALER_MANAGER',1);
+        
     }
     public function run($xml){
         $coding = 'utf8';
