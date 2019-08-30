@@ -19,9 +19,9 @@ class ModifTable extends Handler{
         
         'NEWS'          =>'ID_NEWS', // пока для тестов добавил 
     ];
-    private $adminEmail = 'fmihel76@gmail.com';
+    private $adminEmail = ['fmihel76@gmail.com','george@windeco.ru'];
 
-    private $ID_DEALER_MENAGER = 999999; // дилер для менеджеров
+    private $ID_DEALER_MENAGER = 1; // дилер для менеджеров
     
     public function __construct()
     {
@@ -199,31 +199,40 @@ class ModifTable extends Handler{
      */
     private function validLoginPass($ID_USER,$pass,$login){
 
-        $countLogin =  \base::valE("select count(ID_USER) from USER where ID_USER <> $ID_USER and EMAIL_LOGIN = '$login'",0,'deco');
-        $countPass  =  \base::valE("select count(ID_USER) from USER where ID_USER <> $ID_USER and PASS='$pass' ",0,'deco');
+        $countLogin   =  \base::valE("select count(ID_USER) from USER where ID_USER <> $ID_USER and EMAIL_LOGIN = '$login'",0,'deco');
+        $countDouble  =  \base::valE("select count(ID_USER) from USER where ID_USER <> $ID_USER and PASS='$pass' and EMAIL_LOGIN='$login' ",0,'deco');
 
         $msg = '';
 
-        if ($countLogin>0){
+
+        if ($countDouble>0){
+            
+            $msg.="password `$pass` and login '$login' is duplicated for user ID_USER=$ID_USER is exists\n";
+            
+            $pass  = $this->generate('PASS',$ID_USER);
+            $login = $this->generate('EMAIL_LOGIN',$ID_USER);
+            
+            $msg.="generate new pass = `$pass`\n";
+            
+        }elseif ($countLogin>0){
+            
             $msg.="login `$login` for user ID_USER=$ID_USER is exists\n";
             $login = $this->generate('EMAIL_LOGIN',$ID_USER);
             $msg.="generate new login = `$login`\n";
+            
         };
 
-        if ($countPass>0){
-            
-            $msg.="password `$pass` for user ID_USER=$ID_USER is exists\n";
-            $pass = $this->generate('PASS',$ID_USER);
-            $msg.="generate new pass = `$pass`\n";
-        };
         
         if ($msg!==''){
+            
             // поставил в try т.к. в условиях localhost не работает :( 
             // но как таковым это не является ошибкой    
-            try{
-                Utils::sendMail($this->adminEmail,'info@windeco.su','Windeco: Not unique login password',$msg);
-            }catch(\Exception $e){
-                error_log($e->getMessage());
+            foreach($this->adminEmail as $email){
+                try{
+                    Utils::sendMail($email,'info@windeco.su','Windeco: Not unique login password',$msg);
+                }catch(\Exception $e){
+                    error_log($e->getMessage());
+                }
             }
         }    
 
