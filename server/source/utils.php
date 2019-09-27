@@ -2,6 +2,8 @@
 
 namespace exweb\source;
 
+use Exception;
+
 $utf8_cyr_l = ['а','б','в','г','д','е','ж','з','и','й','к','л','м','н','о','п','р','с','т','у','ф','х','ц','ч','ш','щ','ъ','ы','ь','э','ю','я','ё'];
 $utf8_cyr_h = ['А','Б','В','Г','Д','Е','Ж','З','И','Й','К','Л','М','Н','О','П','Р','С','Т','У','Ф','Х','Ц','Ч','Ш','Щ','Ъ','Ы','Ь','Э','Ю','Я','Ё'];
 $utf8_cyr_l_code = [];//1072;
@@ -112,7 +114,45 @@ class Utils{
         return @mail($ToMail, $Theme, $Message, $headers);
 
     }
-    
+    /**
+     * заменяет $search на $replace пока они существуют в $text 
+     * @param {string} $search - искомое
+     * @param {string} $replace - на что заменить
+     * @param {string}
+     * @return string|Exception
+     */
+    static function replaceAll($search,$replace,$text){
+        
+        $loop = 1000000;
+        while (1>0){
+            $loop--;
+            if ($loop<0) {
+                $msg = 'LOOP in Utils::replaceAll '.__FILE__;
+                error_log($msg);
+                throw new Exception($msg);
+            };   
+            
+            $need = false;
+
+            if (is_array($search)){
+
+                $count = count($search);
+                for($i=0;$i<$count;$i++){
+                    $need = (mb_strpos($text,$search[$i])!==false);
+                    if ($need) 
+                        break;
+                };
+
+            }else
+                $need = (mb_strpos($text,$search)!==false);
+                
+            if ($need)
+                $text = str_replace($search,$replace,$text);
+            else
+                return $text;
+        }
+        
+    }
 
 }
 ?>

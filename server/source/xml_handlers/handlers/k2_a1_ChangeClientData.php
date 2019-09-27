@@ -85,8 +85,81 @@ class ChangeClientData extends Handler{
             };
         };
 
+        self::updateCatalogUserInfo($xml);
+
     }
-}
+    /**
+     * обновление информации о пользователе КАТАЛОГ - ONLINE
+     * @param {xml} - 
+     * @return true | Exception
+     */
+    private function updateCatalogUserInfo($xml){
+        $id         =   (int)$xml->IdKlient;
+        $email      =   trim((string)$xml->KlientInfo->DecoRMail);
+        $enable     =   (int)$xml->KlientInfo->RemoteAccess;
+        $arch       =   (int)$xml->KlientInfo->Arch;
+
+        $admin_email    = \WS_CONF::GET('admin_email','fmihel76@gmailc.com');
+        $appName        = \WS_CONF::GET('appNameCatalog','КАТАЛОГ-ONLINE');
+        $appUrl         = \WS_CONF::GET('CATALOG_URL','https://windeco.su/catalog');
+
+        if (\base::val("select count( ID ) from QID_AUTORIZE where ID = $id",0,'exweb') == 0){
+            $types =  \base::fieldsInfo('QID_AUTORIZE','types','exweb');
+            $pass = UT::random_str(5);
+            $q = \base::dataToSQL('insert','QID_AUTORIZE',[
+                'KIND'=>3,
+                'ID'=>$id,
+                'DATE_CREATE'=>['CURRENT_TIMESTAMP','int'],
+                'EMAIL'=>$email,
+                'ENABLE'=>$enable,
+                'ARCH'=>$arch,
+                'PASS'=>[$pass,'string'],
+            ],['types'=>$types]);
+            \base::queryE($q,'exweb');
+            
+            if ($email!==''){
+                
+                UT::sendMail($email,$admin_email,$appName.': Данные для входа.',
+                    'Данное письмо сгенерировано автоматически, отвечать на него не надо.<br>'.
+                    "Данные для входа в программу $appName ($appUrl)<br><br>".
+                    "login:".$email.'<br>'.
+                    "pass:".$pass.'<br>'.
+                    '<br>С уважением<br>'.
+                    "Cлужба поддержки компании $appName!"
+                );
+            }
+        }else{
+            $types =  \base::fieldsInfo('QID_AUTORIZE','types','exweb');
+            $q = \base::dataToSQL('update','QID_AUTORIZE',[
+                    'ENABLE'=>$enable,
+                    'ARCH'=>$arch,
+                ],['types'=>$types])." where ID = $id";
+
+            \base::queryE($q,'exweb');
+            
+            if ($email!==''){
+                $q = "select EMAIL from QID_AUTORIZE where ID=$id";
+                $emails = \base::val($q,'','exweb');
+            
+                $emails = UT::replaceAll('  ',' ',trim($emails));
+                $emails = UT::replaceAll(' ',',',$emails);
+                $emails = UT::replaceAll(';',',',$emails);
+                $emails = UT::replaceAll(',,',',',$emails);
+
+                $emails = explode(',',$emails);
+
+                if (array_search($email,$emails)===false){
+                    $emails[] = $email;
+                    $emails = implode(',',$emails);
+                    $q = \base::dataToSQL('update','QID_AUTORIZE',['EMAIL'=>[$emails,'string']])." where ID=$id";    
+                    
+                    \base::queryE($q,'exweb');
+                }
+            }// if ($email!=='')
+        } // else
+        return true;
+    }// updateCatalogUserInfo
+};
 
 new ChangeClientData();
 
