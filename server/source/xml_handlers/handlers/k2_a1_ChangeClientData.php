@@ -99,9 +99,6 @@ class ChangeClientData extends Handler{
         $enable     =   (int)$xml->KlientInfo->RemoteAccess;
         $arch       =   (int)$xml->KlientInfo->Arch;
 
-        $admin_email    = \WS_CONF::GET('admin_email','fmihel76@gmailc.com');
-        $appName        = \WS_CONF::GET('appNameCatalog','КАТАЛОГ-ONLINE');
-        $appUrl         = \WS_CONF::GET('CATALOG_URL','https://windeco.su/catalog');
 
         if (\base::val("select count( ID ) from QID_AUTORIZE where ID = $id",0,'exweb') == 0){
             $types =  \base::fieldsInfo('QID_AUTORIZE','types','exweb');
@@ -117,17 +114,6 @@ class ChangeClientData extends Handler{
             ],['types'=>$types]);
             \base::queryE($q,'exweb');
             
-            if ($email!==''){
-                
-                UT::sendMail($email,$admin_email,$appName.': Данные для входа.',
-                    'Данное письмо сгенерировано автоматически, отвечать на него не надо.<br>'.
-                    "Данные для входа в программу $appName ($appUrl)<br><br>".
-                    "login:".$email.'<br>'.
-                    "pass:".$pass.'<br>'.
-                    '<br>С уважением<br>'.
-                    "Cлужба поддержки компании $appName!"
-                );
-            }
         }else{
             $types =  \base::fieldsInfo('QID_AUTORIZE','types','exweb');
             $q = \base::dataToSQL('update','QID_AUTORIZE',[
@@ -146,7 +132,9 @@ class ChangeClientData extends Handler{
                 $emails = UT::replaceAll(';',',',$emails);
                 $emails = UT::replaceAll(',,',',',$emails);
 
-                $emails = explode(',',$emails);
+                $_emails = explode(',',$emails);
+                $emails = [];
+                foreach($_emails as $v){ if ($v!=='') $emails[]=$v;}
 
                 if (array_search($email,$emails)===false){
                     $emails[] = $email;
