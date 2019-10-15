@@ -107,10 +107,11 @@ class Utils{
         return $str;
     }
     /** отправка почты */
-    public static function sendMail($ToMail,$FromMail,$Theme,$Message){
+    public static function sendMail($ToMail,$FromMail,$Theme,$Message,$coding = 'UTF-8'/*windows-1251*/){
+        
         $headers = 'From: '.$FromMail."\r\n" .'Reply-To: '.$FromMail."\r\n";
         //$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";        
-        $headers .= 'Content-type: text/html; charset=windows-1251' . "\r\n";
+        $headers .= 'Content-type: text/html; charset='.$coding . "\r\n";
         return @mail($ToMail, $Theme, $Message, $headers);
 
     }
