@@ -16,7 +16,7 @@ require_once $dir_handlers.'/k2_a3_AddrDost.php';
 require_once $dir_handlers.'/k2_a1_ChangeClientData.php';
 require_once $dir_handlers.'/k1_a2_PredvaritPrinyt.php';
 require_once $dir_handlers.'/k1_a4_OrderState.php';
-require_once $dir_handlers.'/k1_a5_ResultOtmena.php';
+require_once $dir_handlers.'/k1_a6_ResultOtmena.php';
 require_once $dir_handlers.'/k9_a1_ModifTable.php';
 
 

@@ -10,7 +10,7 @@ class ResultOtmena extends Handler{
     {
         parent::__construct();
         $this->kind     =   1;
-        $this->action   =   5; 
+        $this->action   =   6; 
     }
     public function run($xml){
 
