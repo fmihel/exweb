@@ -16,11 +16,13 @@ class ResultOtmena extends Handler{
 
         $ReplyId =  (int)ut::xmlAttr($xml,'ReplyId');
         $OrderInfo = ut::xmlVal($xml,'OrderInfo');
-        $MainZakazId  = (int)ut::xmlVal($OrderInfo,'MainZakazId');
+        //$MainZakazId  = (int)ut::xmlVal($OrderInfo,'MainZakazId');
+        $LocalOrderId  = (int)ut::xmlVal($OrderInfo,'LocalOrderId');
 
         $update = ut::tagToFields('OrderInfo',$OrderInfo);  
         $params = ['types'=>$update['types']];
-        $params['exclude']='MAIN_ZAKAZ_ID';
+        $params['exclude']='ID_ORDER';
+        
 
         
         if ($ReplyId == 1)
@@ -29,7 +31,9 @@ class ResultOtmena extends Handler{
             $STATE = OS_OTMENA_ZAPRESHENA;        
         $update['data']['STATE'] = $STATE;
 
-        $q = \base::dataToSQL('update','ORDERS',$update['data'],$params)." where MAIN_ZAKAZ_ID = $MainZakazId";
+        //$q = \base::dataToSQL('update','ORDERS',$update['data'],$params)." where MAIN_ZAKAZ_ID = $MainZakazId";
+        $q = \base::dataToSQL('update','ORDERS',$update['data'],$params)." where ID_ORDER = $LocalOrderId";
+        
         \base::queryE($q,'deco');
 
     }
