@@ -17,6 +17,8 @@ class ChangeClientData extends Handler{
         $enable     =   (int)$xml->KlientInfo->RemoteAccess;
         $arch       =   (int)$xml->KlientInfo->Arch;
         $klientname =   (string)$xml->KlientInfo->KlientName;
+        $IdMainKlient =   (int)$xml->KlientInfo->IdMainKlient;
+        $Nalichnye =   (int)$xml->KlientInfo->Nalichnye;
 
         $ID_RIGHT  = 0;
         
@@ -61,10 +63,26 @@ class ChangeClientData extends Handler{
 
             
         };//count = 0;
-
-        $q = "update DEALER set NAME='$klientname',EMAIL='$email',ENABLE=$enable,ARCH=$arch where ID_DEALER = $id";
+        
+        //$q = "update DEALER set NAME='$klientname',EMAIL='$email',ENABLE=$enable,ARCH=$arch where ID_DEALER = $id";
+        $q = \base::dataToSQL(
+            'update',
+            'DEALER',
+            [
+                'ID_DEALER' =>$id,
+                'NAME'      =>[$klientname,'string'],
+                'EMAIL'     =>[$email,'string'],
+                'ENABLE'    =>$enable,
+                'ARCH'      =>$arch,
+                'ID_MAIN_KLIENT'    => $IdMainKlient,
+                'NALICHNYE' =>$Nalichnye
+            ],
+            [
+                'exclude'=>'ID_DEALER',
+                'where'=>'ID_DEALER = ::ID_DEALER'
+            ]
+        );
         \base::queryE($q,'deco');
-
         // изменяем главного клиента если он есть
         $id_user = \base::val('select ID_USER_MAIN from DEALER where ID_DEALER = '.$id,0,'deco');
         if ($id_user!=0){
