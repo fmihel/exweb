@@ -18,7 +18,7 @@ class RequestAutorize extends Handler{
         $q = "select * from DEALER where ID_DEALER=$id_client";
         $dealer = \base::rowE($q,'deco',null);
 
-        $s='Клиент: "'.\base::valE('select NAME from DEALER where ID_DEALER = '.$id_client.' order by NAME','','deco').'"<br><br>';
+        $client='Клиент: "'.\base::valE('select NAME from DEALER where ID_DEALER = '.$id_client.' order by NAME','','deco').'"<br><br>';
             
         $userDS =  \base::dsE("select * from USER where ID_DEALER = $id_client",'deco');
         $user = [];
@@ -26,7 +26,8 @@ class RequestAutorize extends Handler{
         $admin_email    = \WS_CONF::GET('admin_email');
         $appName        = \WS_CONF::GET('appName');
         $appUrl         = \WS_CONF::GET('APPLICATION_URL');
-
+        $s = '';
+        
         if ($send_type==1)
         {
             while(\base::by($userDS,$user))
@@ -38,6 +39,7 @@ class RequestAutorize extends Handler{
                 $appName.': Данные для входа.',
                 'Данное письмо сгенерировано автоматически, отвечать на него не надо.<br>'.
                 'Данные для входа в программу '.$appName.' ('.$appUrl.')<br><br>'.
+                $client.
                 $s.
                 '<br>С уважением<br>'.
                 'Cлужба поддержки компании '.$appName.'!'
@@ -47,11 +49,12 @@ class RequestAutorize extends Handler{
                     
             while(\base::by($userDS,$user))
             {
-                $s.='Сотрудник: "'.$user['NAME'].'"   логин: "'.$user['EMAIL_LOGIN'].'" пароль: "'.$user['PASS'].'"<br>';
+                $s='Сотрудник: "'.$user['NAME'].'"   логин: "'.$user['EMAIL_LOGIN'].'" пароль: "'.$user['PASS'].'"<br>';
                 if(trim($user['REL_EMAIL'])!=='')
                     UT::sendMail(trim($user['REL_EMAIL']),$admin_email,$appName.': Данные для входа.',
                         'Данное письмо сгенерировано автоматически, отвечать на него не надо.<br>'.
                         "Данные для входа в программу $appName ($appUrl)<br><br>".
+                        $client.
                         $s.
                         '<br>Вы можете самостоятельно изменить свой логин и пароль, - кнопка "Настройки" раздел "Личные данные"'.
                         '<br>С уважением<br>'.
