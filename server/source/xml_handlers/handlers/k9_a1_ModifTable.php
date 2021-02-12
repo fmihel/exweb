@@ -38,6 +38,7 @@ class ModifTable extends Handler{
         $de_tables=['DE_USER'/*,'DE_RIGHT','DE_ROL','DE_ROL_RIGHT','DE_USER_RIGHT','DE_USER_ROL'*/]; // список таблиц при обновлении,котороых необходимо запустить дополнительный обработчик 
 
         $run_de_handler = false;
+        $run_handler_after_delete = false;
 
         \base::startTransaction('deco');
         \base::startTransaction('exweb');
@@ -88,6 +89,8 @@ class ModifTable extends Handler{
                             if ($id!==''){
 
                                 $query = "delete from `$TableName` where `$IdFieldName` = $id";
+                                $run_handler_after_delete = true;
+
                             }    
                         }
     
@@ -113,8 +116,14 @@ class ModifTable extends Handler{
             throw new \Exception($e->getMessage());
         }
 
-        if ($run_de_handler)
+        if ($run_de_handler){
             $this->updateDE_USER();
+        }
+
+        if ($run_handler_after_delete){
+            $this->updateDE_USER_RIGHT();
+        }
+
     }
     /** 
      * преобразование к нужному регистру имени поля переданного в xml атрибуте
@@ -284,6 +293,59 @@ class ModifTable extends Handler{
         }
     }
     
+    /** удаление разрешиния на просмотр спец предложений из user.RIGHTS  RIGHTS = "...9..." 
+     *  для всех пользователей, клиенту которых запретили просмотр спец предложений
+    */
+    private function updateDE_USER_RIGHT(){
+
+        try {
+            // для всех пользователей
+            $q = "SELECT distinct
+                u.ID_USER,
+                u.RIGHTS
+            from 
+                `USER` u
+                join
+                DE_USER_RIGHT dur 
+                    on u.ID_DEALER = dur.ID_KLIENT 
+            where
+                u.rights like '%9%'
+            and 
+                not exists ( select * 
+                    from 
+                        `USER` u2 
+                        join 
+                        `DE_USER_RIGHT` dur2
+                            on u2.ID_DEALER = dur2.ID_KLIENT 
+                    where 
+                        u2.ID_DEALER=u.ID_DEALER 
+                    and 
+                        dur2.ID_DE_RIGHT =398
+                )
+            ";
+
+            $users =\base::ds($q,'deco');
+
+            while($user = \base::read($users)){
+
+                $q = 'update USER set RIGHTS='.$user['NEW_RIGHT'].' where ID_USER='.$user['ID_USER'];
+                try {
+                    if (!\base::query($q,'deco'))
+                        throw new Exception("cant update RIGHTS for user ID_USER=".$user['ID_USER']);
+                    
+                } catch (\Exception $e) {
+                    error_log('warning['.__FILE__.':'.__LINE__.'] '.$e->getMessage());
+                };
+
+            };
+            
+
+        } catch (\Exception $e) {
+            error_log('Exception ['.__FILE__.':'.__LINE__.'] '.$e->getMessage());
+        };
+
+    }
+
 }
 
 new ModifTable();
