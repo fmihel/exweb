@@ -121,7 +121,7 @@ class ModifTable extends Handler{
         }
 
         if ($run_handler_after_delete){
-            $this->updateDE_USER_RIGHT();
+            //$this->updateDE_USER_RIGHT();
         }
 
     }
