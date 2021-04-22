@@ -229,14 +229,19 @@ class ModifTable extends Handler{
         if ($msg!==''){
             
             // поставил в try т.к. в условиях localhost не работает :( 
-            // но как таковым это не является ошибкой    
+            // но как таковым это не является ошибкой
+            ut::sendReportToAdmin([
+                'header'=>'Windeco: логин или пароль не уникальны',
+                'msg'=>$msg
+            ]);
+            /*
             foreach($this->adminEmail as $email){
                 try{
                     Utils::sendMail($email,'info@windeco.su','Windeco: Not unique login password',$msg);
                 }catch(\Exception $e){
                     error_log($e->getMessage());
                 }
-            }
+            }*/
         }    
 
         return ['login'=>$login,'pass'=>$pass];
