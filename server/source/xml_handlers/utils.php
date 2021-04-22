@@ -196,5 +196,44 @@ class Utils{
          
         throw new \Exception("attr [$attr] is not exists in xml ");
     }
+
+    
+    /** отправка сообщения админу*/
+    public static function sendReportToAdmin($param=[]){
+        try {
+            $br="<br>\n";
+
+            $p = array_merge([
+                'emails'        =>\WS_CONF::GET('emails-for-system-report',[]),
+                'from'          =>'info@windeco.su',
+                'header'        =>'системная ошибка (только для администраторов)',
+                'msg'           =>'',
+                'footer'        =>'',
+                'coding'        =>'UTF-8'
+            ],$param);
+
+            //---------------------------------------------------------------
+            $msg =  mb_convert_encoding($p['msg'], 'UTF-8');// 'windows-1251','utf-8');
+            //---------------------------------------------------------------
+            if (count($p['emails']) === 0)
+                error_log(str_replace(['<br>','&nbsp;'],["\n",' '],$msg));
+            else
+            foreach($p['emails'] as $email){
+                    
+                try {
+                    UP::sendMail($email,$p['from'],$p['header'],$msg.$br.$p['footer'],$p['coding']);
+
+                } catch (\Exception $e) {
+                    error_log('Exception ['.__FILE__.':'.__LINE__.'] '.$e->getMessage());
+                };
+
+            };
+
+        } catch (\Exception $e) {
+            error_log('Exception ['.__FILE__.':'.__LINE__.'] '.$e->getMessage());
+        };
+        
+
+    }
 }
 ?>

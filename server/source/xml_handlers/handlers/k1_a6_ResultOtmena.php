@@ -24,17 +24,31 @@ class ResultOtmena extends Handler{
         $params['exclude']='ID_ORDER';
         
 
+        $STATE = false;
         
         if ($ReplyId == 1)
             $STATE  = OS_OTMENEN;
-        else 
-            $STATE = OS_OTMENA_ZAPRESHENA;        
-        $update['data']['STATE'] = $STATE;
+        elseif ($ReplyId == 2)
+            $STATE = OS_OTMENA_ZAPRESHENA;
+        elseif ($ReplyId == 3)
+            $STATE = OS_FORMIRUETSY;
 
-        //$q = \base::dataToSQL('update','ORDERS',$update['data'],$params)." where MAIN_ZAKAZ_ID = $MainZakazId";
-        $q = \base::dataToSQL('update','ORDERS',$update['data'],$params)." where ID_ORDER = $LocalOrderId";
-        
-        \base::queryE($q,'deco');
+        if ($STATE!==false){    
+
+            $update['data']['STATE'] = $STATE;
+
+            //$q = \base::dataToSQL('update','ORDERS',$update['data'],$params)." where MAIN_ZAKAZ_ID = $MainZakazId";
+            $q = \base::dataToSQL('update','ORDERS',$update['data'],$params)." where ID_ORDER = $LocalOrderId";
+            \base::queryE($q,'deco');
+
+        }else{
+            $data = str_replace(['</','>'],['[/',']'],$xml->asXML());
+            $data = str_replace(['<'],['<br>['],$data);
+
+            ut::sendReportToAdmin([
+                'msg'=>'Не удалось обработать ответ на сообщение об отмене.<br>'.__FILE__.':'.__LINE__.'<br>'.$data
+            ]);
+        }
 
     }
     
